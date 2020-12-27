@@ -4,6 +4,8 @@ House Rules
 -----------
 1. Work off master branch only.  Do not make separate branches.
 2. Always assign a PR reviewer and wait for them to green-light your PR before merging.
+3. We track bugs etc. via the GitHub issue tracker.
+
 
 Building The Project
 --------------------
