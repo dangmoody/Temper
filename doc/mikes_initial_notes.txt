@@ -1,14 +1,14 @@
-TemperV2
-The Tantrum update
+Tantrum (TemperV2)
 
 TODO:
-1 - Test auto registration and execution (with flags for skipping and declaring which suite they belong to)
-2 - Test condition macros
-3 - parametric tests
-4 - Logging in release code to fail tests if conditions aren't met
-5 - AIMING for header only
+0 - AIMING for the final shipable version of this to be a SINGLE header only. Bear this in mind with each feature we build.
+1 - Test auto registration and execution (with flags for skipping and declaring which suite they belong to).
+2 - Logging in release code to fail tests if conditions aren't met, as well as provide a basic AddExpectedError(const char*) and AssertErrorOccured(const char*))
+3 - Parametric testing support, it's very useful not only when doing low level engine stuff but also occasionally in gameplay testing and other higher level features.
+4 - Test condition macros (e.g. TEST_TRUE(condition, message), TEST_GREATER_THAN(conditionA, conditionB, message), TEST_ALMOST_EQUAL(conditionA, conditionB, tolerance, message))
+5 - An Extra run command to act as a basic search - running any test with a name containing a given set of characters
 
 TO AVOID
 1 - Test fixtures with V-tables
 2 - Running tests in parallel
-3 - Making this framework a C++ only system, must work in C99! (less a thing for Dan and more for me)
+3 - Making this framework a C++ only system, must work in C99! (less a thing for Dan and more for Mike as an advisary)
