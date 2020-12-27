@@ -1,0 +1,36 @@
+# visual studio files
+.vs/
+*.sln
+*.vcxproj
+*.vcxproj.user
+*.vcxproj.filters
+
+# vs code files
+.vscode/
+*.code-workspace
+
+# ignore bin folder
+bin/
+
+# ignore most .exes
+*.exe
+
+# but dont ignore the .exes in the tools folders
+!tools/**/*.exe
+
+# ignore other binary file types that we dont care about
+*.pdb
+*.dll
+*.o
+*.ilk
+*.exp
+*.vcxprojAssemblyReference.cache
+
+# ignore remedybg files
+*.rdbg
+
+# ignore log files
+*.log
+
+# ignore StructLayoutSettings vs plugin file
+StructLayoutSettings.json
