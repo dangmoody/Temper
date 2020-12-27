@@ -24,6 +24,20 @@ if /I [%config%]==[release] (
 	set optimisation=-O3
 )
 
+set defines=-D_CRT_SECURE_NO_WARNINGS
+
+if /I [%config%]==[debug] (
+	set defines=!defines! -D_DEBUG
+)
+
+if /I [%config%]==[release] (
+	set defines=!defines! -DNDEBUG
+)
+
+set warninglevels=-Werror -Wall -Wextra -Weverything -Wpedantic
+
+set ignorewarnings=-Wno-newline-eof
+
 REM set cwd to the folder that the batch file is in
 pushd %~dp0
 pushd "..\\"
@@ -35,7 +49,7 @@ if not exist %build_dir% (
 	mkdir %build_dir%
 )
 
-clang -std=c99 -o %build_dir%\\%demo_name%.exe !symbols! !optimisation! %demo_folder%\\%demo_name%.c
+clang -std=c99 -o %build_dir%\\%demo_name%.exe !symbols! !optimisation! !defines! %warninglevels% %ignorewarnings% %demo_folder%\\%demo_name%.c
 
 popd
 popd
