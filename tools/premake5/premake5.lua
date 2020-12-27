@@ -1,188 +1,59 @@
 generated_project_files_root = "..\\..\\vs2019-gen"
-folder_code = "code\\"
+folder_demos = "demos\\"
 folder_3rdparty = "3rdparty\\"
 folder_tools = "tools\\"
 folder_scripts = "scripts\\"
 
+-- get length of array
+-- DM: lua doesnt define this!?
+function array_length( array )
+	array_length = 0
 
-workspace( "sperm-racer" )
+	for i in pairs( array ) do
+		array_length = array_length + 1
+	end
+
+	return array_length
+end
+
+
+workspace( "Tantrum" )
 	location( generated_project_files_root )
 
 	platforms { "win64" }
 	configurations { "debug", "release" }
 
-	startproject( "sperm-racer" )
+	startproject( "demos" )
 
 	architecture( "x64" )
 
 
 --[[
-  ,ad8888ba,                                        
- d8"'    `"8b                                       
-d8'                                                 
-88              ,adPPYba,   8b,dPPYba,   ,adPPYba,  
-88             a8"     "8a  88P'   "Y8  a8P_____88  
-Y8,            8b       d8  88          8PP"""""""  
- Y8a.    .a8P  "8a,   ,a8"  88          "8b,   ,aa  
-  `"Y8888Y"'    `"YbbdP"'   88           `"Ybbd8"'  
+88888888ba,                                                            
+88      `"8b                                                           
+88        `8b                                                          
+88         88   ,adPPYba,  88,dPYba,,adPYba,    ,adPPYba,   ,adPPYba,  
+88         88  a8P_____88  88P'   "88"    "8a  a8"     "8a  I8[    ""  
+88         8P  8PP"""""""  88      88      88  8b       d8   `"Y8ba,   
+88      .a8P   "8b,   ,aa  88      88      88  "8a,   ,a8"  aa    ]8I  
+88888888Y"'     `"Ybbd8"'  88      88      88   `"YbbdP"'   `"YbbdP"'  
 ]]
-project( "core" )
+function make_demo_project( demo_name )
+	project( demo_name )
 	location( generated_project_files_root )
 
 	files {
-		"..\\..\\" .. folder_code .. "core\\**.h",
-		"..\\..\\" .. folder_code .. "core\\**.c"
-	}
-
-	defines {
-		"SR_USE_XXHASH"
-	}
-
-	sysincludedirs {
-		"..\\" .. folder_code .. "3rdparty\\include"
-	}
-
-	syslibdirs { "..\\" .. folder_code .. "3rdparty\\lib" }
-
-	-- required because VS will create these folders if they don't exist
-	targetdir( "..\\..\\bin\\%{cfg.platform}\\%{cfg.buildcfg}" )
-	objdir( "..\\..\\bin\\%{cfg.platform}\\%{cfg.buildcfg}\\intermediate\\core" )
-
-	filter "platforms:win64"
-		kind( "MakeFile" )
-
-		buildcommands (
-			"..\\" .. folder_scripts .. "\\build_core.bat %{cfg.buildcfg}"
-		)
-
-		rebuildcommands (
-			"..\\" .. folder_scripts .. "\\build_core.bat %{cfg.buildcfg}"
-		)
-
-		cleancommands (
-			"..\\" .. folder_scripts .. "\\clean.bat"
-		)
-
-		defines {
-			"__clang__"
-		}
-	filter {}
-
-	filter "configurations:debug"
-		defines {
-			"_DEBUG"
-		}
-
-	filter "configurations:release"
-		defines {
-			"NDEBUG"
-		}
-	filter {}
-
-
---[[
-  ,ad8888ba,                                                  88888888ba,    88           88           
- d8"'    `"8b                                                 88      `"8b   88           88           
-d8'                                                           88        `8b  88           88           
-88             ,adPPYYba,  88,dPYba,,adPYba,    ,adPPYba,     88         88  88           88           
-88      88888  ""     `Y8  88P'   "88"    "8a  a8P_____88     88         88  88           88           
-Y8,        88  ,adPPPPP88  88      88      88  8PP"""""""     88         8P  88           88           
- Y8a.    .a88  88,    ,88  88      88      88  "8b,   ,aa     88      .a8P   88           88           
-  `"Y88888P"   `"8bbdP"Y8  88      88      88   `"Ybbd8"'     88888888Y"'    88888888888  88888888888  
-]]
-project( "game-dll" )
-	location( generated_project_files_root )
-
-	files {
-		"..\\..\\" .. folder_code .. "game-dll\\**.h",
-		"..\\..\\" .. folder_code .. "game-dll\\**.c",
-		"..\\..\\" .. folder_code .. "game-dll\\**.cpp",
-		"..\\..\\" .. folder_code .. "game-dll\\**.h",
-		"..\\..\\" .. folder_code .. "game-dll\\**.inl"
-	}
-
-	defines {
-		"SR_USE_VULKAN",
-		"SR_USE_CGLTF",
-		"SR_USE_STB_IMAGE",
-		"SR_USE_JSMN",
-		"SR_USE_CIMGUI"
-	}
-
-	sysincludedirs {
-		"..\\..\\" .. folder_code .. "core",
-		"..\\..\\" .. folder_3rdparty .. "include",
-		"$(VULKAN_SDK)\\Include\\vulkan"
-	}
-
-	syslibdirs {
-		"..\\..\\" .. folder_3rdparty .. "\\lib"
-	}
-
-	-- required because VS will create these folders if they don't exist
-	targetdir( "..\\..\\bin\\%{cfg.platform}\\%{cfg.buildcfg}" )
-	objdir( "..\\..\\bin\\%{cfg.platform}\\%{cfg.buildcfg}\\intermediate\\game-dll" )
-
-	debugcommand( "..\\..\\" .. "bin\\%{cfg.platform}\\%{cfg.buildcfg}\\sperm-racer-dll.dll" )
-
-	filter "platforms:win64"
-		kind( "MakeFile" )
-
-		buildcommands (
-			"..\\" .. folder_scripts .. "\\build_game_dll.bat %{cfg.buildcfg}"
-		)
-
-		rebuildcommands (
-			"..\\" .. folder_scripts .. "\\build_game_dll.bat %{cfg.buildcfg}"
-		)
-
-		cleancommands (
-			"..\\" .. folder_scripts .. "\\clean.bat"
-		)
-
-		defines {
-			"__clang__"
-		}
-	filter {}
-
-	filter "configurations:debug"
-		defines {
-			"_DEBUG"
-		}
-
-	filter "configurations:release"
-		defines {
-			"NDEBUG"
-		}
-	filter {}
-
-
---[[
-  ,ad8888ba,                                                  88888888888  8b        d8  88888888888  
- d8"'    `"8b                                                 88            Y8,    ,8P   88           
-d8'                                                           88             `8b  d8'    88           
-88             ,adPPYYba,  88,dPYba,,adPYba,    ,adPPYba,     88aaaaa          Y88P      88aaaaa      
-88      88888  ""     `Y8  88P'   "88"    "8a  a8P_____88     88"""""          d88b      88"""""      
-Y8,        88  ,adPPPPP88  88      88      88  8PP"""""""     88             ,8P  Y8,    88           
- Y8a.    .a88  88,    ,88  88      88      88  "8b,   ,aa     88            d8'    `8b   88           
-  `"Y88888P"   `"8bbdP"Y8  88      88      88   `"Ybbd8"'     88888888888  8P        Y8  88888888888  
-]]
-project( "sperm-racer" )
-	location( generated_project_files_root )
-
-	files {
-		"..\\..\\" .. folder_code .. "game-exe\\**.h",
-		"..\\..\\" .. folder_code .. "game-exe\\**.c",
-		"..\\..\\" .. folder_code .. "game-exe\\**.cpp",
-		"..\\..\\" .. folder_code .. "game-exe\\**.h",
-		"..\\..\\" .. folder_code .. "game-exe\\**.inl"
+		"..\\..\\" .. folder_demos .. "**.h",
+		"..\\..\\" .. folder_demos .. "**.c",
+		"..\\..\\" .. folder_demos .. "**.cpp",
+		"..\\..\\" .. folder_demos .. "**.h",
+		"..\\..\\" .. folder_demos .. "**.inl"
 	}
 
 	defines {
 	}
 
 	sysincludedirs {
-		"..\\..\\" .. folder_code .. "core\\"
 	}
 
 	syslibdirs {
@@ -190,21 +61,21 @@ project( "sperm-racer" )
 
 	-- required because VS will create these folders if they don't exist
 	targetdir( "..\\..\\bin\\%{cfg.platform}\\%{cfg.buildcfg}" )
-	objdir( "..\\..\\bin\\%{cfg.platform}\\%{cfg.buildcfg}\\intermediate\\sperm-racer" )
+	objdir( "..\\..\\bin\\%{cfg.platform}\\%{cfg.buildcfg}\\" .. folder_demos .. "intermediate" )
 
 	debugdir( "$(SolutionDir)..\\" )
 
-	debugcommand( "..\\..\\bin\\%{cfg.platform}\\%{cfg.buildcfg}\\sperm-racer.exe" )
+	debugcommand( "..\\..\\bin\\%{cfg.platform}\\%{cfg.buildcfg}\\demo_name.exe" )
 
 	filter "platforms:win64"
 		kind( "MakeFile" )
 
 		buildcommands (
-			"..\\" .. folder_scripts .. "\\build_game_exe.bat %{cfg.buildcfg}"
+			"..\\" .. folder_scripts .. "\\build_demo.bat " .. demo_name .. " %{cfg.buildcfg}"
 		)
 
 		rebuildcommands (
-			"..\\" .. folder_scripts .. "\\build_game_exe.bat %{cfg.buildcfg}"
+			"..\\" .. folder_scripts .. "\\build_demo.bat " .. demo_name .. " %{cfg.buildcfg}"
 		)
 
 		cleancommands (
@@ -212,7 +83,7 @@ project( "sperm-racer" )
 		)
 
 		defines {
-			"__clang__"
+			"__clang__"	-- required, build system wont generate this for you
 		}
 	filter {}
 
@@ -226,18 +97,14 @@ project( "sperm-racer" )
 			"NDEBUG"
 		}
 	filter {}
+end
 
+demos_names = {
+	"basic_c"
+}
 
---[[
-888888888888                       88             
-     88                            88             
-     88                            88             
-     88   ,adPPYba,    ,adPPYba,   88  ,adPPYba,  
-     88  a8"     "8a  a8"     "8a  88  I8[    ""  
-     88  8b       d8  8b       d8  88   `"Y8ba,   
-     88  "8a,   ,a8"  "8a,   ,a8"  88  aa    ]8I  
-     88   `"YbbdP"'    `"YbbdP"'   88  `"YbbdP"'  
-]]
-group( "tools" )
-	dofile "..\\hash\\hash.premake.lua"
-	dofile "..\\shader_compiler\\shader_compiler.premake.lua"
+group( "demos" )
+demos_names_length = array_length( demos_names )
+for i = 1, demos_names_length do
+	make_demo_project( demos_names[i] )
+end
