@@ -60,7 +60,7 @@ function make_demo_project( demo_name )
 	}
 
 	-- required because VS will create these folders if they don't exist
-	targetdir( "..\\..\\bin\\%{cfg.platform}\\%{cfg.buildcfg}" )
+	targetdir( "..\\..\\bin\\%{cfg.platform}\\%{cfg.buildcfg}\\" .. folder_demos )
 	objdir( "..\\..\\bin\\%{cfg.platform}\\%{cfg.buildcfg}\\" .. folder_demos .. "intermediate" )
 
 	debugdir( "$(SolutionDir)..\\" )

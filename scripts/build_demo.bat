@@ -29,7 +29,7 @@ pushd %~dp0
 pushd "..\\"
 
 set demo_folder=demos\\%demo_name%
-set build_dir=bin\\win64\\demos
+set build_dir=bin\\win64\\%config%\\demos
 
 if not exist %build_dir% (
 	mkdir %build_dir%
