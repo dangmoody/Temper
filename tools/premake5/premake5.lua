@@ -65,7 +65,7 @@ function make_demo_project( demo_name )
 
 	debugdir( "$(SolutionDir)..\\" )
 
-	debugcommand( "..\\..\\bin\\%{cfg.platform}\\%{cfg.buildcfg}\\demo_name.exe" )
+	debugcommand( "..\\..\\bin\\%{cfg.platform}\\%{cfg.buildcfg}\\" .. folder_demos .. demo_name .. ".exe" )
 
 	filter "platforms:win64"
 		kind( "MakeFile" )
