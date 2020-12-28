@@ -21,25 +21,33 @@ typedef void ( *testFunc_t )( void );
 #define TEMPER_CONCAT_INTERNAL_( a, b )	a ## b
 #define TEMPER_CONCAT_INTERNAL( a, b )	TEMPER_CONCAT_INTERNAL_( a, b )
 
-#define TEMPER_TEST( ... ) \
-	__declspec( dllexport ) void TEMPER_CONCAT_INTERNAL( test_, __COUNTER__ )( void ) { \
-		__VA_ARGS__ \
-	}
+#define TANTRUM_TEST( test_name ) \
+	void ( test_name )( void );\
+	__declspec( dllexport ) void TEMPER_CONCAT_INTERNAL( tantrum_test_invoker_, __COUNTER__ )( void )\
+	{\
+		/*Here we can declare a test name and that it's running then starting a timer*/\
+		( test_name )();\
+		/*Here we can stop the timer and print the total execution time and if it failed etc*/\
+	}\
+	void ( test_name )( void )
 
-TEMPER_TEST({
+TANTRUM_TEST( OrderingBeer )
+{
 	printf( "Beer...\n" );
 	printf( "\n" );
-})
+}
 
-TEMPER_TEST({
+TANTRUM_TEST( ReOrderingBeer )
+{
 	printf( "Another one for me please barman...\n" );
 	printf( "\n" );
-})
+}
 
-TEMPER_TEST({
+TANTRUM_TEST(TableFlippingForBeer)
+{
 	printf( "I SAID ANOTHER!\n" );
 	printf( "\n" );
-})
+}
 
 int main( int argc, char** argv ) {
 	( (void) argc );
@@ -54,7 +62,8 @@ int main( int argc, char** argv ) {
 		testFunc_t testFunc = NULL;
 
 		for ( uint32_t i = 0; i < __COUNTER__; i++ ) {
-			snprintf( testFuncNames, 1024, "test_%d", i );
+			snprintf( testFuncNames, 1024, "tantrum_test_invoker_%d", i );
+			printf( "tantrum_test_invoker_%d\t\t", i );
 			testFunc = (testFunc_t) GetProcAddress( handle, testFuncNames );
 			assert( testFunc );
 
@@ -64,7 +73,6 @@ int main( int argc, char** argv ) {
 
 	FreeLibrary( handle );
 	handle = NULL;
-
 	return 0;
 }
 
