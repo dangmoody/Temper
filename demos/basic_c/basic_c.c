@@ -16,37 +16,54 @@ but so far I'm somewhat happy with what I've got here
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 #endif
 
-typedef void ( *testFunc_t )( void );
+typedef enum tantrumTestResult_t {
+	TANTRUM_TEST_RESULT_FAIL	= 0,
+	TANTRUM_TEST_RESULT_SUCCESS,
+	TANTRUM_TEST_RESULT_SKIPPED
+} tantrumTestResult_t;
 
-#define TEMPER_CONCAT_INTERNAL_( a, b )	a ## b
-#define TEMPER_CONCAT_INTERNAL( a, b )	TEMPER_CONCAT_INTERNAL_( a, b )
+typedef tantrumTestResult_t ( *testFunc_t )( void );
 
-#define TANTRUM_TEST( test_name ) \
-	void ( test_name )( void );\
-	__declspec( dllexport ) void TEMPER_CONCAT_INTERNAL( tantrum_test_invoker_, __COUNTER__ )( void )\
-	{\
-		/*Here we can declare a test name and that it's running then starting a timer*/\
-		( test_name )();\
-		/*Here we can stop the timer and print the total execution time and if it failed etc*/\
-	}\
-	void ( test_name )( void )
+#define TANTRUM_CONCAT_INTERNAL_( a, b )	a ## b
+#define TANTRUM_CONCAT_INTERNAL( a, b )		TANTRUM_CONCAT_INTERNAL_( a, b )
+
+#define TANTRUM_PASS()						return TANTRUM_TEST_RESULT_SUCCESS
+
+#define TANTRUM_TEST( testName ) \
+	tantrumTestResult_t ( testName )( void ); \
+	__declspec( dllexport ) void TANTRUM_CONCAT_INTERNAL( tantrum_test_invoker_, __COUNTER__ )( void ) { \
+		printf( "%s:\t", #testName ); \
+		tantrumTestResult_t testResult = ( testName )(); \
+		switch ( testResult ) { \
+			case TANTRUM_TEST_RESULT_FAIL: \
+				printf( "FAILED.\n" ); \
+				break; \
+\
+			case TANTRUM_TEST_RESULT_SUCCESS: \
+				printf( "OK.\n" ); \
+				break; \
+\
+			case TANTRUM_TEST_RESULT_SKIPPED: \
+				printf( "SKIPPED.\n" ); /* TODO: add skipped msg */ \
+				break; \
+\
+		} \
+	} \
+	tantrumTestResult_t ( testName )( void )
 
 TANTRUM_TEST( OrderingBeer )
 {
-	printf( "Beer...\n" );
-	printf( "\n" );
+	TANTRUM_PASS();
 }
 
 TANTRUM_TEST( ReOrderingBeer )
 {
-	printf( "Another one for me please barman...\n" );
-	printf( "\n" );
+	TANTRUM_PASS();
 }
 
-TANTRUM_TEST(TableFlippingForBeer)
+TANTRUM_TEST( TableFlippingForBeer )
 {
-	printf( "I SAID ANOTHER!\n" );
-	printf( "\n" );
+	TANTRUM_PASS();
 }
 
 int main( int argc, char** argv ) {
@@ -63,7 +80,6 @@ int main( int argc, char** argv ) {
 
 		for ( uint32_t i = 0; i < __COUNTER__; i++ ) {
 			snprintf( testFuncNames, 1024, "tantrum_test_invoker_%d", i );
-			printf( "tantrum_test_invoker_%d\t\t", i );
 			testFunc = (testFunc_t) GetProcAddress( handle, testFuncNames );
 			assert( testFunc );
 
@@ -73,6 +89,9 @@ int main( int argc, char** argv ) {
 
 	FreeLibrary( handle );
 	handle = NULL;
+
+	getchar();
+
 	return 0;
 }
 
