@@ -33,7 +33,9 @@ typedef tantrumTestResult_t ( *testFunc_t )( void );
 	tantrumTestResult_t ( testName )( void ); \
 	__declspec( dllexport ) void TANTRUM_CONCAT_INTERNAL( tantrum_test_invoker_, __COUNTER__ )( void ) { \
 		printf( "%s:\t", #testName ); \
+\
 		tantrumTestResult_t testResult = ( testName )(); \
+\
 		switch ( testResult ) { \
 			case TANTRUM_TEST_RESULT_FAIL: \
 				printf( "FAILED.\n" ); \
