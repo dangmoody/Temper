@@ -11,6 +11,8 @@ there are no guarantees it will look anything like this when I start moving code
 but so far I'm somewhat happy with what I've got here
 */
 
+//================================================================
+
 #if defined( __GNUC__ ) || defined( __clang__ )
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
@@ -28,20 +30,20 @@ typedef enum tantrumTestFlag_t {
 	TANTRUM_TEST_DEPRECATED
 } tantrumTestFlag_t;
 
-typedef struct testInfo {
+typedef struct testInfo_t {
 	tantrumTestFlag_t	testingFlag;
 	tantrumTestResult_t	testResults;
 	const char*			testNameStr;
-} testInfo;
+} testInfo_t;
 
-typedef struct suiteTestInfo {
+typedef struct suiteTestInfo_t {
 	tantrumTestFlag_t	testingFlag;
 	tantrumTestResult_t	testResults;
 	const char*			testNameStr;
-	const char*			testSuiteNameStr;
-} suiteTestInfo;
+	const char*			suiteNameStr;
+} suiteTestInfo_t;
 
-typedef testInfo( *testFunc_t )( void );
+typedef testInfo_t ( *testFunc_t )( void );
 
 #define TANTRUM_CONCAT_INTERNAL_( a, b )	a ## b
 #define TANTRUM_CONCAT_INTERNAL( a, b )		TANTRUM_CONCAT_INTERNAL_( a, b )
@@ -50,14 +52,14 @@ typedef testInfo( *testFunc_t )( void );
 	tantrumTestResult_t ( testName )( void ); \
 \
 	typedef struct TANTRUM_CONCAT_INTERNAL( testName, _testInfo ) { \
-		testInfo testInformation; \
+		testInfo_t testInformation; \
 	} TANTRUM_CONCAT_INTERNAL( testName, _testInfo ); \
 \
 	static TANTRUM_CONCAT_INTERNAL( testName, _testInfo ) TANTRUM_CONCAT_INTERNAL( testName, GlobalInfo ); \
 \
-	__declspec( dllexport ) testInfo TANTRUM_CONCAT_INTERNAL( tantrum_test_invoker_, __COUNTER__ )( void ) { \
+	__declspec( dllexport ) testInfo_t TANTRUM_CONCAT_INTERNAL( tantrum_test_invoker_, __COUNTER__ )( void ) { \
 		TANTRUM_CONCAT_INTERNAL( testName, GlobalInfo ).testInformation.testNameStr = #testName; \
-		TANTRUM_CONCAT_INTERNAL( testName, GlobalInfo ).testInformation.testingFlag = (int) runFlag; \
+		TANTRUM_CONCAT_INTERNAL( testName, GlobalInfo ).testInformation.testingFlag = runFlag; \
 		TANTRUM_CONCAT_INTERNAL( testName, GlobalInfo ).testInformation.testResults = TANTRUM_TEST_RESULT_DODGED; \
 		if ( runFlag == TANTRUM_TEST_SHOULD_RUN ) { \
 			TANTRUM_CONCAT_INTERNAL( testName, GlobalInfo ).testInformation.testResults = ( testName )(); \
@@ -65,6 +67,30 @@ typedef testInfo( *testFunc_t )( void );
 		return TANTRUM_CONCAT_INTERNAL( testName, GlobalInfo ).testInformation; \
 	} \
 	tantrumTestResult_t ( testName )( void )
+
+#define TANTRUM_SUITE_TEST( suiteName, testName, runFlag ) \
+	tantrumTestResult_t ( testName )( void ); \
+\
+	typedef struct TANTRUM_CONCAT_INTERNAL( testName, _suiteTestInfo ) { \
+		suiteTestInfo_t testInformation; \
+	} TANTRUM_CONCAT_INTERNAL( testName, _suiteTestInfo ); \
+\
+	static TANTRUM_CONCAT_INTERNAL( testName, _suiteTestInfo ) TANTRUM_CONCAT_INTERNAL( testName, GlobalInfo ); \
+\
+	__declspec( dllexport ) suiteTestInfo_t TANTRUM_CONCAT_INTERNAL( tantrum_test_invoker_, __COUNTER__ )( void ) { \
+		TANTRUM_CONCAT_INTERNAL( testName, GlobalInfo ).testInformation.suiteNameStr = #suiteName; \
+		TANTRUM_CONCAT_INTERNAL( testName, GlobalInfo ).testInformation.testNameStr = #testName; \
+		TANTRUM_CONCAT_INTERNAL( testName, GlobalInfo ).testInformation.testingFlag = runFlag; \
+		TANTRUM_CONCAT_INTERNAL( testName, GlobalInfo ).testInformation.testResults = TANTRUM_TEST_RESULT_DODGED; \
+		if ( runFlag == TANTRUM_TEST_SHOULD_RUN ) { \
+			TANTRUM_CONCAT_INTERNAL( testName, GlobalInfo ).testInformation.testResults = ( testName )(); \
+		} \
+		return TANTRUM_CONCAT_INTERNAL( testName, GlobalInfo ).testInformation; \
+	} \
+	tantrumTestResult_t ( testName )( void )
+
+//================================================================
+
 
 TANTRUM_TEST( OrderingBeer, TANTRUM_TEST_SHOULD_RUN )
 {
@@ -86,6 +112,10 @@ TANTRUM_TEST( TableFlippingForBeer, TANTRUM_TEST_SHOULD_SKIP )
 	return TANTRUM_TEST_RESULT_SUCCESS;
 }
 
+TANTRUM_SUITE_TEST( MySuite, DansSuiteTest, TANTRUM_TEST_SHOULD_RUN ) {
+	return TANTRUM_TEST_RESULT_SUCCESS;
+}
+
 int main( int argc, char** argv ) {
 	( (void) argc );
 
@@ -103,8 +133,9 @@ int main( int argc, char** argv ) {
 			testFunc = (testFunc_t) GetProcAddress( handle, testFuncNames );
 			assert( testFunc );
 
-			testInfo information = testFunc();
-			switch( information.testResults ) {
+			testInfo_t information = testFunc();
+
+			switch ( information.testResults ) {
 				case TANTRUM_TEST_RESULT_FAIL:
 					printf( "TestName: %s - FAILED\n", information.testNameStr );
 					break;
