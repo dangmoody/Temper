@@ -25,7 +25,7 @@ typedef enum tantrumTestResult_t {
 typedef enum tantrumTestFlag_t {
 	TANTRUM_TEST_SHOULD_RUN		= 0,
 	TANTRUM_TEST_SHOULD_SKIP,
-	TANTRUM_TEST_DEPRICATED
+	TANTRUM_TEST_DEPRECATED
 } tantrumTestFlag_t;
 
 typedef struct testInfo {
@@ -76,7 +76,7 @@ TANTRUM_TEST( ReOrderingBeer, TANTRUM_TEST_SHOULD_RUN )
 	return TANTRUM_TEST_RESULT_FAIL;
 }
 
-TANTRUM_TEST( ReReOrderingBeer, TANTRUM_TEST_DEPRICATED )
+TANTRUM_TEST( ReReOrderingBeer, TANTRUM_TEST_DEPRECATED )
 {
 	return TANTRUM_TEST_RESULT_SUCCESS;
 }
