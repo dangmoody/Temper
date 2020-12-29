@@ -43,11 +43,11 @@ function make_demo_project( demo_name )
 	location( generated_project_files_root )
 
 	files {
-		"..\\..\\" .. folder_demos .. "**.h",
-		"..\\..\\" .. folder_demos .. "**.c",
-		"..\\..\\" .. folder_demos .. "**.cpp",
-		"..\\..\\" .. folder_demos .. "**.h",
-		"..\\..\\" .. folder_demos .. "**.inl"
+		"..\\..\\" .. folder_demos .. demo_name .. "\\**.h",
+		"..\\..\\" .. folder_demos .. demo_name .. "\\**.c",
+		"..\\..\\" .. folder_demos .. demo_name .. "\\**.cpp",
+		"..\\..\\" .. folder_demos .. demo_name .. "\\**.h",
+		"..\\..\\" .. folder_demos .. demo_name .. "\\**.inl"
 	}
 
 	defines {
@@ -100,7 +100,9 @@ function make_demo_project( demo_name )
 end
 
 demos_names = {
-	"basic_c"
+	"basic_c",
+	"basic_suites_c",
+	"filtering"
 }
 
 group( "demos" )
