@@ -29,13 +29,13 @@ typedef enum tantrumTestFlag_t {
 } tantrumTestFlag_t;
 
 typedef struct testInfo {
-	tantrumTestResult_t	testingFlag;
+	tantrumTestFlag_t	testingFlag;
 	tantrumTestResult_t	testResults;
 	const char*			testNameStr;
 } testInfo;
 
 typedef struct suiteTestInfo {
-	tantrumTestResult_t	testingFlag;
+	tantrumTestFlag_t	testingFlag;
 	tantrumTestResult_t	testResults;
 	const char*			testNameStr;
 	const char*			testSuiteNameStr;
