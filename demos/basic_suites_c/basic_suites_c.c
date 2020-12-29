@@ -59,7 +59,7 @@ typedef testInfo( *testFunc_t )( void );
 		TANTRUM_CONCAT_INTERNAL( testName, GlobalInfo ).testInformation.testNameStr = #testName; \
 		TANTRUM_CONCAT_INTERNAL( testName, GlobalInfo ).testInformation.testingFlag = (int) runFlag; \
 		TANTRUM_CONCAT_INTERNAL( testName, GlobalInfo ).testInformation.testResults = TANTRUM_TEST_RESULT_DODGED; \
-		if (runFlag == 0) { \
+		if ( runFlag == TANTRUM_TEST_SHOULD_RUN ) { \
 			TANTRUM_CONCAT_INTERNAL( testName, GlobalInfo ).testInformation.testResults = ( testName )(); \
 		} \
 		return TANTRUM_CONCAT_INTERNAL( testName, GlobalInfo ).testInformation; \
