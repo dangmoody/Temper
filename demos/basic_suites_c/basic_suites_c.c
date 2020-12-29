@@ -9,7 +9,7 @@ DM: I'm not happy with the fact that TANTRUM_TEST and TANTRUM_SUITE_TEST is dupl
 I also don't think the current setup will work for when trying to filter by suite because "suiteless" tests have no suite string to check against
 I think it might be better to remove testInfo_t entirely and replace it with suiteTestInfo_t
 that would get rid of the WET code and suiteless tests could just have suiteNameStr set to NULL - which would still work for filtering suites
-I've written an example of this inside suite_filtering.c
+I've written an example of this inside filtering.c
 */
 
 //================================================================
