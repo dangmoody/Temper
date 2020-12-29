@@ -5,10 +5,11 @@
 #include <assert.h>
 
 /*
-DM: this file just contains me hacking something together that solves our primary problem: test auto-registration
-everything in this demo file right now is just to show how it _might_ work
-there are no guarantees it will look anything like this when I start moving code into tantrum.h for others to play around with
-but so far I'm somewhat happy with what I've got here
+DM: I'm not happy with the fact that TANTRUM_TEST and TANTRUM_SUITE_TEST is duplicated
+I also don't think the current setup will work for when trying to filter by suite because "suiteless" tests have no suite string to check against
+I think it might be better to remove testInfo_t entirely and replace it with suiteTestInfo_t
+that would get rid of the WET code and suiteless tests could just have suiteNameStr set to NULL - which would still work for filtering suites
+I've written an example of this inside suite_filtering.c
 */
 
 //================================================================
