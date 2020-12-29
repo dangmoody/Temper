@@ -26,9 +26,6 @@ bin/
 *.exp
 *.vcxprojAssemblyReference.cache
 
-# ignore remedybg files
-*.rdbg
-
 # ignore log files
 *.log
 
