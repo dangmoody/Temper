@@ -133,7 +133,7 @@ do {\
 
 #define TEST_EQUAL( conditionA, conditionB, message )\
 do {\
-	if( fabsf( conditionA - conditionB ) < EPSILON )\
+	if( fabsf( conditionA - conditionB ) > EPSILON )\
 	{\
 		tantrumGlobalTestContext.totalErrorsInCurrentTests += 1;\
 		printf( "TEST_EQUAL( %f, %f ) has failed\n", (double)conditionA, (double)conditionB );\
@@ -290,18 +290,17 @@ static int TantrumExecuteAllTests()
 
 					if( tantrumGlobalTestContext.totalErrorsInCurrentTests > 0 )
 					{
-						printf( "%s - FAILED\n", information.testNameStr );
+						printf( "%s - FAILED\n\n", information.testNameStr );
 					}
 					else
 					{
-						printf( "%s - SUCCEEDED\n", information.testNameStr );
-						break;
+						printf( "%s - SUCCEEDED\n\n", information.testNameStr );
 					}
 				}
 				else
 				{
 					const char* dodgeReason = information.testingFlag == TANTRUM_TEST_DEPRECATED ? "DEPRICATED" : "SHOULD_SKIP";
-					printf( "NOT RUNNING \"%s\" AS IT WAS FLAGGED With \"%s\"\n", information.testNameStr, dodgeReason );
+					printf( "NOT RUNNING \"%s\" AS IT WAS FLAGGED With \"%s\"\n\n", information.testNameStr, dodgeReason );
 				}
 			}
 		}

@@ -13,7 +13,7 @@ TANTRUM_SUITE_TEST( VectorOperators, GivenTwoVectors_WhenAddedTogether_ThenAdded
 	vector2d A = { 2.f,4.f };
 	vector2d B = { 4.f,6.f };
 	vector2d Result = Vector2D_Add( A, B );
-	TEST_EQUAL( Result.x, 5.f, "Vector2D_Add function is broken" );
+	TEST_EQUAL( Result.x, 6.f, "Vector2D_Add function is broken" );
 	TEST_EQUAL( Result.y, 10.f, "Vector2D_Add function is broken" );
 }
 
@@ -22,7 +22,7 @@ TANTRUM_SUITE_TEST( VectorOperators, GivenTwoVectors_WhenSubtractedTogether_Then
 	vector2d A = { 2.f,4.f };
 	vector2d B = { 4.f,6.f };
 	vector2d Result = Vector2D_Sub( A, B );
-	TEST_EQUAL( Result.x, -1.f, "Vector2D_Sub function is broken" );
+	TEST_EQUAL( Result.x, -2.f, "Vector2D_Sub function is broken" );
 	TEST_EQUAL( Result.y, -2.f, "Vector2D_Sub function is broken" );
 }
 
@@ -40,15 +40,15 @@ TANTRUM_SUITE_TEST( VectorOperators, GivenTwoVectors_WhenDividedTogether_ThenDiv
 	vector2d A = { 2.f,4.f };
 	vector2d B = { 4.f,6.f };
 	vector2d Result = Vector2D_Div( A, B );
-	TEST_EQUAL( Result.x, 0.5f, "Vector2D_Div function is broken" );
-	TEST_EQUAL( Result.y, 0.5f, "Vector2D_Div function is broken" );
+	TEST_ALMOST_EQUAL( Result.x, 0.5f, 0.2f, "Vector2D_Div function is broken" );
+	TEST_ALMOST_EQUAL( Result.y, 0.5f, 0.2f, "Vector2D_Div function is broken" );
 }
 
 TANTRUM_TEST( GivenAVectors_WhenGetLengthIsCalled_ThenTrueLengthFound, TANTRUM_TEST_SHOULD_RUN )
 {
 	vector2d vector = { 0.f,7.5f };
 	float vectorLength = Vector2D_GetLength( vector );
-	TEST_ALMOST_EQUAL( vectorLength, 5.5f, 0.1f, "Expected a vector of length 7.5 to be found" );
+	TEST_ALMOST_EQUAL( vectorLength, 7.5f, 0.1f, "Expected a vector of length 7.5 to be found" );
 }
 
 #if defined( __GNUC__ ) || defined( __clang__ )
