@@ -35,10 +35,10 @@ typedef suiteTestInfo_t( *testInvoker_t )( void );
 //----------------------------------------------------------
 
 typedef struct tantrumTestContext_t {
-	unsigned int	testsPassed;
-	unsigned int	testsFailed;
-	unsigned int	totalTestsDeclared; // Gets set in the main function with a preprocessor
-	unsigned int	totalErrorsInCurrentTests;
+	uint32_t		testsPassed;
+	uint32_t		testsFailed;
+	uint32_t		totalTestsDeclared; // Gets set in the main function with a preprocessor
+	uint32_t		totalErrorsInCurrentTests;
 	const char*		programName;
 	const char*		suiteFilter;
 	const char*		testFilter;
