@@ -63,7 +63,7 @@ static tantrumTestContext_t tantrumGlobalTestContext;
 // PREPROCESSORS - TANTRUM INTERNAL
 //==========================================================
 
-#define EPSILON 0.0001f
+#define TANTRUM_DEFAULT_EPSILON 0.00001f
 
 //----------------------------------------------------------
 
@@ -110,11 +110,6 @@ static tantrumTestContext_t tantrumGlobalTestContext;
 #define TANTRUM_SUITE_TEST( suiteName, testName, runFlag ) \
 	TANTRUM_DEFINE_TEST_INTERNAL( #suiteName, testName, runFlag )
 
-//----------------------------------------------------------
-
-#define TANTRUM_SETUP()\
-	tantrumGlobalTestContext.totalTestsDeclared = __COUNTER__
-
 //==========================================================
 // PREPROCESSORS - CONDITION TESTING
 //==========================================================
@@ -133,7 +128,7 @@ do {\
 
 #define TEST_EQUAL( conditionA, conditionB, message )\
 do {\
-	if( fabsf( conditionA - conditionB ) > EPSILON )\
+	if( fabsf( conditionA - conditionB ) > TANTRUM_DEFAULT_EPSILON )\
 	{\
 		tantrumGlobalTestContext.totalErrorsInCurrentTests += 1;\
 		printf( "TEST_EQUAL( %f, %f ) has failed\n", (double)conditionA, (double)conditionB );\
@@ -145,7 +140,7 @@ do {\
 
 #define TEST_NOT_EQUAL(conditionA, conditionB, message)\
 do {\
-	if(conditionA == conditionB)\
+	if( fabsf( conditionA - conditionB ) < TANTRUM_DEFAULT_EPSILON )\
 	{\
 		tantrumGlobalTestContext.totalErrorsInCurrentTests += 1;\
 		printf( "TEST_NOT_EQUAL( %f,%f ) has failed\n", (double)conditionA, (double)conditionB );\
@@ -205,7 +200,7 @@ do {\
 // FUNCTIONS
 //==========================================================
 
-static const char* TantrumGetNextArgInternal( const int argIndex, const int argc, char** argv )
+const char* TantrumGetNextArgInternal( const int argIndex, const int argc, char** argv )
 {
 	assert( argc );
 	assert( argv );
@@ -215,7 +210,7 @@ static const char* TantrumGetNextArgInternal( const int argIndex, const int argc
 
 //----------------------------------------------------------
 
-static void TantrumHandleCommandLineArguments( int argc, char** argv )
+void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv )
 {
 	// MY: Honestly I'd like to be able to use this without needing
 	// argc/argv, ideally anyone should be able to use this weather
@@ -280,7 +275,6 @@ static int TantrumExecuteAllTests()
 				if( information.testingFlag == TANTRUM_TEST_SHOULD_RUN )
 				{
 					tantrumGlobalTestContext.totalErrorsInCurrentTests = 0;
-					// DM: given this is now where information.testResults gets set, we can maybe remove that member?
 					information.callback();
 
 					if( information.suiteNameStr )
@@ -315,9 +309,27 @@ static int TantrumExecuteAllTests()
 
 static int TantrumExecuteAllTestsWithArguments( int argc, char** argv )
 {
-	TantrumHandleCommandLineArguments( argc, argv );
+	TantrumHandleCommandLineArgumentsInternal( argc, argv );
 	return TantrumExecuteAllTests();
 }
+
+//==========================================================
+// PREPROCESSORS - USER API / SETUP
+//==========================================================
+
+// MY: I'd like to eventually add more security around this,
+// such as ensuring it's only ever called/used once and thowing
+// an error if it isn't. Maybe also (SOMEHOW) ensuring no test
+// ever has a higher count.
+#define TANTRUM_SETUP()	tantrumGlobalTestContext.totalTestsDeclared = __COUNTER__
+
+//----------------------------------------------------------
+
+#define TANTRUM_RUN_ALL_TESTS() TantrumExecuteAllTests()
+
+//----------------------------------------------------------
+
+#define TANTRUM_RUN_ALL_TESTS_WITH_ARGS(ARGC, ARGV) TantrumExecuteAllTestsWithArguments( ARGC, ARGV )
 
 //----------------------------------------------------------
 

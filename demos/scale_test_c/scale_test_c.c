@@ -7,8 +7,7 @@ int main( int argc, char** argv )
 {
 	TANTRUM_SETUP();
 
-	int returnCode = TantrumExecuteAllTestsWithArguments( argc, argv );
-	getchar();
+	int returnCode = TANTRUM_RUN_ALL_TESTS_WITH_ARGS( argc, argv );
 	return returnCode;
 }
 //#else
