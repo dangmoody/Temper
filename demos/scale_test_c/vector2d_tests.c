@@ -2,12 +2,6 @@
 #include "vector2d.h"
 #include "vector2d.c"
 
-#if defined( __GNUC__ ) || defined( __clang__ )
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmissing-prototypes"
-#pragma GCC diagnostic ignored "-Wcomment"
-#endif
-
 TANTRUM_SUITE_TEST( VectorOperators, GivenTwoVectors_WhenAddedTogether_ThenAddedCorrectly, TANTRUM_TEST_SHOULD_RUN ){
 	vector2d A = { 2.f,4.f };
 	vector2d B = { 4.f,6.f };
@@ -45,7 +39,3 @@ TANTRUM_TEST( GivenAVectors_WhenGetLengthIsCalled_ThenTrueLengthFound, TANTRUM_T
 	float vectorLength = Vector2D_GetLength( vector );
 	TEST_ALMOST_EQUAL( vectorLength, 7.5f, 0.1f, "Expected a vector of length 7.5 to be found" );
 }
-
-#if defined( __GNUC__ ) || defined( __clang__ )
-#pragma GCC diagnostic pop
-#endif

@@ -9,12 +9,6 @@
 #include <assert.h>
 #include <math.h>
 
-#if defined( __GNUC__ ) || defined( __clang__ )
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmissing-prototypes"
-#pragma GCC diagnostic ignored "-Wcomment"
-#endif //defined( __GNUC__ ) || defined( __clang__ )
-
 //==========================================================
 // STRUCTS
 //==========================================================
@@ -82,11 +76,12 @@ static tantrumTestContext_t tantrumGlobalTestContext;
 		suiteTestInfo_t testInformation; \
 	} TANTRUM_CONCAT_INTERNAL( testName, _TestInfo ); \
 \
-	/*3. Create a static/global instance of this new struct for us to access and write data about this test to.*/\
-	static TANTRUM_CONCAT_INTERNAL( testName, _TestInfo ) TANTRUM_CONCAT_INTERNAL( testName, _GlobalInfo ); \
+	/*3. Create a global instance of this new struct for us to access and write data about this test to.*/ \
+	extern TANTRUM_CONCAT_INTERNAL( testName, _TestInfo ) TANTRUM_CONCAT_INTERNAL( testName, _GlobalInfo ); \
+	TANTRUM_CONCAT_INTERNAL( testName, _TestInfo ) TANTRUM_CONCAT_INTERNAL( testName, _GlobalInfo ); \
 \
 	/*4. Create our invoker_n function. This is what the runner will loop over to grab the test function as well as all the information concerning it*/\
-	__declspec( dllexport ) suiteTestInfo_t TANTRUM_CONCAT_INTERNAL( tantrum_test_invoker_, __COUNTER__ )( void ) { \
+	__declspec( dllexport ) inline suiteTestInfo_t TANTRUM_CONCAT_INTERNAL( tantrum_test_invoker_, __COUNTER__ )( void ) { \
 		TANTRUM_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.callback = testName; \
 		TANTRUM_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.suiteNameStr = suiteNameString; \
 		TANTRUM_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.testNameStr = #testName; \
@@ -197,7 +192,7 @@ do {\
 // FUNCTIONS
 //==========================================================
 
-const char* TantrumGetNextArgInternal( const int argIndex, const int argc, char** argv ){
+static const char* TantrumGetNextArgInternal( const int argIndex, const int argc, char** argv ){
 	assert( argc );
 	assert( argv );
 
@@ -206,7 +201,7 @@ const char* TantrumGetNextArgInternal( const int argIndex, const int argc, char*
 
 //----------------------------------------------------------
 
-void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ){
+static void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ){
 	// MY: Honestly I'd like to be able to use this without needing
 	// argc/argv, ideally anyone should be able to use this weather
 	// their using main(), main(argc, argv) or WinMain(...).
@@ -326,7 +321,4 @@ static int TantrumExecuteAllTestsWithArguments( int argc, char** argv ){
 
 //----------------------------------------------------------
 
-#if defined( __GNUC__ ) || defined( __clang__ )
-#pragma GCC diagnostic pop
-#endif //defined( __GNUC__ ) || defined( __clang__ )
 #endif //TANTRUM_SCALE_TEST_HEADER
