@@ -5,11 +5,6 @@
 extern "C" {
 #endif
 
-#if defined( __GNUC__ ) || defined( __clang__ )
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-#endif // defined( __GNUC__ ) || defined( __clang__ )
-
 #include <Windows.h>
 
 #include <stdio.h>
@@ -17,6 +12,11 @@ extern "C" {
 #include <stdbool.h>
 #include <assert.h>
 #include <math.h>
+
+#if defined( __GNUC__ ) || defined( __clang__ )
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+#endif // defined( __GNUC__ ) || defined( __clang__ )
 
 //==========================================================
 // STRUCTS
