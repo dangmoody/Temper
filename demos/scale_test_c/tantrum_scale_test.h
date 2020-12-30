@@ -13,14 +13,13 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 #pragma GCC diagnostic ignored "-Wcomment"
-#endif
+#endif //defined( __GNUC__ ) || defined( __clang__ )
 
 //==========================================================
 // STRUCTS
 //==========================================================
 
-typedef enum tantrumTestFlag_t
-{
+typedef enum tantrumTestFlag_t{
 	TANTRUM_TEST_SHOULD_RUN = 0,
 	TANTRUM_TEST_SHOULD_SKIP,
 	TANTRUM_TEST_DEPRECATED
@@ -30,8 +29,7 @@ typedef enum tantrumTestFlag_t
 
 typedef void( *testCallback_t )( void );
 
-typedef struct suiteTestInfo_t
-{
+typedef struct suiteTestInfo_t{
 	testCallback_t		callback;
 	tantrumTestFlag_t	testingFlag;
 	const char* testNameStr;
@@ -42,8 +40,7 @@ typedef suiteTestInfo_t( *testInvoker_t )( void );
 
 //----------------------------------------------------------
 
-typedef struct tantrumTestContext_t
-{
+typedef struct tantrumTestContext_t{
 	unsigned int testsPassed;
 	unsigned int testsFailed;
 	unsigned int totalTestsDeclared; // Gets set in the main function with a preprocessor
@@ -200,8 +197,7 @@ do {\
 // FUNCTIONS
 //==========================================================
 
-const char* TantrumGetNextArgInternal( const int argIndex, const int argc, char** argv )
-{
+const char* TantrumGetNextArgInternal( const int argIndex, const int argc, char** argv ){
 	assert( argc );
 	assert( argv );
 
@@ -210,8 +206,7 @@ const char* TantrumGetNextArgInternal( const int argIndex, const int argc, char*
 
 //----------------------------------------------------------
 
-void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv )
-{
+void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ){
 	// MY: Honestly I'd like to be able to use this without needing
 	// argc/argv, ideally anyone should be able to use this weather
 	// their using main(), main(argc, argv) or WinMain(...).
@@ -245,8 +240,7 @@ void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv )
 
 //----------------------------------------------------------
 
-static int TantrumExecuteAllTests()
-{
+static int TantrumExecuteAllTests(){
 	HANDLE handle = LoadLibrary( tantrumGlobalTestContext.programName );
 	assert( handle );
 
@@ -307,8 +301,7 @@ static int TantrumExecuteAllTests()
 
 //----------------------------------------------------------
 
-static int TantrumExecuteAllTestsWithArguments( int argc, char** argv )
-{
+static int TantrumExecuteAllTestsWithArguments( int argc, char** argv ){
 	TantrumHandleCommandLineArgumentsInternal( argc, argv );
 	return TantrumExecuteAllTests();
 }
@@ -335,5 +328,5 @@ static int TantrumExecuteAllTestsWithArguments( int argc, char** argv )
 
 #if defined( __GNUC__ ) || defined( __clang__ )
 #pragma GCC diagnostic pop
-#endif
+#endif //defined( __GNUC__ ) || defined( __clang__ )
 #endif //TANTRUM_SCALE_TEST_HEADER

@@ -1,8 +1,7 @@
 #ifndef VECTOR2D_HEADER
 #define VECTOR2D_HEADER
 
-typedef struct vector2d
-{
+typedef struct vector2d{
 	float x, y;
 }vector2d;
 
