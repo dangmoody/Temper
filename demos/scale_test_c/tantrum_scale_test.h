@@ -108,8 +108,7 @@ static tantrumTestContext_t tantrumGlobalTestContext;
 
 #define TEST_TRUE( condition, message )\
 do {\
-	if( !( condition ) )\
-	{\
+	if( !( condition ) ) {\
 		tantrumGlobalTestContext.totalErrorsInCurrentTests += 1;\
 		printf( "TEST_TRUE(%s) has failed\n", #condition );\
 		printf( "%s\n", #message );\
@@ -120,8 +119,7 @@ do {\
 
 #define TEST_EQUAL( conditionA, conditionB, message )\
 do {\
-	if( fabsf( conditionA - conditionB ) > TANTRUM_DEFAULT_EPSILON )\
-	{\
+	if( fabsf( conditionA - conditionB ) > TANTRUM_DEFAULT_EPSILON ) {\
 		tantrumGlobalTestContext.totalErrorsInCurrentTests += 1;\
 		printf( "TEST_EQUAL( %f, %f ) has failed\n", (double)conditionA, (double)conditionB );\
 		printf( "%s\n", #message );\
@@ -132,8 +130,7 @@ do {\
 
 #define TEST_NOT_EQUAL(conditionA, conditionB, message)\
 do {\
-	if( fabsf( conditionA - conditionB ) < TANTRUM_DEFAULT_EPSILON )\
-	{\
+	if( fabsf( conditionA - conditionB ) < TANTRUM_DEFAULT_EPSILON ) {\
 		tantrumGlobalTestContext.totalErrorsInCurrentTests += 1;\
 		printf( "TEST_NOT_EQUAL( %f,%f ) has failed\n", (double)conditionA, (double)conditionB );\
 		printf( "%s\n", #message );\
@@ -144,8 +141,7 @@ do {\
 
 #define TEST_ALMOST_EQUAL( conditionA, conditionB, tolerance, message )\
 do {\
-	if( fabsf( conditionA - conditionB ) > tolerance )\
-	{\
+	if( fabsf( conditionA - conditionB ) > tolerance ) {\
 		tantrumGlobalTestContext.totalErrorsInCurrentTests += 1;\
 		printf( "TEST_ALMOST_EQUAL( %f, %f, %f ) has failed\n", (double)conditionA, (double)conditionB, (double)tolerance );\
 		printf( "%s\n", #message ); \
@@ -156,8 +152,7 @@ do {\
 
 #define TEST_NOT_ALMOST_EQUAL( conditionA, conditionB, tolerance, message )\
 do {\
-	if( fabsf( conditionA - conditionB ) < tolerance )\
-	{\
+	if( fabsf( conditionA - conditionB ) < tolerance ) {\
 		tantrumGlobalTestContext.totalErrorsInCurrentTests += 1;\
 		printf( "ASSER_NOT_ALMOST_EQUAL( %f, %f, %f ) has failed\n", (double)conditionA, (double)conditionB, (double)tolerance );\
 		printf( "%s\n", #message ); \
@@ -168,8 +163,7 @@ do {\
 
 #define TEST_GREATER_THAN(conditionA, conditionB, message)\
 do {\
-	if(conditionA > conditionB)\
-	{\
+	if(conditionA > conditionB) {\
 		tantrumGlobalTestContext.totalErrorsInCurrentTests += 1;\
 		printf( "TEST_GREATER_THAN(%f,%f) has failed\n", (double)conditionA, (double)conditionB );\
 		printf( "%s\n", #message );\
@@ -180,8 +174,7 @@ do {\
 
 #define TEST_LESS_THAN(conditionA, conditionB, message)\
 do {\
-	if( conditionA < conditionB )\
-	{\
+	if( conditionA < conditionB ) {\
 		tantrumGlobalTestContext.totalErrorsInCurrentTests += 1;\
 		printf( "TEST_LESS_THAN(%f,%f) has failed\n", (double)conditionA, (double)conditionB );\
 		printf( "%s\n", #message );\
@@ -209,12 +202,10 @@ static void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ){
 	tantrumGlobalTestContext.programName = argv[ 0 ];
 
 	// parse command line args
-	for( int argIndex = 0; argIndex < argc; argIndex++ )
-	{
+	for( int argIndex = 0; argIndex < argc; argIndex++ ) {
 		const char* arg = argv[ argIndex ];
 
-		if( strcmp( arg, "-s" ) == 0 )
-		{
+		if( strcmp( arg, "-s" ) == 0 ) {
 			const char* nextArg = TantrumGetNextArgInternal( argIndex, argc, argv );
 			// TODO(DM): if nextArg == NULL then error that the suite filter wasnt set and show usage to help user
 			tantrumGlobalTestContext.suiteFilter = nextArg;
@@ -222,8 +213,7 @@ static void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ){
 			continue;
 		}
 
-		if( strcmp( arg, "-t" ) == 0 )
-		{
+		if( strcmp( arg, "-t" ) == 0 ) {
 			const char* nextArg = TantrumGetNextArgInternal( argIndex, argc, argv );
 			// TODO(DM): if nextArg == NULL then error that the test filter wasnt set and show usage to help user
 			tantrumGlobalTestContext.testFilter = nextArg;
@@ -244,8 +234,7 @@ static int TantrumExecuteAllTests(){
 	char testFuncNames[ 1024 ];
 	testInvoker_t testInfoGrabberFunc = NULL;
 
-	for( uint32_t i = 0; i < tantrumGlobalTestContext.totalTestsDeclared; i++ )
-	{
+	for( uint32_t i = 0; i < tantrumGlobalTestContext.totalTestsDeclared; i++ ) {
 		snprintf( testFuncNames, 1024, "tantrum_test_invoker_%d", i );
 		testInfoGrabberFunc = ( testInvoker_t ) GetProcAddress( handle, testFuncNames );
 		assert( testInfoGrabberFunc );
@@ -254,34 +243,27 @@ static int TantrumExecuteAllTests(){
 
 		bool isFilteredSuite = tantrumGlobalTestContext.suiteFilter && information.suiteNameStr && strcmp( information.suiteNameStr, tantrumGlobalTestContext.suiteFilter ) == 0;
 
-		if( isFilteredSuite || !tantrumGlobalTestContext.suiteFilter )
-		{
+		if( isFilteredSuite || !tantrumGlobalTestContext.suiteFilter ) {
 			bool isFilteredTest = tantrumGlobalTestContext.testFilter && strcmp( information.testNameStr, tantrumGlobalTestContext.testFilter ) == 0;
 
-			if( isFilteredTest || !tantrumGlobalTestContext.testFilter )
-			{
+			if( isFilteredTest || !tantrumGlobalTestContext.testFilter ) {
 				// MY : I'm not checking the flag first as it'd still be helpful for search queries to see if the test even appears
-				if( information.testingFlag == TANTRUM_TEST_SHOULD_RUN )
-				{
+				if( information.testingFlag == TANTRUM_TEST_SHOULD_RUN ) {
 					tantrumGlobalTestContext.totalErrorsInCurrentTests = 0;
 					information.callback();
 
-					if( information.suiteNameStr )
-					{
+					if( information.suiteNameStr ) {
 						printf( "%s: ", information.suiteNameStr );
 					}
 
-					if( tantrumGlobalTestContext.totalErrorsInCurrentTests > 0 )
-					{
+					if( tantrumGlobalTestContext.totalErrorsInCurrentTests > 0 ) {
 						printf( "%s - FAILED\n\n", information.testNameStr );
 					}
-					else
-					{
+					else {
 						printf( "%s - SUCCEEDED\n\n", information.testNameStr );
 					}
 				}
-				else
-				{
+				else {
 					const char* dodgeReason = information.testingFlag == TANTRUM_TEST_DEPRECATED ? "DEPRICATED" : "SHOULD_SKIP";
 					printf( "NOT RUNNING \"%s\" AS IT WAS FLAGGED With \"%s\"\n\n", information.testNameStr, dodgeReason );
 				}
@@ -296,7 +278,7 @@ static int TantrumExecuteAllTests(){
 
 //----------------------------------------------------------
 
-static int TantrumExecuteAllTestsWithArguments( int argc, char** argv ){
+static int TantrumExecuteAllTestsWithArguments( int argc, char** argv ) {
 	TantrumHandleCommandLineArgumentsInternal( argc, argv );
 	return TantrumExecuteAllTests();
 }
