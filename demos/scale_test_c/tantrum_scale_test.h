@@ -110,7 +110,7 @@ static tantrumTestContext_t						tantrumGlobalTestContext;
 do { \
 	if ( !( condition ) ) { \
 		tantrumGlobalTestContext.totalErrorsInCurrentTests += 1; \
-		printf( "TEST_TRUE(%s) has failed\n", #condition ); \
+		printf( "TEST_TRUE( %s ) has failed\n", #condition ); \
 		printf( "%s\n", #message ); \
 	} \
 } while( 0 )
@@ -132,7 +132,7 @@ do { \
 do { \
 	if ( fabsf( conditionA - conditionB ) < TANTRUM_DEFAULT_EPSILON ) { \
 		tantrumGlobalTestContext.totalErrorsInCurrentTests += 1; \
-		printf( "TEST_NOT_EQUAL( %f,%f ) has failed\n", (double) conditionA, (double) conditionB ); \
+		printf( "TEST_NOT_EQUAL( %f, %f ) has failed\n", (double) conditionA, (double) conditionB ); \
 		printf( "%s\n", #message ); \
 	} \
 } while( 0 )
@@ -165,7 +165,7 @@ do { \
 do { \
 	if ( conditionA > conditionB ) { \
 		tantrumGlobalTestContext.totalErrorsInCurrentTests += 1; \
-		printf( "TEST_GREATER_THAN(%f,%f) has failed\n", (double) conditionA, (double) conditionB ); \
+		printf( "TEST_GREATER_THAN( %f, %f ) has failed\n", (double) conditionA, (double) conditionB ); \
 		printf( "%s\n", #message ); \
 	} \
 } while( 0 )
@@ -176,7 +176,7 @@ do { \
 do { \
 	if ( conditionA < conditionB ) { \
 		tantrumGlobalTestContext.totalErrorsInCurrentTests += 1; \
-		printf( "TEST_LESS_THAN(%f,%f) has failed\n", (double) conditionA, (double) conditionB ); \
+		printf( "TEST_LESS_THAN(%f, %f) has failed\n", (double) conditionA, (double) conditionB ); \
 		printf( "%s\n", #message ); \
 	} \
 } while( 0 )
