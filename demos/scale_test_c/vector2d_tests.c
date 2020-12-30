@@ -1,5 +1,12 @@
 #include "tantrum_scale_test.h"
 #include "vector2d.h"
+#include "vector2d.c"
+
+#if defined( __GNUC__ ) || defined( __clang__ )
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-prototypes"
+#pragma GCC diagnostic ignored "-Wcomment"
+#endif
 
 TANTRUM_SUITE_TEST( VectorOperators, GivenTwoVectors_WhenAddedTogether_ThenAddedCorrectly, TANTRUM_TEST_SHOULD_RUN )
 {
@@ -43,3 +50,7 @@ TANTRUM_TEST( GivenAVectors_WhenGetLengthIsCalled_ThenTrueLengthFound, TANTRUM_T
 	float vectorLength = Vector2D_GetLength( vector );
 	TEST_ALMOST_EQUAL( vectorLength, 5.5f, 0.1f, "Expected a vector of length 7.5 to be found" );
 }
+
+#if defined( __GNUC__ ) || defined( __clang__ )
+#pragma GCC diagnostic pop
+#endif

@@ -1,5 +1,5 @@
 #include "vector2d.h"
-#include <cmath>
+#include <math.h>
 
 //==========================================================
 
@@ -41,7 +41,7 @@ vector2d Vector2D_Normalize( vector2d vector )
 
 float Vector2D_GetLength( vector2d vector )
 {
-	return sqrt( ( vector.x * vector.x ) + ( vector.y * vector.y ) );
+	return sqrtf( ( vector.x * vector.x ) + ( vector.y * vector.y ) );
 }
 
 //==========================================================

@@ -102,7 +102,8 @@ end
 demos_names = {
 	"basic_c",
 	"basic_suites_c",
-	"filtering"
+	"filtering",
+	"scale_test_c"
 }
 
 group( "demos" )

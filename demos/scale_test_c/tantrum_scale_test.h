@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <assert.h>
+#include <math.h>
 
 #if defined( __GNUC__ ) || defined( __clang__ )
 #pragma GCC diagnostic push
@@ -47,7 +48,7 @@ typedef struct tantrumTestContext_t
 	unsigned int testsFailed;
 	unsigned int totalTestsDeclared; // Gets set in the main function with a preprocessor
 	unsigned int totalErrorsInCurrentTests;
-	const char** inputArgv;
+	const char* programName;
 	const char* suiteFilter;
 	const char* testFilter;
 } tantrumTestContext_t;
@@ -61,6 +62,10 @@ static tantrumTestContext_t tantrumGlobalTestContext;
 //==========================================================
 // PREPROCESSORS - TANTRUM INTERNAL
 //==========================================================
+
+#define EPSILON 0.0001f
+
+//----------------------------------------------------------
 
 #define TANTRUM_CONCAT_INTERNAL_FINAL( a, b )	a ## b
 
@@ -84,7 +89,7 @@ static tantrumTestContext_t tantrumGlobalTestContext;
 	static TANTRUM_CONCAT_INTERNAL( testName, _TestInfo ) TANTRUM_CONCAT_INTERNAL( testName, _GlobalInfo ); \
 \
 	/*4. Create our invoker_n function. This is what the runner will loop over to grab the test function as well as all the information concerning it*/\
-	__declspec( dllexport ) suiteTestInfo_t TANTRUM_CONCAT_INTERNAL( tantrum_test_func_info_fetcher_, __COUNTER__ )( void ) { \
+	__declspec( dllexport ) suiteTestInfo_t TANTRUM_CONCAT_INTERNAL( tantrum_test_invoker_, __COUNTER__ )( void ) { \
 		TANTRUM_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.callback = testName; \
 		TANTRUM_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.suiteNameStr = suiteNameString; \
 		TANTRUM_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.testNameStr = #testName; \
@@ -115,83 +120,86 @@ static tantrumTestContext_t tantrumGlobalTestContext;
 //==========================================================
 
 #define TEST_TRUE( condition, message )\
-{\
-	if( condition )\
+do {\
+	if( !( condition ) )\
 	{\
+		tantrumGlobalTestContext.totalErrorsInCurrentTests += 1;\
 		printf( "TEST_TRUE(%s) has failed\n", #condition );\
 		printf( "%s\n", #message );\
 	}\
-}
+} while(0)
 
 //----------------------------------------------------------
 
 #define TEST_EQUAL( conditionA, conditionB, message )\
-{\
-	if( conditionA != conditionB )\
+do {\
+	if( fabsf( conditionA - conditionB ) < EPSILON )\
 	{\
-		printf( "TEST_EQUAL( %f, %f ) has failed\n", ( double )conditionA, ( double )conditionB );\
+		tantrumGlobalTestContext.totalErrorsInCurrentTests += 1;\
+		printf( "TEST_EQUAL( %f, %f ) has failed\n", (double)conditionA, (double)conditionB );\
 		printf( "%s\n", #message );\
 	}\
-}
+} while(0)
 
 //----------------------------------------------------------
 
 #define TEST_NOT_EQUAL(conditionA, conditionB, message)\
-{\
+do {\
 	if(conditionA == conditionB)\
 	{\
-		printf( "TEST_NOT_EQUAL( %f,%f ) has failed\n", ( double )conditionA, ( double )conditionB );\
+		tantrumGlobalTestContext.totalErrorsInCurrentTests += 1;\
+		printf( "TEST_NOT_EQUAL( %f,%f ) has failed\n", (double)conditionA, (double)conditionB );\
 		printf( "%s\n", #message );\
 	}\
-}
+} while(0)
 
 //----------------------------------------------------------
 
 #define TEST_ALMOST_EQUAL( conditionA, conditionB, tolerance, message )\
-{\
-	double epsilon = Absolute( ( ( double )conditionA ) - ( ( double )conditionB ) );\
-	double absoluteTolerance = Absolute( tolerance );\
-	if( epsilon > absoluteTolerance )\
+do {\
+	if( fabsf( conditionA - conditionB ) > tolerance )\
 	{\
-		printf( "TEST_ALMOST_EQUAL( %f, %f, %f ) has failed\n", conditionA, conditionB, tolerance );\
+		tantrumGlobalTestContext.totalErrorsInCurrentTests += 1;\
+		printf( "TEST_ALMOST_EQUAL( %f, %f, %f ) has failed\n", (double)conditionA, (double)conditionB, (double)tolerance );\
 		printf( "%s\n", #message ); \
 	}\
-}
+} while(0)
 
 //----------------------------------------------------------
 
 #define TEST_NOT_ALMOST_EQUAL( conditionA, conditionB, tolerance, message )\
-{\
-	double epsilon = Absolute( ( ( double )conditionA ) - ( ( double )conditionB ) );\
-	double absoluteTolerance = Absolute( tolerance );\
-	if( epsilon <= absoluteTolerance )\
+do {\
+	if( fabsf( conditionA - conditionB ) < tolerance )\
 	{\
-		printf( "ASSER_NOT_ALMOST_EQUAL( %f, %f, %f ) has failed\n", conditionA, conditionB, tolerance );\
+		tantrumGlobalTestContext.totalErrorsInCurrentTests += 1;\
+		printf( "ASSER_NOT_ALMOST_EQUAL( %f, %f, %f ) has failed\n", (double)conditionA, (double)conditionB, (double)tolerance );\
 		printf( "%s\n", #message ); \
 	}\
-}
+} while(0)
 
 //----------------------------------------------------------
 
 #define TEST_GREATER_THAN(conditionA, conditionB, message)\
-{\
+do {\
 	if(conditionA > conditionB)\
 	{\
-		printf( "TEST_GREATER_THAN(%f,%f) has failed\n", ( double )conditionA, ( double )conditionB );\
+		tantrumGlobalTestContext.totalErrorsInCurrentTests += 1;\
+		printf( "TEST_GREATER_THAN(%f,%f) has failed\n", (double)conditionA, (double)conditionB );\
 		printf( "%s\n", #message );\
 	}\
-}
+} while(0)
 
 //----------------------------------------------------------
 
 #define TEST_LESS_THAN(conditionA, conditionB, message)\
-{\
+do {\
 	if( conditionA < conditionB )\
 	{\
-		printf( "TEST_LESS_THAN(%f,%f) has failed\n", ( double )conditionA, ( double )conditionB );\
+		tantrumGlobalTestContext.totalErrorsInCurrentTests += 1;\
+		printf( "TEST_LESS_THAN(%f,%f) has failed\n", (double)conditionA, (double)conditionB );\
 		printf( "%s\n", #message );\
 	}\
-}
+} while(0)
 
 //==========================================================
 // FUNCTIONS
@@ -209,6 +217,12 @@ static const char* TantrumGetNextArgInternal( const int argIndex, const int argc
 
 static void TantrumHandleCommandLineArguments( int argc, char** argv )
 {
+	// MY: Honestly I'd like to be able to use this without needing
+	// argc/argv, ideally anyone should be able to use this weather
+	// their using main(), main(argc, argv) or WinMain(...).
+	// temporarily using global data to make this function work.
+	tantrumGlobalTestContext.programName = argv[ 0 ];
+
 	// parse command line args
 	for( int argIndex = 0; argIndex < argc; argIndex++ )
 	{
@@ -238,11 +252,7 @@ static void TantrumHandleCommandLineArguments( int argc, char** argv )
 
 static int TantrumExecuteAllTests()
 {
-	// MY: Honestly I'd like to be able to use this without needing
-	// argc/argv, ideally anyone should be able to use this weather
-	// their using main(), main(argc, argv) or WinMain(...).
-	// temporarily using global data to make this function work.
-	HANDLE handle = LoadLibrary( tantrumGlobalTestContext.inputArgv[ 0 ] );
+	HANDLE handle = LoadLibrary( tantrumGlobalTestContext.programName );
 	assert( handle );
 
 	// DM: yeah yeah yeah, I know: fixed-length string arrays bad
@@ -250,9 +260,9 @@ static int TantrumExecuteAllTests()
 	char testFuncNames[ 1024 ];
 	testInvoker_t testInfoGrabberFunc = NULL;
 
-	for( uint32_t i = 0; i < __COUNTER__; i++ )
+	for( uint32_t i = 0; i < tantrumGlobalTestContext.totalTestsDeclared; i++ )
 	{
-		snprintf( testFuncNames, 1024, "tantrum_test_func_info_fetcher_%d", i );
+		snprintf( testFuncNames, 1024, "tantrum_test_invoker_%d", i );
 		testInfoGrabberFunc = ( testInvoker_t ) GetProcAddress( handle, testFuncNames );
 		assert( testInfoGrabberFunc );
 
@@ -269,6 +279,7 @@ static int TantrumExecuteAllTests()
 				// MY : I'm not checking the flag first as it'd still be helpful for search queries to see if the test even appears
 				if( information.testingFlag == TANTRUM_TEST_SHOULD_RUN )
 				{
+					tantrumGlobalTestContext.totalErrorsInCurrentTests = 0;
 					// DM: given this is now where information.testResults gets set, we can maybe remove that member?
 					information.callback();
 
