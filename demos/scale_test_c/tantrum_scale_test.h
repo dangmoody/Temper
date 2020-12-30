@@ -1,6 +1,15 @@
 #ifndef TANTRUM_SCALE_TEST_HEADER
 #define TANTRUM_SCALE_TEST_HEADER
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#if defined( __GNUC__ ) || defined( __clang__ )
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+#endif // defined( __GNUC__ ) || defined( __clang__ )
+
 #include <Windows.h>
 
 #include <stdio.h>
@@ -117,9 +126,15 @@ do { \
 
 //----------------------------------------------------------
 
+static bool TantrumFloatEqualsInternal( const float a, const float b, const float epsilon ) {
+	return fabsf( a - b ) > epsilon;
+}
+
+//----------------------------------------------------------
+
 #define TEST_EQUAL( conditionA, conditionB, message ) \
 do { \
-	if ( fabsf( conditionA - conditionB ) > TANTRUM_DEFAULT_EPSILON ) { \
+	if ( TantrumFloatEqualsInternal( conditionA, conditionB, TANTRUM_DEFAULT_EPSILON ) ) { \
 		tantrumGlobalTestContext.totalErrorsInCurrentTests += 1; \
 		printf( "TEST_EQUAL( %f, %f ) has failed\n", (double) conditionA, (double) conditionB ); \
 		printf( "%s\n", #message ); \
@@ -130,7 +145,7 @@ do { \
 
 #define TEST_NOT_EQUAL(conditionA, conditionB, message) \
 do { \
-	if ( fabsf( conditionA - conditionB ) < TANTRUM_DEFAULT_EPSILON ) { \
+	if ( TantrumFloatEqualsInternal( conditionA, conditionB, TANTRUM_DEFAULT_EPSILON ) ) { \
 		tantrumGlobalTestContext.totalErrorsInCurrentTests += 1; \
 		printf( "TEST_NOT_EQUAL( %f, %f ) has failed\n", (double) conditionA, (double) conditionB ); \
 		printf( "%s\n", #message ); \
@@ -141,7 +156,7 @@ do { \
 
 #define TEST_ALMOST_EQUAL( conditionA, conditionB, tolerance, message ) \
 do { \
-	if ( fabsf( conditionA - conditionB ) > tolerance ) { \
+	if ( TantrumFloatEqualsInternal( conditionA, conditionB, tolerance ) ) { \
 		tantrumGlobalTestContext.totalErrorsInCurrentTests += 1; \
 		printf( "TEST_ALMOST_EQUAL( %f, %f, %f ) has failed\n", (double) conditionA, (double) conditionB, (double) tolerance ); \
 		printf( "%s\n", #message ); \
@@ -152,9 +167,9 @@ do { \
 
 #define TEST_NOT_ALMOST_EQUAL( conditionA, conditionB, tolerance, message ) \
 do { \
-	if ( fabsf( conditionA - conditionB ) < tolerance ) { \
+	if ( !TantrumFloatEqualsInternal( conditionA, conditionB, tolerance ) ) { \
 		tantrumGlobalTestContext.totalErrorsInCurrentTests += 1; \
-		printf( "ASSER_NOT_ALMOST_EQUAL( %f, %f, %f ) has failed\n", (double)conditionA, (double)conditionB, (double)tolerance ); \
+		printf( "ASSER_NOT_ALMOST_EQUAL( %f, %f, %f ) has failed\n", (double) conditionA, (double) conditionB, (double) tolerance ); \
 		printf( "%s\n", #message ); \
 	} \
 } while( 0 )
@@ -182,7 +197,7 @@ do { \
 } while( 0 )
 
 //==========================================================
-// FUNCTIONS
+// PRIVATE API FUNCTIONS
 //==========================================================
 
 static const char* TantrumGetNextArgInternal( const int argIndex, const int argc, char** argv ) {
@@ -225,7 +240,7 @@ static void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 
 //----------------------------------------------------------
 
-static int TantrumExecuteAllTests() {
+static int TantrumExecuteAllTestsInternal() {
 	HANDLE handle = LoadLibrary( tantrumGlobalTestContext.programName );
 	assert( handle );
 
@@ -271,14 +286,15 @@ static int TantrumExecuteAllTests() {
 
 	FreeLibrary( handle );
 	handle = NULL;
+
 	return tantrumGlobalTestContext.testsFailed == 0 ? 0 : -1;
 }
 
 //----------------------------------------------------------
 
-static int TantrumExecuteAllTestsWithArguments( int argc, char** argv ) {
+static int TantrumExecuteAllTestsWithArgumentsInternal( int argc, char** argv ) {
 	TantrumHandleCommandLineArgumentsInternal( argc, argv );
-	return TantrumExecuteAllTests();
+	return TantrumExecuteAllTestsInternal();
 }
 
 //==========================================================
@@ -293,12 +309,20 @@ static int TantrumExecuteAllTestsWithArguments( int argc, char** argv ) {
 
 //----------------------------------------------------------
 
-#define TANTRUM_RUN_ALL_TESTS()							TantrumExecuteAllTests()
+#define TANTRUM_RUN_ALL_TESTS()							TantrumExecuteAllTestsInternal()
 
 //----------------------------------------------------------
 
-#define TANTRUM_RUN_ALL_TESTS_WITH_ARGS( argc, argv )	TantrumExecuteAllTestsWithArguments( argc, argv )
+#define TANTRUM_RUN_ALL_TESTS_WITH_ARGS( argc, argv )	TantrumExecuteAllTestsWithArgumentsInternal( argc, argv )
 
 //----------------------------------------------------------
+
+#if defined( __GNUC__ ) || defined( __clang__ )
+#pragma GCC diagnostic pop
+#endif // defined( __GNUC__ ) || defined( __clang__ )
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //TANTRUM_SCALE_TEST_HEADER
