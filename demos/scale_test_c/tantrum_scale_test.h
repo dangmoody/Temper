@@ -61,6 +61,39 @@ typedef struct tantrumTestContext_t {
 } tantrumTestContext_t;
 
 //==========================================================
+// FUNCTIONS - BASE HELPER/UTILITY FUNCTIONS
+//==========================================================
+
+static bool TantrumFloatEqualsInternal( const float a, const float b, const float epsilon )
+{
+	return fabsf( a - b ) > epsilon;
+}
+
+//----------------------------------------------------------
+
+static const char* TantrumGetNextArgInternal( const int argIndex, const int argc, char** argv )
+{
+	assert( argc );
+	assert( argv );
+
+	return ( argIndex + 1 < argc ) ? argv[ argIndex + 1 ] : NULL;
+}
+
+//----------------------------------------------------------
+
+static tantrumBool32 TantrumStringEqualsInternal( const char* a, const char* b )
+{
+	return strcmp( a, b ) == 0;
+}
+
+//----------------------------------------------------------
+
+static tantrumBool32 TantrumStringContainsInternal( const char* str, const char* substring )
+{
+	return strstr( str, substring ) != NULL;
+}
+
+//==========================================================
 // GLOBALS
 //==========================================================
 
@@ -122,7 +155,7 @@ static tantrumTestContext_t						tantrumGlobalTestContext;
 // PREPROCESSORS - CONDITION TESTING
 //==========================================================
 
-#define TEST_TRUE( condition, message ) \
+#define TANTRUM_TEST_TRUE( condition, message ) \
 do { \
 	if ( !( condition ) ) { \
 		tantrumGlobalTestContext.totalErrorsInCurrentTests += 1; \
@@ -133,13 +166,7 @@ do { \
 
 //----------------------------------------------------------
 
-static bool TantrumFloatEqualsInternal( const float a, const float b, const float epsilon ) {
-	return fabsf( a - b ) > epsilon;
-}
-
-//----------------------------------------------------------
-
-#define TEST_EQUAL( conditionA, conditionB, message ) \
+#define TANTRUM_TEST_EQUAL( conditionA, conditionB, message ) \
 do { \
 	if ( TantrumFloatEqualsInternal( conditionA, conditionB, TANTRUM_DEFAULT_EPSILON ) ) { \
 		tantrumGlobalTestContext.totalErrorsInCurrentTests += 1; \
@@ -150,7 +177,7 @@ do { \
 
 //----------------------------------------------------------
 
-#define TEST_NOT_EQUAL(conditionA, conditionB, message) \
+#define TANTRUM_TEST_NOT_EQUAL(conditionA, conditionB, message) \
 do { \
 	if ( TantrumFloatEqualsInternal( conditionA, conditionB, TANTRUM_DEFAULT_EPSILON ) ) { \
 		tantrumGlobalTestContext.totalErrorsInCurrentTests += 1; \
@@ -161,7 +188,7 @@ do { \
 
 //----------------------------------------------------------
 
-#define TEST_ALMOST_EQUAL( conditionA, conditionB, tolerance, message ) \
+#define TANTRUM_TEST_ALMOST_EQUAL( conditionA, conditionB, tolerance, message ) \
 do { \
 	if ( TantrumFloatEqualsInternal( conditionA, conditionB, tolerance ) ) { \
 		tantrumGlobalTestContext.totalErrorsInCurrentTests += 1; \
@@ -172,7 +199,7 @@ do { \
 
 //----------------------------------------------------------
 
-#define TEST_NOT_ALMOST_EQUAL( conditionA, conditionB, tolerance, message ) \
+#define TANTRUM_TEST_NOT_ALMOST_EQUAL( conditionA, conditionB, tolerance, message ) \
 do { \
 	if ( !TantrumFloatEqualsInternal( conditionA, conditionB, tolerance ) ) { \
 		tantrumGlobalTestContext.totalErrorsInCurrentTests += 1; \
@@ -183,7 +210,7 @@ do { \
 
 //----------------------------------------------------------
 
-#define TEST_GREATER_THAN( conditionA, conditionB, message ) \
+#define TANTRUM_TEST_GREATER_THAN( conditionA, conditionB, message ) \
 do { \
 	if ( conditionA > conditionB ) { \
 		tantrumGlobalTestContext.totalErrorsInCurrentTests += 1; \
@@ -194,7 +221,7 @@ do { \
 
 //----------------------------------------------------------
 
-#define TEST_LESS_THAN( conditionA, conditionB, message ) \
+#define TANTRUM_TEST_LESS_THAN( conditionA, conditionB, message ) \
 do { \
 	if ( conditionA < conditionB ) { \
 		tantrumGlobalTestContext.totalErrorsInCurrentTests += 1; \
@@ -204,29 +231,8 @@ do { \
 } while( 0 )
 
 //==========================================================
-// PRIVATE API FUNCTIONS
+// FUNCTIONS - PRIVATE API
 //==========================================================
-
-static const char* TantrumGetNextArgInternal( const int argIndex, const int argc, char** argv ) {
-	assert( argc );
-	assert( argv );
-
-	return ( argIndex + 1 < argc ) ? argv[argIndex + 1] : NULL;
-}
-
-//----------------------------------------------------------
-
-static tantrumBool32 TantrumStringEqualsInternal( const char* a, const char* b ) {
-	return strcmp( a, b ) == 0;
-}
-
-//----------------------------------------------------------
-
-static tantrumBool32 TantrumStringContainsInternal( const char* str, const char* substring ) {
-	return strstr( str, substring ) != NULL;
-}
-
-//----------------------------------------------------------
 
 static void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 	// MY: Honestly I'd like to be able to use this without needing
