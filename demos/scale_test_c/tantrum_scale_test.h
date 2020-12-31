@@ -5,7 +5,9 @@
 extern "C" {
 #endif
 
+#ifdef _WIN32
 #include <Windows.h>
+#endif
 
 #include <stdio.h>
 #include <stdint.h>
@@ -236,14 +238,15 @@ static void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 	char fullExePath[MAX_PATH];
 	DWORD fullExePathLength = GetModuleFileName( NULL, fullExePath, MAX_PATH );
 	if ( fullExePathLength == 0 ) {
+		// TODO(DM): TantrumPrintErrorInternal
 		printf( "ERROR: WinAPI call GetModuleFileName() failed: 0x%lX\n", GetLastError() );
 		return;
 	}
 
 	tantrumGlobalTestContext.programName = fullExePath;
-#else
+#else // _WIN32
 #error Uncrecognised platform.  It appears Tantrum doesn't support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
-#endif
+#endif // _WIN32
 
 	// parse command line args
 	for ( int argIndex = 0; argIndex < argc; argIndex++ ) {
@@ -274,6 +277,7 @@ static void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 	// if partial filtering was enabled but the user did not then specify a suite or test filter then they need to know about incorrect usage
 	if ( tantrumGlobalTestContext.partialFilter ) {
 		if ( !tantrumGlobalTestContext.suiteFilter && !tantrumGlobalTestContext.testFilter ) {
+			// TODO(DM): TantrumPrintErrorInternal
 			printf( "ERROR: Partial filtering (-p) was enabled but suite or test filtering (-s, -t) was not.\n" );
 			return;
 		}
@@ -283,8 +287,13 @@ static void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 //----------------------------------------------------------
 
 static int TantrumExecuteAllTestsInternal() {
+	// make the exe load itself
+#ifdef _WIN32
 	HANDLE handle = LoadLibrary( tantrumGlobalTestContext.programName );
 	assert( handle );
+#else // _WIN32
+#error Uncrecognised platform.  It appears Tantrum doesn't support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
+#endif // _WIN32
 
 	// DM: yeah yeah yeah, I know: fixed-length string arrays bad
 	// I'll write a tprintf at some point
@@ -293,7 +302,14 @@ static int TantrumExecuteAllTestsInternal() {
 
 	for ( uint32_t i = 0; i < tantrumGlobalTestContext.totalTestsDeclared; i++ ) {
 		snprintf( testFuncNames, 1024, "tantrum_test_invoker_%d", i );
+
+		// get the test grabber functions out of the binary
+#ifdef _WIN32
 		testInfoGrabberFunc = (testInvoker_t) GetProcAddress( handle, testFuncNames );
+#else // _WIN32
+#error Uncrecognised platform.  It appears Tantrum doesn't support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
+#endif // _WIN32
+
 		assert( testInfoGrabberFunc );
 
 		suiteTestInfo_t information = testInfoGrabberFunc();
@@ -330,8 +346,13 @@ static int TantrumExecuteAllTestsInternal() {
 		}
 	}
 
+	// cleanup
+#ifdef _WIN32
 	FreeLibrary( handle );
 	handle = NULL;
+#else // _WIN32
+#error Uncrecognised platform.  It appears Tantrum doesn't support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
+#endif // _WIN32
 
 	return tantrumGlobalTestContext.testsFailed == 0 ? 0 : -1;
 }
