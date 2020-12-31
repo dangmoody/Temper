@@ -34,6 +34,8 @@ typedef enum tantrumTestFlag_t {
 
 typedef void( *testCallback_t )( void );
 
+typedef tantrumBool32 ( *tantrumStringCompareFunc_t )( const char*, const char* );
+
 typedef struct suiteTestInfo_t {
 	testCallback_t		callback;
 	tantrumTestFlag_t	testingFlag;
@@ -50,6 +52,7 @@ typedef struct tantrumTestContext_t {
 	uint32_t		testsFailed;
 	uint32_t		totalTestsDeclared; // Gets set in the main function with a preprocessor
 	uint32_t		totalErrorsInCurrentTests;
+	tantrumBool32	partialFilter;
 	const char*		programName;
 	const char*		suiteFilter;
 	const char*		testFilter;
@@ -249,6 +252,19 @@ static void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 
 			continue;
 		}
+
+		if ( TantrumStringEqualsInternal( arg, "-p" ) == 0 ) {
+			tantrumGlobalTestContext.partialFilter = true;
+			continue;
+		}
+	}
+
+	// if partial filtering was enabled but the user did not then specify a suite or test filter then they need to know about incorrect usage
+	if ( tantrumGlobalTestContext.partialFilter ) {
+		if ( !tantrumGlobalTestContext.suiteFilter && !tantrumGlobalTestContext.testFilter ) {
+			printf( "ERROR: Partial filtering (-p) was enabled but suite or test filtering (-s, -t) was not.\n" );
+			return;
+		}
 	}
 }
 
@@ -270,10 +286,14 @@ static int TantrumExecuteAllTestsInternal() {
 
 		suiteTestInfo_t information = testInfoGrabberFunc();
 
-		bool isFilteredSuite = tantrumGlobalTestContext.suiteFilter && information.suiteNameStr && TantrumStringEqualsInternal( information.suiteNameStr, tantrumGlobalTestContext.suiteFilter );
+		// if partial suite/test filtering is enabled then we want to check if the queried filter is in a part of the name they specified
+		// otherwise partial filtering is off so we want to check for an exact string match
+		tantrumStringCompareFunc_t stringCompareFunc = tantrumGlobalTestContext.partialFilter ? TantrumStringContainsInternal : TantrumStringEqualsInternal;
+
+		bool isFilteredSuite = tantrumGlobalTestContext.suiteFilter && information.suiteNameStr && stringCompareFunc( information.suiteNameStr, tantrumGlobalTestContext.suiteFilter );
 
 		if ( isFilteredSuite || !tantrumGlobalTestContext.suiteFilter ) {
-			bool isFilteredTest = tantrumGlobalTestContext.testFilter && TantrumStringEqualsInternal( information.testNameStr, tantrumGlobalTestContext.testFilter );
+			bool isFilteredTest = tantrumGlobalTestContext.testFilter && stringCompareFunc( information.testNameStr, tantrumGlobalTestContext.testFilter );
 
 			if ( isFilteredTest || !tantrumGlobalTestContext.testFilter ) {
 				// MY : I'm not checking the flag first as it'd still be helpful for search queries to see if the test even appears
