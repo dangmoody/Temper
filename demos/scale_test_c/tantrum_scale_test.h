@@ -45,7 +45,7 @@ typedef struct suiteTestInfo_t {
 	const char*			suiteNameStr;
 } suiteTestInfo_t;
 
-typedef suiteTestInfo_t( *testInvoker_t )( void );
+typedef suiteTestInfo_t( *testInfoFetcherFunc_t )( void );
 
 //----------------------------------------------------------
 
@@ -130,7 +130,7 @@ static tantrumTestContext_t						tantrumGlobalTestContext;
 	TANTRUM_CONCAT_INTERNAL( testName, _TestInfo ) TANTRUM_CONCAT_INTERNAL( testName, _GlobalInfo ); \
 \
 	/*4. Create our invoker_n function. This is what the runner will loop over to grab the test function as well as all the information concerning it*/ \
-	__declspec( dllexport ) inline suiteTestInfo_t TANTRUM_CONCAT_INTERNAL( tantrum_test_invoker_, __COUNTER__ )( void ) { \
+	__declspec( dllexport ) inline suiteTestInfo_t TANTRUM_CONCAT_INTERNAL( tantrum_test_info_fetcher_, __COUNTER__ )( void ) { \
 		TANTRUM_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.callback = testName; \
 		TANTRUM_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.suiteNameStr = suiteNameString; \
 		TANTRUM_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.testNameStr = #testName; \
@@ -214,7 +214,7 @@ static tantrumTestContext_t						tantrumGlobalTestContext;
 	TANTRUM_CONCAT_INTERNAL( parametricInvokationName, _TestInfo ) TANTRUM_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ); \
 \
 	/*5. Create our invoker_n function. This is what the runner will loop over to grab the test function as well as all the information concerning it*/ \
-	__declspec( dllexport ) inline suiteTestInfo_t TANTRUM_CONCAT_INTERNAL( tantrum_test_invoker_, __COUNTER__ )( void ) { \
+	__declspec( dllexport ) inline suiteTestInfo_t TANTRUM_CONCAT_INTERNAL( tantrum_test_info_fetcher_, __COUNTER__ )( void ) { \
 		TANTRUM_CONCAT_INTERNAL( nameOfTestToCall, _ParametricTestInfoBinder )();/*Make it so we can grab the needed information out of the test function's global info*/\
 		TANTRUM_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation.callback = parametricInvokationName; \
 		TANTRUM_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation.suiteNameStr = TANTRUM_CONCAT_INTERNAL( nameOfTestToCall, _GlobalParametricInfo ).suiteNameStr; \
@@ -371,14 +371,14 @@ static int TantrumExecuteAllTestsInternal() {
 	// DM: yeah yeah yeah, I know: fixed-length string arrays bad
 	// I'll write a tprintf at some point
 	char testFuncNames[1024];
-	testInvoker_t testInfoGrabberFunc = NULL;
+	testInfoFetcherFunc_t testInfoGrabberFunc = NULL;
 
 	for ( uint32_t i = 0; i < tantrumGlobalTestContext.totalTestsDeclared; i++ ) {
-		snprintf( testFuncNames, 1024, "tantrum_test_invoker_%d", i );
+		snprintf( testFuncNames, 1024, "tantrum_test_info_fetcher_%d", i );
 
 		// get the test grabber functions out of the binary
 #ifdef _WIN32
-		testInfoGrabberFunc = (testInvoker_t) GetProcAddress( handle, testFuncNames );
+		testInfoGrabberFunc = (testInfoFetcherFunc_t) GetProcAddress( handle, testFuncNames );
 #else // _WIN32
 #error Uncrecognised platform.  It appears Tantrum doesn't support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
 #endif // _WIN32
