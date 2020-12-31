@@ -151,6 +151,73 @@ static tantrumTestContext_t						tantrumGlobalTestContext;
 #define TANTRUM_SUITE_TEST( suiteName, testName, runFlag ) \
 	TANTRUM_DEFINE_TEST_INTERNAL( #suiteName, testName, runFlag )
 
+//----------------------------------------------------------
+
+//	#define TANTRUM_DECLARE_PARAMETRIC_TEST( testName, runFlag, ... )\
+//		TANTRUM_DECLARE_PARAMETRIC_TEST( NULL, testName, runFlag, __VA_ARGS__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_DECLARE_PARAMETRIC_TEST( suiteName, testName, runFlag, ... )\
+\
+	/*1. Create a function with a name matching the test with the provided parameters.*/\
+	void ( testName )( __VA_ARGS__ );\
+\
+	/*2. Typedef this function type.*/\
+	typedef void ( *TANTRUM_CONCAT_INTERNAL( testName, _FuncType ) )( __VA_ARGS__ );\
+\
+	/*3. Stash this function and run info in a struct unique to this.*/\
+	typedef struct TANTRUM_CONCAT_INTERNAL( testName, _ParametricTestInfo ) { \
+		TANTRUM_CONCAT_INTERNAL( testName, _FuncType ) Callback; \
+		tantrumTestFlag_t testingFlag; \
+		const char* testNameStr; \
+		const char* suiteNameStr; \
+	} TANTRUM_CONCAT_INTERNAL( testName, _ParametricTestInfo ); \
+\
+	/*4. Create a global instance of this new struct for us to access and write data about this test to.*/ \
+	extern TANTRUM_CONCAT_INTERNAL( testName, _ParametricTestInfo ) TANTRUM_CONCAT_INTERNAL( testName, _GlobalParametricInfo ); \
+	TANTRUM_CONCAT_INTERNAL( testName, _ParametricTestInfo ) TANTRUM_CONCAT_INTERNAL( testName, _GlobalParametricInfo ); \
+\
+	/*5. Define an info binding function to tie all this information into the struct*/\
+	__declspec( dllexport ) inline void (TANTRUM_CONCAT_INTERNAL( testName, _ParametricTestInfoBinder ))(void){\
+		TANTRUM_CONCAT_INTERNAL( testName, _GlobalParametricInfo ).Callback = testName;\
+		TANTRUM_CONCAT_INTERNAL( testName, _GlobalParametricInfo ).testingFlag = runFlag;\
+		TANTRUM_CONCAT_INTERNAL( testName, _GlobalParametricInfo ).testNameStr = #testName;\
+		TANTRUM_CONCAT_INTERNAL( testName, _GlobalParametricInfo ).suiteNameStr = #suiteName;\
+	}\
+\
+	/*6. The test function declared at Step1 is now declared here by the user*/\
+	void ( testName )( __VA_ARGS__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_INVOKE_PARAMETRIC_TEST( nameOfTestToCall, parametricInvokationName, ... )\
+\
+	/*1. Create a function with a name matching the test.*/ \
+	void ( parametricInvokationName )( void ); \
+\
+	/*2. Define this test body immediately*/ \
+	void ( parametricInvokationName )( void ) { TANTRUM_CONCAT_INTERNAL( nameOfTestToCall, _GlobalParametricInfo ).Callback( __VA_ARGS__ ); } \
+\
+	/*3. Create a testName_TestInfo struct that will just wrap the test information meta data.*/ \
+	typedef struct TANTRUM_CONCAT_INTERNAL( parametricInvokationName, _TestInfo ) { \
+		suiteTestInfo_t testInformation; \
+	} TANTRUM_CONCAT_INTERNAL( parametricInvokationName, _TestInfo ); \
+\
+	/*4. Create a global instance of this new struct for us to access and write data about this test to.*/ \
+	extern TANTRUM_CONCAT_INTERNAL( parametricInvokationName, _TestInfo ) TANTRUM_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ); \
+	TANTRUM_CONCAT_INTERNAL( parametricInvokationName, _TestInfo ) TANTRUM_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ); \
+\
+	/*5. Create our invoker_n function. This is what the runner will loop over to grab the test function as well as all the information concerning it*/ \
+	__declspec( dllexport ) inline suiteTestInfo_t TANTRUM_CONCAT_INTERNAL( tantrum_test_invoker_, __COUNTER__ )( void ) { \
+		TANTRUM_CONCAT_INTERNAL( nameOfTestToCall, _ParametricTestInfoBinder )();/*Make it so we can grab the needed information out of the test function's global info*/\
+		TANTRUM_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation.callback = parametricInvokationName; \
+		TANTRUM_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation.suiteNameStr = TANTRUM_CONCAT_INTERNAL( nameOfTestToCall, _GlobalParametricInfo ).suiteNameStr; \
+		TANTRUM_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation.testNameStr = #parametricInvokationName; \
+		TANTRUM_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation.testingFlag = TANTRUM_CONCAT_INTERNAL( nameOfTestToCall, _GlobalParametricInfo ).testingFlag; \
+		return TANTRUM_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation; \
+	}\
+
 //==========================================================
 // PREPROCESSORS - CONDITION TESTING
 //==========================================================
