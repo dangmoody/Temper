@@ -253,7 +253,7 @@ static void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 			continue;
 		}
 
-		if ( TantrumStringEqualsInternal( arg, "-p" ) == 0 ) {
+		if ( TantrumStringEqualsInternal( arg, "-p" ) ) {
 			tantrumGlobalTestContext.partialFilter = true;
 			continue;
 		}
