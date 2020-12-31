@@ -22,6 +22,8 @@ extern "C" {
 // STRUCTS
 //==========================================================
 
+typedef uint32_t tantrumBool32;
+
 typedef enum tantrumTestFlag_t {
 	TANTRUM_TEST_SHOULD_RUN	= 0,
 	TANTRUM_TEST_SHOULD_SKIP,
@@ -191,7 +193,7 @@ do { \
 do { \
 	if ( conditionA < conditionB ) { \
 		tantrumGlobalTestContext.totalErrorsInCurrentTests += 1; \
-		printf( "TEST_LESS_THAN(%f, %f) has failed\n", (double) conditionA, (double) conditionB ); \
+		printf( "TEST_LESS_THAN( %f, %f ) has failed\n", (double) conditionA, (double) conditionB ); \
 		printf( "%s\n", #message ); \
 	} \
 } while( 0 )
@@ -209,6 +211,18 @@ static const char* TantrumGetNextArgInternal( const int argIndex, const int argc
 
 //----------------------------------------------------------
 
+static tantrumBool32 TantrumStringEqualsInternal( const char* a, const char* b ) {
+	return strcmp( a, b ) == 0;
+}
+
+//----------------------------------------------------------
+
+static tantrumBool32 TantrumStringContainsInternal( const char* str, const char* substring ) {
+	return strstr( str, substring ) != NULL;
+}
+
+//----------------------------------------------------------
+
 static void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 	// MY: Honestly I'd like to be able to use this without needing
 	// argc/argv, ideally anyone should be able to use this weather
@@ -220,7 +234,7 @@ static void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 	for ( int argIndex = 0; argIndex < argc; argIndex++ ) {
 		const char* arg = argv[argIndex];
 
-		if ( strcmp( arg, "-s" ) == 0 ) {
+		if ( TantrumStringEqualsInternal( arg, "-s" ) ) {
 			const char* nextArg = TantrumGetNextArgInternal( argIndex, argc, argv );
 			// TODO(DM): if nextArg == NULL then error that the suite filter wasnt set and show usage to help user
 			tantrumGlobalTestContext.suiteFilter = nextArg;
@@ -228,7 +242,7 @@ static void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 			continue;
 		}
 
-		if ( strcmp( arg, "-t" ) == 0 ) {
+		if ( TantrumStringEqualsInternal( arg, "-t" ) ) {
 			const char* nextArg = TantrumGetNextArgInternal( argIndex, argc, argv );
 			// TODO(DM): if nextArg == NULL then error that the test filter wasnt set and show usage to help user
 			tantrumGlobalTestContext.testFilter = nextArg;
@@ -256,10 +270,10 @@ static int TantrumExecuteAllTestsInternal() {
 
 		suiteTestInfo_t information = testInfoGrabberFunc();
 
-		bool isFilteredSuite = tantrumGlobalTestContext.suiteFilter && information.suiteNameStr && strcmp( information.suiteNameStr, tantrumGlobalTestContext.suiteFilter ) == 0;
+		bool isFilteredSuite = tantrumGlobalTestContext.suiteFilter && information.suiteNameStr && TantrumStringEqualsInternal( information.suiteNameStr, tantrumGlobalTestContext.suiteFilter );
 
 		if ( isFilteredSuite || !tantrumGlobalTestContext.suiteFilter ) {
-			bool isFilteredTest = tantrumGlobalTestContext.testFilter && strcmp( information.testNameStr, tantrumGlobalTestContext.testFilter ) == 0;
+			bool isFilteredTest = tantrumGlobalTestContext.testFilter && TantrumStringEqualsInternal( information.testNameStr, tantrumGlobalTestContext.testFilter );
 
 			if ( isFilteredTest || !tantrumGlobalTestContext.testFilter ) {
 				// MY : I'm not checking the flag first as it'd still be helpful for search queries to see if the test even appears
