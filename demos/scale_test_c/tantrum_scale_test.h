@@ -231,7 +231,19 @@ static void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 	// argc/argv, ideally anyone should be able to use this weather
 	// their using main(), main(argc, argv) or WinMain(...).
 	// temporarily using global data to make this function work.
-	tantrumGlobalTestContext.programName = argv[0];
+
+#ifdef _WIN32
+	char fullExePath[MAX_PATH];
+	DWORD fullExePathLength = GetModuleFileName( NULL, fullExePath, MAX_PATH );
+	if ( fullExePathLength == 0 ) {
+		printf( "ERROR: WinAPI call GetModuleFileName() failed: 0x%lX\n", GetLastError() );
+		return;
+	}
+
+	tantrumGlobalTestContext.programName = fullExePath;
+#else
+#error Uncrecognised platform.  It appears Tantrum doesn't support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
+#endif
 
 	// parse command line args
 	for ( int argIndex = 0; argIndex < argc; argIndex++ ) {
