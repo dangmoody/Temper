@@ -51,17 +51,34 @@ typedef suiteTestInfo_t( *testInfoFetcherFunc_t )( void );
 typedef struct tantrumTestContext_t {
 	uint32_t		testsPassed;
 	uint32_t		testsFailed;
+	uint32_t		testsDodged;
 	uint32_t		totalTestsDeclared; // Gets set in the main function with a preprocessor
+	uint32_t		totalTestsFoundWithFilters;
+	uint32_t		totalTestsExecuted;
 	uint32_t		totalErrorsInCurrentTests;
 	tantrumBool32	partialFilter;
+	tantrumBool32	isFilteringTests;
 	const char*		programName;
 	const char*		suiteFilter;
 	const char*		testFilter;
 } tantrumTestContext_t;
 
 //==========================================================
+// GLOBALS
+//==========================================================
+
+static tantrumTestContext_t						g_tantrumTestContext;
+
+//==========================================================
 // FUNCTIONS - BASE HELPER/UTILITY FUNCTIONS
 //==========================================================
+
+static uint32_t TantrumGetPercentInternal( uint32_t yourValue, uint32_t yourMax )
+{
+	return ( uint32_t ) ( ( ( ( double ) yourValue ) / ( ( double ) yourMax ) ) * 100 );
+}
+
+//----------------------------------------------------------
 
 static bool TantrumFloatEqualsInternal( const float a, const float b, const float epsilon ) {
 	return fabsf( a - b ) > epsilon;
@@ -88,11 +105,25 @@ static tantrumBool32 TantrumStringContainsInternal( const char* str, const char*
 	return strstr( str, substring ) != NULL;
 }
 
-//==========================================================
-// GLOBALS
-//==========================================================
+//----------------------------------------------------------
 
-static tantrumTestContext_t						g_tantrumTestContext;
+static void PrintTestExecutionInformation() {
+	printf("=== TANTRUM TESTING REPORT ===\n");
+
+	printf( "Total tests defined: %d\n", g_tantrumTestContext.totalTestsDeclared );
+	if( g_tantrumTestContext.isFilteringTests ) {
+		printf( "\t- Total tests matching filters: %d\n\t- Suite filter: %s\n\t- Test filter: %s\n\t- Partial results %s\n",
+				g_tantrumTestContext.totalTestsFoundWithFilters, 
+				g_tantrumTestContext.suiteFilter,
+				g_tantrumTestContext.testFilter,
+				g_tantrumTestContext.partialFilter ? "PERMITTED" : "DISCARDED" );
+	}
+
+	uint32_t totalFound = g_tantrumTestContext.totalTestsFoundWithFilters;
+	printf( "Passed: %d ( %d%% )\n", g_tantrumTestContext.testsPassed, TantrumGetPercentInternal( g_tantrumTestContext.testsPassed, totalFound ) );
+	printf( "Failed: %d ( %d%% )\n", g_tantrumTestContext.testsFailed, TantrumGetPercentInternal( g_tantrumTestContext.testsFailed, totalFound ) );
+	printf( "Dodged: %d ( %d%% )\n", g_tantrumTestContext.testsDodged, TantrumGetPercentInternal( g_tantrumTestContext.testsDodged, totalFound ) );
+}
 
 //==========================================================
 // PREPROCESSORS - TANTRUM INTERNAL
@@ -324,6 +355,7 @@ static void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 			const char* nextArg = TantrumGetNextArgInternal( argIndex, argc, argv );
 			// TODO(DM): if nextArg == NULL then error that the suite filter wasnt set and show usage to help user
 			g_tantrumTestContext.suiteFilter = nextArg;
+			g_tantrumTestContext.isFilteringTests = true;
 
 			continue;
 		}
@@ -332,6 +364,7 @@ static void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 			const char* nextArg = TantrumGetNextArgInternal( argIndex, argc, argv );
 			// TODO(DM): if nextArg == NULL then error that the test filter wasnt set and show usage to help user
 			g_tantrumTestContext.testFilter = nextArg;
+			g_tantrumTestContext.isFilteringTests = true;
 
 			continue;
 		}
@@ -392,10 +425,13 @@ static int TantrumExecuteAllTestsInternal() {
 			bool isFilteredTest = g_tantrumTestContext.testFilter && stringCompareFunc( information.testNameStr, g_tantrumTestContext.testFilter );
 
 			if ( isFilteredTest || !g_tantrumTestContext.testFilter ) {
+				g_tantrumTestContext.totalTestsFoundWithFilters += 1; // TANTRUM TELEMETRY
+
 				// MY : I'm not checking the flag first as it'd still be helpful for search queries to see if the test even appears
 				if ( information.testingFlag == TANTRUM_TEST_SHOULD_RUN ) {
 					g_tantrumTestContext.totalErrorsInCurrentTests = 0;
 					information.callback();
+					g_tantrumTestContext.totalTestsExecuted += 1; // TANTRUM TELEMETRY
 
 					if ( information.suiteNameStr ) {
 						printf( "%s: ", information.suiteNameStr );
@@ -403,16 +439,21 @@ static int TantrumExecuteAllTestsInternal() {
 
 					if ( g_tantrumTestContext.totalErrorsInCurrentTests > 0 ) {
 						printf( "%s - FAILED\n\n", information.testNameStr );
+						g_tantrumTestContext.testsFailed += 1; // TANTRUM TELEMETRY
 					} else {
 						printf( "%s - SUCCEEDED\n\n", information.testNameStr );
+						g_tantrumTestContext.testsPassed += 1; // TANTRUM TELEMETRY
 					}
 				} else {
 					const char* dodgeReason = information.testingFlag == TANTRUM_TEST_DEPRECATED ? "DEPRICATED" : "SHOULD_SKIP";
 					printf( "NOT RUNNING \"%s\" AS IT WAS FLAGGED With \"%s\"\n\n", information.testNameStr, dodgeReason );
+					g_tantrumTestContext.testsDodged += 1; // TANTRUM TELEMETRY
 				}
 			}
 		}
 	}
+
+	PrintTestExecutionInformation();
 
 	// cleanup
 #ifdef _WIN32
