@@ -1,4 +1,4 @@
-#include "../scale_test_c/tantrum_scale_test.h"
+#include "../../tantrum.h"
 
 /*
 DM: you need to run this demo with command line arguments to see filtering working:

@@ -1,4 +1,5 @@
-#include "tantrum_scale_test.h"
+#include "../../tantrum.h"
+
 #include "vector2d.h"
 #include "vector2d_tests.c"
 
