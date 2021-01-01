@@ -13,22 +13,22 @@ this is also the best I can do for unifying TANTRUM_TEST() and TANTRUM_SUITE_TES
 I'm not so sure I like the unification of tests and "suite tests" because the NULL suite name string has added a lot of extra branching
 */
 
-TANTRUM_TEST( OrderingBeer, TANTRUM_TEST_SHOULD_RUN ) {
+TANTRUM_TEST( OrderingBeer, TANTRUM_TEST_FLAG_SHOULD_RUN ) {
 }
 
-TANTRUM_TEST( ReOrderingBeer, TANTRUM_TEST_SHOULD_RUN ) {
+TANTRUM_TEST( ReOrderingBeer, TANTRUM_TEST_FLAG_SHOULD_RUN ) {
 }
 
-TANTRUM_TEST( ReReOrderingBeer, TANTRUM_TEST_DEPRECATED ) {
+TANTRUM_TEST( ReReOrderingBeer, TANTRUM_TEST_FLAG_DEPRECATED ) {
 }
 
-TANTRUM_TEST( TableFlippingForBeer, TANTRUM_TEST_SHOULD_SKIP ) {
+TANTRUM_TEST( TableFlippingForBeer, TANTRUM_TEST_FLAG_SHOULD_SKIP ) {
 }
 
-TANTRUM_SUITE_TEST( MySuite, DansSuiteTest, TANTRUM_TEST_SHOULD_RUN ) {
+TANTRUM_SUITE_TEST( MySuite, DansSuiteTest, TANTRUM_TEST_FLAG_SHOULD_RUN ) {
 }
 
-TANTRUM_SUITE_TEST( MySuite, DansSuiteTest2, TANTRUM_TEST_SHOULD_RUN ) {
+TANTRUM_SUITE_TEST( MySuite, DansSuiteTest2, TANTRUM_TEST_FLAG_SHOULD_RUN ) {
 }
 
 int main( int argc, char** argv ){
