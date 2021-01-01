@@ -12,7 +12,9 @@
 // what do we think? good idea? bad?
 int main( int argc, char** argv ){
 	TANTRUM_SETUP();
-	return TANTRUM_RUN_ALL_TESTS_WITH_ARGS( argc, argv );
+	int returnValue = TANTRUM_RUN_ALL_TESTS_WITH_ARGS( argc, argv );
+	//getchar();
+	return returnValue;
 }
 
 //#else

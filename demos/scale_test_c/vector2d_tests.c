@@ -22,7 +22,7 @@ TANTRUM_SUITE_TEST( VectorOperators, GivenTwoVectors_WhenMultipliedTogether_Then
 	vector2d A = { 2.f,4.f };
 	vector2d B = { 4.f,6.f };
 	vector2d Result = Vector2D_Mul( A, B );
-	TANTRUM_TEST_EQUAL( Result.x, 99.f, "Vector2D_Mul function is broken" ); // expecting this to fail - to test tantrum's internal system
+	TANTRUM_TEST_EQUAL( Result.x, 8.f, "Vector2D_Mul function is broken" );
 	TANTRUM_TEST_EQUAL( Result.y, 99.f, "Vector2D_Mul function is broken" ); // expecting this to fail - to test tantrum's internal system
 }
 
@@ -30,8 +30,8 @@ TANTRUM_SUITE_TEST( VectorOperators, GivenTwoVectors_WhenDividedTogether_ThenDiv
 	vector2d A = { 2.f,4.f };
 	vector2d B = { 4.f,6.f };
 	vector2d Result = Vector2D_Div( A, B );
-	TANTRUM_TEST_ALMOST_EQUAL( Result.x, 0.5f, 99.f, "Vector2D_Div function is broken" ); // expecting this to fail - to test tantrum's internal system
-	TANTRUM_TEST_ALMOST_EQUAL( Result.y, 0.5f, 99.f, "Vector2D_Div function is broken" ); // expecting this to fail - to test tantrum's internal system
+	TANTRUM_TEST_ALMOST_EQUAL( Result.x, 99.f, 0.2f, "Vector2D_Div function is broken" ); // expecting this to fail - to test tantrum's internal system
+	TANTRUM_TEST_ALMOST_EQUAL( Result.y, 0.5f, 0.2f, "Vector2D_Div function is broken" );
 }
 
 TANTRUM_TEST( GivenAVectors_WhenGetLengthIsCalled_ThenTrueLengthFound, TANTRUM_TEST_SHOULD_RUN ){

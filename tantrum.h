@@ -96,7 +96,15 @@ static const char* TantrumGetNextArgInternal( const int argIndex, const int argc
 //----------------------------------------------------------
 
 static tantrumBool32 TantrumStringEqualsInternal( const char* a, const char* b ) {
-	return strcmp( a, b ) == 0;
+	if( a && b )
+	{
+		return strcmp( a, b ) == 0;
+	}
+	else if( !a && !b )
+	{
+		return true;
+	}
+	return false;
 }
 
 //----------------------------------------------------------
@@ -107,8 +115,14 @@ static tantrumBool32 TantrumStringContainsInternal( const char* str, const char*
 
 //----------------------------------------------------------
 
-static void PrintTestExecutionInformation() {
-	printf("=== TANTRUM TESTING REPORT ===\n");
+static void TantrumPrintSuiteChangeDividerInternal() {
+	printf( "------------------------------------------------------------\n\n" );
+}
+
+//----------------------------------------------------------
+
+static void TantrumPrintTestExecutionInformationInternal() {
+	printf("\n=== TANTRUM TESTING REPORT ===\n");
 
 	printf( "Total tests defined: %d\n", g_tantrumTestContext.totalTestsDeclared );
 	if( g_tantrumTestContext.isFilteringTests ) {
@@ -401,6 +415,9 @@ static int TantrumExecuteAllTestsInternal() {
 	char testFuncNames[1024];
 	testInfoFetcherFunc_t testInfoGrabberFunc = NULL;
 
+	const char* previousSuiteName;
+	bool firstRun = true;
+
 	for ( uint32_t i = 0; i < g_tantrumTestContext.totalTestsDeclared; i++ ) {
 		snprintf( testFuncNames, 1024, "tantrum_test_info_fetcher_%d", i );
 
@@ -427,33 +444,43 @@ static int TantrumExecuteAllTestsInternal() {
 			if ( isFilteredTest || !g_tantrumTestContext.testFilter ) {
 				g_tantrumTestContext.totalTestsFoundWithFilters += 1; // TANTRUM TELEMETRY
 
+				if( firstRun || TantrumStringEqualsInternal( previousSuiteName, information.suiteNameStr ) == false ) {
+					TantrumPrintSuiteChangeDividerInternal();
+					previousSuiteName = information.suiteNameStr;
+					firstRun = false;
+				}
+
+				if( information.suiteNameStr ) {
+					printf( "TEST \t- \"%s\" : \"%s\"\n", information.suiteNameStr, information.testNameStr );
+				}
+				else {
+					printf( "TEST \t- \"%s\"\n", information.testNameStr );
+				}
+
 				// MY : I'm not checking the flag first as it'd still be helpful for search queries to see if the test even appears
 				if ( information.testingFlag == TANTRUM_TEST_SHOULD_RUN ) {
 					g_tantrumTestContext.totalErrorsInCurrentTests = 0;
 					information.callback();
 					g_tantrumTestContext.totalTestsExecuted += 1; // TANTRUM TELEMETRY
 
-					if ( information.suiteNameStr ) {
-						printf( "%s: ", information.suiteNameStr );
-					}
-
 					if ( g_tantrumTestContext.totalErrorsInCurrentTests > 0 ) {
-						printf( "%s - FAILED\n\n", information.testNameStr );
+						printf( "TEST FAILED\n\n" );
 						g_tantrumTestContext.testsFailed += 1; // TANTRUM TELEMETRY
 					} else {
-						printf( "%s - SUCCEEDED\n\n", information.testNameStr );
+						printf( "TEST SUCCEEDED\n\n" );
 						g_tantrumTestContext.testsPassed += 1; // TANTRUM TELEMETRY
 					}
 				} else {
 					const char* dodgeReason = information.testingFlag == TANTRUM_TEST_DEPRECATED ? "DEPRICATED" : "SHOULD_SKIP";
-					printf( "NOT RUNNING \"%s\" AS IT WAS FLAGGED With \"%s\"\n\n", information.testNameStr, dodgeReason );
+					printf( "TEST FLAGGED \"%s\"\n\n", dodgeReason );
 					g_tantrumTestContext.testsDodged += 1; // TANTRUM TELEMETRY
 				}
 			}
 		}
 	}
 
-	PrintTestExecutionInformation();
+	TantrumPrintSuiteChangeDividerInternal();
+	TantrumPrintTestExecutionInformationInternal();
 
 	// cleanup
 #ifdef _WIN32
