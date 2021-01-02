@@ -144,4 +144,5 @@ fi
 
 defines=-D_CRT_SECURE_NO_WARNINGS
 
-${g_compiler} ${std} -o ${g_bin_dir}/${g_output} ${symbols} ${optimisations} ${defines} ${g_source_files} ${warning_level} ${ignore_warnings}
+# echo RUNNING: ${g_compiler} ${std} -o ${g_bin_dir}/${g_output} ${symbols} ${optimisations} ${defines} ${g_source_files} ${warning_level} ${ignore_warnings}
+${g_compiler} ${std} -o ${g_bin_dir}/${g_output} ${symbols} ${optimisations} ${defines} ${g_source_files} ${warning_level} ${ignore_warnings} -lm -ldl -Wl,--export-dynamic
