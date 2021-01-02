@@ -261,7 +261,7 @@ do { \
 	if ( !( condition ) ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
 		printf( "TANTRUM_TEST_TRUE( %s ) has failed\n", #condition); \
-		printf( "%s\n", #message ); \
+		printf( "%s\n", message ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
 	} \
@@ -284,7 +284,7 @@ do { \
 	if ( ( condition ) ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
 		printf( "TANTRUM_TEST_FALSE( %s ) has failed\n", #condition ); \
-		printf( "%s\n", #message ); \
+		printf( "%s\n", message ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
 	} \
@@ -307,7 +307,7 @@ do { \
 	if ( TantrumFloatEqualsInternal( conditionA, conditionB, TANTRUM_DEFAULT_EPSILON ) ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
 		printf( "TANTRUM_TEST_EQUAL( %f, %f ) has failed\n", (double) conditionA, (double) conditionB  ); \
-		printf( "%s\n", #message ); \
+		printf( "%s\n", message ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
 	} \
@@ -330,7 +330,7 @@ do { \
 	if ( TantrumFloatEqualsInternal( conditionA, conditionB, TANTRUM_DEFAULT_EPSILON ) ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
 		printf( "TANTRUM_TEST_NOT_EQUAL( %f, %f ) has failed\n", (double) conditionA, (double) conditionB  ); \
-		printf( "%s\n", #message ); \
+		printf( "%s\n", message ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
 	} \
@@ -353,7 +353,7 @@ do { \
 	if ( TantrumFloatEqualsInternal( conditionA, conditionB, tolerance ) ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
 		printf( "TANTRUM_TEST_ALMOST_EQUAL( %f, %f, %f ) has failed\n", (double) conditionA, (double) conditionB, (double) tolerance  ); \
-		printf( "%s\n", #message ); \
+		printf( "%s\n", message ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
 	} \
@@ -376,7 +376,7 @@ do { \
 	if ( !TantrumFloatEqualsInternal( conditionA, conditionB, tolerance ) ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
 		printf( "TANTRUM_TEST_NOT_ALMOST_EQUAL( %f, %f, %f ) has failed\n", (double) conditionA, (double) conditionB, (double) tolerance  ); \
-		printf( "%s\n", #message ); \
+		printf( "%s\n", message ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
 	} \
@@ -399,7 +399,7 @@ do { \
 	if ( conditionA > conditionB ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
 		printf( "TANTRUM_TEST_GREATER_THAN( %f, %f ) has failed\n", (double) conditionA, (double) conditionB  ); \
-		printf( "%s\n", #message ); \
+		printf( "%s\n", message ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
 	} \
@@ -422,7 +422,7 @@ do { \
 	if ( conditionA < conditionB ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
 		printf( "TANTRUM_TEST_LESS_THAN( %f, %f ) has failed\n", (double) conditionA, (double) conditionB  ); \
-		printf( "%s\n", #message ); \
+		printf( "%s\n", message ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
 	} \
