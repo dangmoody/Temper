@@ -4,20 +4,45 @@
 extern "C" {
 #endif
 
-#ifdef _WIN32
+#if defined( __GNUC__ ) || defined( __clang__ )
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+#pragma GCC diagnostic ignored "-Wreserved-id-macro"
+#endif	// defined( __GNUC__ ) || defined( __clang__ )
+
+#if defined( __linux__ ) || defined( __APPLE__ )
+#pragma push_macro( "_POSIX_C_SOURCE" )
+#undef _POSIX_C_SOURCE
+#define _POSIX_C_SOURCE 200112L
+#endif
+
+#if defined( _WIN32 )
 #include <Windows.h>
+#elif defined( __APPLE__ ) || defined( __linux__ )
+#include <unistd.h>
+#include <dlfcn.h>
+#include <errno.h>
+#include <sys/stat.h>
+#include <linux/limits.h>
 #endif
 
 #include <stdio.h>
 #include <stdint.h>
-#include <stdbool.h>
+#include <string.h>
 #include <assert.h>
 #include <math.h>
 
-#if defined( __GNUC__ ) || defined( __clang__ )
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-#endif // defined( __GNUC__ ) || defined( __clang__ )
+#ifndef __cplusplus
+#include <stdbool.h>
+#endif
+
+#if defined( _WIN32 )
+#define TANTRUM_API	__declspec( dllexport )
+#elif defined( __APPLE__ ) || defined( __linux__ )
+#define TANTRUM_API	__attribute__((visibility("default")))
+#else
+#error Uncrecognised platform.  It appears Tantrum doesn't support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
+#endif
 
 //==========================================================
 // STRUCTS
@@ -42,6 +67,7 @@ typedef tantrumBool32 ( *tantrumStringCompareFunc_t )( const char*, const char* 
 typedef struct suiteTestInfo_t {
 	testCallback_t		callback;
 	tantrumTestFlag_t	testingFlag;
+	uint32_t			pad0;
 	const char*			testNameStr;
 	const char*			suiteNameStr;
 } suiteTestInfo_t;
@@ -77,9 +103,8 @@ static tantrumTestContext_t						g_tantrumTestContext;
 // FUNCTIONS - BASE HELPER/UTILITY FUNCTIONS
 //==========================================================
 
-static uint32_t TantrumGetPercentInternal( uint32_t yourValue, uint32_t yourMax )
-{
-	return ( uint32_t ) ( ( ( ( double ) yourValue ) / ( ( double ) yourMax ) ) * 100 );
+static uint32_t TantrumGetPercentInternal( uint32_t yourValue, uint32_t yourMax ) {
+	return (uint32_t) ( ( ( (double) yourValue ) / ( (double) yourMax ) ) * 100 );
 }
 
 //----------------------------------------------------------
@@ -94,20 +119,18 @@ static const char* TantrumGetNextArgInternal( const int argIndex, const int argc
 	assert( argc );
 	assert( argv );
 
-	return ( argIndex + 1 < argc ) ? argv[ argIndex + 1 ] : NULL;
+	return ( argIndex + 1 < argc ) ? argv[argIndex + 1] : NULL;
 }
 
 //----------------------------------------------------------
 
 static tantrumBool32 TantrumStringEqualsInternal( const char* a, const char* b ) {
-	if( a && b )
-	{
+	if ( a && b ) {
 		return strcmp( a, b ) == 0;
-	}
-	else if( !a && !b )
-	{
+	} else if ( !a && !b ) {
 		return true;
 	}
+
 	return false;
 }
 
@@ -133,7 +156,7 @@ static tantrumBool32 TantrumStringContainsInternal( const char* str, const char*
 
 //----------------------------------------------------------
 
-#define TANTRUM_DEFINE_TEST_INTERNAL( suiteNameString, testName, runFlag ) \
+#define TANTRUM_DEFINE_TEST_INTERNAL( counter, suiteNameString, testName, runFlag ) \
 \
 	/*1. Create a function with a name matching the test.*/ \
 	void ( testName )( void ); \
@@ -148,7 +171,8 @@ static tantrumBool32 TantrumStringContainsInternal( const char* str, const char*
 	TANTRUM_CONCAT_INTERNAL( testName, _TestInfo ) TANTRUM_CONCAT_INTERNAL( testName, _GlobalInfo ); \
 \
 	/*4. Create our invoker_n function. This is what the runner will loop over to grab the test function as well as all the information concerning it*/ \
-	__declspec( dllexport ) inline suiteTestInfo_t TANTRUM_CONCAT_INTERNAL( tantrum_test_info_fetcher_, __COUNTER__ )( void ) { \
+	suiteTestInfo_t TANTRUM_API TANTRUM_CONCAT_INTERNAL( tantrum_test_info_fetcher_, counter )( void ); \
+	suiteTestInfo_t TANTRUM_CONCAT_INTERNAL( tantrum_test_info_fetcher_, counter )( void ) { \
 		TANTRUM_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.callback = testName; \
 		TANTRUM_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.suiteNameStr = suiteNameString; \
 		TANTRUM_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.testNameStr = #testName; \
@@ -162,12 +186,12 @@ static tantrumBool32 TantrumStringContainsInternal( const char* str, const char*
 //----------------------------------------------------------
 
 #define TANTRUM_TEST( testName, runFlag ) \
-	TANTRUM_DEFINE_TEST_INTERNAL( NULL, testName, runFlag )
+	TANTRUM_DEFINE_TEST_INTERNAL( __COUNTER__, NULL, testName, runFlag )
 
 //----------------------------------------------------------
 
 #define TANTRUM_SUITE_TEST( suiteName, testName, runFlag ) \
-	TANTRUM_DEFINE_TEST_INTERNAL( #suiteName, testName, runFlag )
+	TANTRUM_DEFINE_TEST_INTERNAL( __COUNTER__, #suiteName, testName, runFlag )
 
 //----------------------------------------------------------
 
@@ -183,6 +207,7 @@ static tantrumBool32 TantrumStringContainsInternal( const char* str, const char*
 	typedef struct TANTRUM_CONCAT_INTERNAL( testName, _ParametricTestInfo ) { \
 		TANTRUM_CONCAT_INTERNAL( testName, _FuncType ) Callback; \
 		tantrumTestFlag_t testingFlag; \
+		uint32_t pad0; \
 		const char* testNameStr; \
 		const char* suiteNameStr; \
 	} TANTRUM_CONCAT_INTERNAL( testName, _ParametricTestInfo ); \
@@ -192,7 +217,8 @@ static tantrumBool32 TantrumStringContainsInternal( const char* str, const char*
 	TANTRUM_CONCAT_INTERNAL( testName, _ParametricTestInfo ) TANTRUM_CONCAT_INTERNAL( testName, _GlobalParametricInfo ); \
 \
 	/*5. Define an info binding function to tie all this information into the struct*/ \
-	__declspec( dllexport ) inline void (TANTRUM_CONCAT_INTERNAL( testName, _ParametricTestInfoBinder ))(void){ \
+	void TANTRUM_API TANTRUM_CONCAT_INTERNAL( testName, _ParametricTestInfoBinder )( void ); \
+	void TANTRUM_CONCAT_INTERNAL( testName, _ParametricTestInfoBinder )( void ) { \
 		TANTRUM_CONCAT_INTERNAL( testName, _GlobalParametricInfo ).Callback = testName; \
 		TANTRUM_CONCAT_INTERNAL( testName, _GlobalParametricInfo ).testingFlag = runFlag; \
 		TANTRUM_CONCAT_INTERNAL( testName, _GlobalParametricInfo ).testNameStr = #testName; \
@@ -214,7 +240,8 @@ static tantrumBool32 TantrumStringContainsInternal( const char* str, const char*
 
 //----------------------------------------------------------
 
-#define TANTRUM_INVOKE_PARAMETRIC_TEST( nameOfTestToCall, parametricInvokationName, ... ) \
+// TODO: make this macro end with a semicolon
+#define TANTRUM_INVOKE_PARAMETRIC_TEST_INTERNAL( counter, nameOfTestToCall, parametricInvokationName, ... ) \
 \
 	/*1. Create a function with a name matching the test.*/ \
 	void ( parametricInvokationName )( void ); \
@@ -232,7 +259,8 @@ static tantrumBool32 TantrumStringContainsInternal( const char* str, const char*
 	TANTRUM_CONCAT_INTERNAL( parametricInvokationName, _TestInfo ) TANTRUM_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ); \
 \
 	/*5. Create our invoker_n function. This is what the runner will loop over to grab the test function as well as all the information concerning it*/ \
-	__declspec( dllexport ) inline suiteTestInfo_t TANTRUM_CONCAT_INTERNAL( tantrum_test_info_fetcher_, __COUNTER__ )( void ) { \
+	suiteTestInfo_t TANTRUM_API TANTRUM_CONCAT_INTERNAL( tantrum_test_info_fetcher_, counter )( void ); \
+	suiteTestInfo_t TANTRUM_CONCAT_INTERNAL( tantrum_test_info_fetcher_, counter )( void ) { \
 		TANTRUM_CONCAT_INTERNAL( nameOfTestToCall, _ParametricTestInfoBinder )();/*Make it so we can grab the needed information out of the test function's global info*/\
 		TANTRUM_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation.callback = parametricInvokationName; \
 		TANTRUM_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation.suiteNameStr = TANTRUM_CONCAT_INTERNAL( nameOfTestToCall, _GlobalParametricInfo ).suiteNameStr; \
@@ -240,6 +268,9 @@ static tantrumBool32 TantrumStringContainsInternal( const char* str, const char*
 		TANTRUM_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation.testingFlag = TANTRUM_CONCAT_INTERNAL( nameOfTestToCall, _GlobalParametricInfo ).testingFlag; \
 		return TANTRUM_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation; \
 	}
+
+#define TANTRUM_INVOKE_PARAMETRIC_TEST( nameOfTestToCall, parametricInvokationName, ... ) \
+	TANTRUM_INVOKE_PARAMETRIC_TEST_INTERNAL( __COUNTER__, nameOfTestToCall, parametricInvokationName, __VA_ARGS__ )
 
 //==========================================================
 // PREPROCESSORS - CONDITION TESTING
@@ -260,7 +291,7 @@ do { \
 do { \
 	if ( !( condition ) ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-		printf( "TANTRUM_TEST_TRUE( %s ) has failed\n", #condition); \
+		printf( "TANTRUM_TEST_TRUE( %s ) has failed\n", #condition ); \
 		printf( "%s\n", #message ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
@@ -306,7 +337,7 @@ do { \
 do { \
 	if ( TantrumFloatEqualsInternal( conditionA, conditionB, TANTRUM_DEFAULT_EPSILON ) ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-		printf( "TANTRUM_TEST_EQUAL( %f, %f ) has failed\n", (double) conditionA, (double) conditionB  ); \
+		printf( "TANTRUM_TEST_EQUAL( %f, %f ) has failed\n", (double) conditionA, (double) conditionB ); \
 		printf( "%s\n", #message ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
@@ -329,7 +360,7 @@ do { \
 do { \
 	if ( TantrumFloatEqualsInternal( conditionA, conditionB, TANTRUM_DEFAULT_EPSILON ) ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-		printf( "TANTRUM_TEST_NOT_EQUAL( %f, %f ) has failed\n", (double) conditionA, (double) conditionB  ); \
+		printf( "TANTRUM_TEST_NOT_EQUAL( %f, %f ) has failed\n", (double) conditionA, (double) conditionB ); \
 		printf( "%s\n", #message ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
@@ -352,7 +383,7 @@ do { \
 do { \
 	if ( TantrumFloatEqualsInternal( conditionA, conditionB, tolerance ) ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-		printf( "TANTRUM_TEST_ALMOST_EQUAL( %f, %f, %f ) has failed\n", (double) conditionA, (double) conditionB, (double) tolerance  ); \
+		printf( "TANTRUM_TEST_ALMOST_EQUAL( %f, %f, %f ) has failed\n", (double) conditionA, (double) conditionB, (double) tolerance ); \
 		printf( "%s\n", #message ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
@@ -375,7 +406,7 @@ do { \
 do { \
 	if ( !TantrumFloatEqualsInternal( conditionA, conditionB, tolerance ) ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-		printf( "TANTRUM_TEST_NOT_ALMOST_EQUAL( %f, %f, %f ) has failed\n", (double) conditionA, (double) conditionB, (double) tolerance  ); \
+		printf( "TANTRUM_TEST_NOT_ALMOST_EQUAL( %f, %f, %f ) has failed\n", (double) conditionA, (double) conditionB, (double) tolerance ); \
 		printf( "%s\n", #message ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
@@ -398,7 +429,7 @@ do { \
 do { \
 	if ( conditionA > conditionB ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-		printf( "TANTRUM_TEST_GREATER_THAN( %f, %f ) has failed\n", (double) conditionA, (double) conditionB  ); \
+		printf( "TANTRUM_TEST_GREATER_THAN( %f, %f ) has failed\n", (double) conditionA, (double) conditionB ); \
 		printf( "%s\n", #message ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
@@ -421,7 +452,7 @@ do { \
 do { \
 	if ( conditionA < conditionB ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-		printf( "TANTRUM_TEST_LESS_THAN( %f, %f ) has failed\n", (double) conditionA, (double) conditionB  ); \
+		printf( "TANTRUM_TEST_LESS_THAN( %f, %f ) has failed\n", (double) conditionA, (double) conditionB ); \
 		printf( "%s\n", #message ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
@@ -472,15 +503,14 @@ static void TantrumPrintTestExecutionInformation_UserModdable() {
 //----------------------------------------------------------
 
 static void TantrumOnBeforeTest_UserModdable( const suiteTestInfo_t information ) {
-	if( TantrumStringEqualsInternal( g_tantrumTestContext.suiteFilterPrevious, information.suiteNameStr ) == false ) {
+	if ( !TantrumStringEqualsInternal( g_tantrumTestContext.suiteFilterPrevious, information.suiteNameStr ) ) {
 		TantrumPrintDivider_UserModdable();
 		g_tantrumTestContext.suiteFilterPrevious = information.suiteNameStr;
 	}
 
-	if( information.suiteNameStr ) {
+	if ( information.suiteNameStr ) {
 		printf( "TEST \t- \"%s\" : \"%s\"\n", information.suiteNameStr, information.testNameStr );
-	}
-	else {
+	} else {
 		printf( "TEST \t- \"%s\"\n", information.testNameStr );
 	}
 }
@@ -489,15 +519,13 @@ static void TantrumOnBeforeTest_UserModdable( const suiteTestInfo_t information 
 
 static void TantrumOnAfterTest_UserModdable( const suiteTestInfo_t information )
 {
-	if( information.testingFlag == TANTRUM_TEST_FLAG_SHOULD_RUN ) {
-		if( g_tantrumTestContext.totalErrorsInCurrentTests > 0 ) {
+	if ( information.testingFlag == TANTRUM_TEST_FLAG_SHOULD_RUN ) {
+		if ( g_tantrumTestContext.totalErrorsInCurrentTests > 0 ) {
 			printf( "TEST FAILED\n\n" );
-		}
-		else {
+		} else {
 			printf( "TEST SUCCEEDED\n\n" );
 		}
-	}
-	else {
+	} else {
 		const char* dodgeReason = information.testingFlag == TANTRUM_TEST_FLAG_DEPRECATED ? "DEPRICATED" : "SHOULD_SKIP";
 		printf( "TEST FLAGGED \"%s\"\n\n", dodgeReason );
 	}
@@ -508,7 +536,7 @@ static void TantrumOnAfterTest_UserModdable( const suiteTestInfo_t information )
 //==========================================================
 
 static void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
-#ifdef _WIN32
+#if defined( _WIN32 )
 	char fullExePath[MAX_PATH];
 	DWORD fullExePathLength = GetModuleFileName( NULL, fullExePath, MAX_PATH );
 	if ( fullExePathLength == 0 ) {
@@ -518,7 +546,27 @@ static void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 	}
 
 	g_tantrumTestContext.programName = fullExePath;
-#else // _WIN32
+#elif defined( __APPLE__ ) || defined( __linux__ ) // _WIN32
+	int err = 0;
+
+	const char* exeFilenameVirtual = "/proc/self/exe";
+	struct stat exeFileInfo = { 0 };
+	if ( lstat( exeFilenameVirtual, &exeFileInfo ) == -1 ) {
+		err = errno;
+		printf( "ERROR: lstat() failed: %s", strerror( err ) );
+		return;
+	}
+
+	char fullExePath[PATH_MAX];
+	ssize_t fullExePathLength = readlink( exeFilenameVirtual, fullExePath, (size_t) exeFileInfo.st_size + 1 );
+	err = errno;
+	if ( fullExePathLength == -1 ) {
+		printf( "ERROR: readlink() failed: %s", strerror( err ) );
+		return;
+	}
+
+	fullExePath[exeFileInfo.st_size] = 0;
+#else
 #error Uncrecognised platform.  It appears Tantrum doesn't support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
 #endif // _WIN32
 
@@ -564,29 +612,44 @@ static void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 
 static int TantrumExecuteAllTestsInternal() {
 	// make the exe load itself
-#ifdef _WIN32
+#if defined( _WIN32 )
 	HANDLE handle = LoadLibrary( g_tantrumTestContext.programName );
 	assert( handle );
-#else // _WIN32
+#elif defined( __APPLE__ ) || defined( __linux__ )	// defined( _WIN32 )
+	void* handle = dlopen( NULL, RTLD_LAZY );
+	assert( handle );
+#else	// defined( _WIN32 )
 #error Uncrecognised platform.  It appears Tantrum doesn't support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
-#endif // _WIN32
+#endif // defined( _WIN32 )
 
 	// DM: yeah yeah yeah, I know: fixed-length string arrays bad
 	// I'll write a tprintf at some point
-	char testFuncNames[1024];
+	char testFuncName[1024];
 	testInfoFetcherFunc_t testInfoGrabberFunc = NULL;
 
 	for ( uint32_t i = 0; i < g_tantrumTestContext.totalTestsDeclared; i++ ) {
-		snprintf( testFuncNames, 1024, "tantrum_test_info_fetcher_%d", i );
+		snprintf( testFuncName, 1024, "tantrum_test_info_fetcher_%d", i );
+
+		printf( "Loading test func: %s\n", testFuncName );
 
 		// get the test grabber functions out of the binary
 #ifdef _WIN32
-		testInfoGrabberFunc = (testInfoFetcherFunc_t) GetProcAddress( handle, testFuncNames );
-#else // _WIN32
+		testInfoGrabberFunc = (testInfoFetcherFunc_t) GetProcAddress( handle, testFuncName );
+#elif defined( __APPLE__ ) || defined( __linux__ )	// defined( _WIN32 )
+		testInfoGrabberFunc = (testInfoFetcherFunc_t) dlsym( handle, testFuncName );
+#else	// defined( _WIN32 )
 #error Uncrecognised platform.  It appears Tantrum doesn't support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
-#endif // _WIN32
+#endif	// defined( _WIN32 )
 
-		assert( testInfoGrabberFunc );
+		if ( !testInfoGrabberFunc ) {
+			const char* platformErrorMsg = "";
+#if defined( __APPLE__ ) || defined( __linux__ )
+			platformErrorMsg = "\nOn MacOS/Linux you need to explicitly allow dynamic symbol exporting (E.G.: on Clang use: \"-Wl,--export-dynamic\").\n";
+#endif
+
+			printf( "ERROR: Failed to find function %s.%s\n", testFuncName, platformErrorMsg );
+			return -1;
+		}
 
 		suiteTestInfo_t information = testInfoGrabberFunc();
 
@@ -627,12 +690,14 @@ static int TantrumExecuteAllTestsInternal() {
 	TantrumPrintTestExecutionInformation_UserModdable();
 
 	// cleanup
-#ifdef _WIN32
+#if defined( _WIN32 )
 	FreeLibrary( handle );
 	handle = NULL;
-#else // _WIN32
+#elif defined( __APPLE__ ) || defined( __linux__ ) // _WIN32
+	dlclose( handle );
+#else	// _WIN32
 #error Uncrecognised platform.  It appears Tantrum doesn't support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
-#endif // _WIN32
+#endif	// _WIN32
 
 	return g_tantrumTestContext.testsFailed == 0 ? 0 : -1;
 }
@@ -663,6 +728,10 @@ static int TantrumExecuteAllTestsWithArgumentsInternal( int argc, char** argv ) 
 #define TANTRUM_RUN_ALL_TESTS_WITH_ARGS( argc, argv )	TantrumExecuteAllTestsWithArgumentsInternal( argc, argv )
 
 //----------------------------------------------------------
+
+#if defined( __linux__ ) || defined( __APPLE__ )
+#pragma pop_macro( "_POSIX_C_SOURCE" )
+#endif
 
 #if defined( __GNUC__ ) || defined( __clang__ )
 #pragma GCC diagnostic pop
