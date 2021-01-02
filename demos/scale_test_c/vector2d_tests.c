@@ -43,12 +43,12 @@ TANTRUM_TEST( GivenAVectors_WhenGetLengthIsCalled_ThenTrueLengthFound, TANTRUM_T
 TANTRUM_DECLARE_PARAMETRIC_SUITE_TEST( AdditionSuite, AdditionPowerSet, TANTRUM_TEST_FLAG_SHOULD_RUN, float left, float right, float expected )
 {
 	float result = left + right;
-	TANTRUM_TEST_EQUAL( result, expected, "Addition function is broken" );
+	TANTRUM_TEST_EQUAL_OR_ABORT( result, expected, "Addition function is broken" );
 }
 
 TANTRUM_INVOKE_PARAMETRIC_TEST( AdditionPowerSet, AddTest0, 5, 15.f, 20.f )
 TANTRUM_INVOKE_PARAMETRIC_TEST( AdditionPowerSet, AddTest1, 7, 3.f, 10.f )
-TANTRUM_INVOKE_PARAMETRIC_TEST( AdditionPowerSet, AddTest2, -9.1f, 14.6f, 5.5f )
+TANTRUM_INVOKE_PARAMETRIC_TEST( AdditionPowerSet, AddTest2, -9.1f, 14.6f, 7.5f ) // expecting this to fail
 TANTRUM_INVOKE_PARAMETRIC_TEST( AdditionPowerSet, AddTest3, -63.f, 2.f, -61.f )
 
 TANTRUM_DECLARE_PARAMETRIC_TEST( SubtractionPowerSet, TANTRUM_TEST_FLAG_DEPRECATED, float left, float right, float expected )

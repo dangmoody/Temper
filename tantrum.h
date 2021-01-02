@@ -53,6 +53,7 @@ typedef suiteTestInfo_t( *testInfoFetcherFunc_t )( void );
 typedef struct tantrumTestContext_t {
 	uint32_t		testsPassed;
 	uint32_t		testsFailed;
+	uint32_t		testsAborted;
 	uint32_t		testsDodged;
 	uint32_t		totalTestsDeclared; // Gets set in the main function with a preprocessor
 	uint32_t		totalTestsFoundWithFilters;
@@ -244,80 +245,198 @@ static tantrumBool32 TantrumStringContainsInternal( const char* str, const char*
 // PREPROCESSORS - CONDITION TESTING
 //==========================================================
 
-#define TANTRUM_TEST_TRUE( condition, message ) \
+#define TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ) \
+do { \
+	if( abortOnFail ) { \
+		printf( "=== THIS TEST IS BEING ABORTED ===\n" ); \
+		g_tantrumTestContext.testsAborted += 1;\
+		return; \
+	} \
+} while( 0 )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_TRUE_INTERNAL( condition, abortOnFail, message ) \
 do { \
 	if ( !( condition ) ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-		printf( "TANTRUM_TEST_TRUE( %s ) has failed\n", #condition ); \
+		printf( "TANTRUM_TEST_TRUE( %s ) has failed\n", #condition); \
 		printf( "%s\n", #message ); \
+\
+		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
+	} \
+} while( 0 )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_TRUE( condition, message ) \
+	TANTRUM_TEST_TRUE_INTERNAL( condition, false, message )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_TRUE_OR_ABORT( condition, message ) \
+	TANTRUM_TEST_TRUE_INTERNAL( condition, true, message )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_FALSE_INTERNAL( condition, abortOnFail, message ) \
+do { \
+	if ( ( condition ) ) { \
+		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
+		printf( "TANTRUM_TEST_FALSE( %s ) has failed\n", #condition ); \
+		printf( "%s\n", #message ); \
+\
+		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
+	} \
+} while( 0 )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_FALSE( condition, message ) \
+	TANTRUM_TEST_FALSE_INTERNAL( condition, false, message )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_FALSE_OR_ABORT( condition, message ) \
+	TANTRUM_TEST_FALSE_INTERNAL( condition, true, message )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_EQUAL_INTERNAL( conditionA, conditionB, abortOnFail, message ) \
+do { \
+	if ( TantrumFloatEqualsInternal( conditionA, conditionB, TANTRUM_DEFAULT_EPSILON ) ) { \
+		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
+		printf( "TANTRUM_TEST_EQUAL( %f, %f ) has failed\n", (double) conditionA, (double) conditionB  ); \
+		printf( "%s\n", #message ); \
+\
+		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
 	} \
 } while( 0 )
 
 //----------------------------------------------------------
 
 #define TANTRUM_TEST_EQUAL( conditionA, conditionB, message ) \
+	TANTRUM_TEST_EQUAL_INTERNAL( conditionA, conditionB, false, message )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_EQUAL_OR_ABORT( conditionA, conditionB, message ) \
+	TANTRUM_TEST_EQUAL_INTERNAL( conditionA, conditionB, true, message )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_NOT_EQUAL_INTERNAL( conditionA, conditionB, abortOnFail, message ) \
 do { \
 	if ( TantrumFloatEqualsInternal( conditionA, conditionB, TANTRUM_DEFAULT_EPSILON ) ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-		printf( "TANTRUM_TEST_EQUAL( %f, %f ) has failed\n", (double) conditionA, (double) conditionB ); \
+		printf( "TANTRUM_TEST_NOT_EQUAL( %f, %f ) has failed\n", (double) conditionA, (double) conditionB  ); \
 		printf( "%s\n", #message ); \
+\
+		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
 	} \
 } while( 0 )
 
 //----------------------------------------------------------
 
-#define TANTRUM_TEST_NOT_EQUAL(conditionA, conditionB, message) \
+#define TANTRUM_TEST_NOT_EQUAL( conditionA, conditionB, message ) \
+	TANTRUM_TEST_NOT_EQUAL_INTERNAL( conditionA, conditionB, false, message )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_NOT_EQUAL_OR_ABORT( conditionA, conditionB, message ) \
+	TANTRUM_TEST_NOT_EQUAL_INTERNAL( conditionA, conditionB, true, message )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_ALMOST_EQUAL_INTERNAL( conditionA, conditionB, tolerance, abortOnFail, message ) \
 do { \
-	if ( TantrumFloatEqualsInternal( conditionA, conditionB, TANTRUM_DEFAULT_EPSILON ) ) { \
+	if ( TantrumFloatEqualsInternal( conditionA, conditionB, tolerance ) ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-		printf( "TANTRUM_TEST_NOT_EQUAL( %f, %f ) has failed\n", (double) conditionA, (double) conditionB ); \
+		printf( "TANTRUM_TEST_ALMOST_EQUAL( %f, %f, %f ) has failed\n", (double) conditionA, (double) conditionB, (double) tolerance  ); \
 		printf( "%s\n", #message ); \
+\
+		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
 	} \
 } while( 0 )
 
 //----------------------------------------------------------
 
 #define TANTRUM_TEST_ALMOST_EQUAL( conditionA, conditionB, tolerance, message ) \
+	TANTRUM_TEST_ALMOST_EQUAL_INTERNAL( conditionA, conditionB, tolerance, false, message )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_ALMOST_EQUAL_OR_ABORT( conditionA, conditionB, tolerance, message ) \
+	TANTRUM_TEST_ALMOST_EQUAL_INTERNAL( conditionA, conditionB, tolerance, true, message )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_NOT_ALMOST_EQUAL_INTERNAL( conditionA, conditionB, tolerance, abortOnFail, message ) \
 do { \
-	if ( TantrumFloatEqualsInternal( conditionA, conditionB, tolerance ) ) { \
+	if ( !TantrumFloatEqualsInternal( conditionA, conditionB, tolerance ) ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-		printf( "TANTRUM_TEST_ALMOST_EQUAL( %f, %f, %f ) has failed\n", (double) conditionA, (double) conditionB, (double) tolerance ); \
+		printf( "TANTRUM_TEST_NOT_ALMOST_EQUAL( %f, %f, %f ) has failed\n", (double) conditionA, (double) conditionB, (double) tolerance  ); \
 		printf( "%s\n", #message ); \
+\
+		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
 	} \
 } while( 0 )
 
 //----------------------------------------------------------
 
 #define TANTRUM_TEST_NOT_ALMOST_EQUAL( conditionA, conditionB, tolerance, message ) \
+	TANTRUM_TEST_NOT_ALMOST_EQUAL_INTERNAL( conditionA, conditionB, tolerance, false, message )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_NOT_ALMOST_EQUAL_OR_ABORT( conditionA, conditionB, tolerance, message ) \
+	TANTRUM_TEST_NOT_ALMOST_EQUAL_INTERNAL( conditionA, conditionB, tolerance, true, message )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_GREATER_THAN_INTERNAL( conditionA, conditionB, abortOnFail, message ) \
 do { \
-	if ( !TantrumFloatEqualsInternal( conditionA, conditionB, tolerance ) ) { \
+	if ( conditionA > conditionB ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-		printf( "TANTRUM_TEST_NOT_ALMOST_EQUAL( %f, %f, %f ) has failed\n", (double) conditionA, (double) conditionB, (double) tolerance ); \
+		printf( "TANTRUM_TEST_GREATER_THAN( %f, %f ) has failed\n", (double) conditionA, (double) conditionB  ); \
 		printf( "%s\n", #message ); \
+\
+		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
 	} \
 } while( 0 )
 
 //----------------------------------------------------------
 
 #define TANTRUM_TEST_GREATER_THAN( conditionA, conditionB, message ) \
+	TANTRUM_TEST_GREATER_THAN_INTERNAL( conditionA, conditionB, false, message )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_GREATER_THAN_OR_ABORT( conditionA, conditionB, message ) \
+	TANTRUM_TEST_GREATER_THAN_INTERNAL( conditionA, conditionB, true, message )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_LESS_THAN_INTERNAL( conditionA, conditionB, abortOnFail, message ) \
 do { \
-	if ( conditionA > conditionB ) { \
+	if ( conditionA < conditionB ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-		printf( "TANTRUM_TEST_GREATER_THAN( %f, %f ) has failed\n", (double) conditionA, (double) conditionB ); \
+		printf( "TANTRUM_TEST_LESS_THAN( %f, %f ) has failed\n", (double) conditionA, (double) conditionB  ); \
 		printf( "%s\n", #message ); \
+\
+		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
 	} \
 } while( 0 )
 
 //----------------------------------------------------------
 
 #define TANTRUM_TEST_LESS_THAN( conditionA, conditionB, message ) \
-do { \
-	if ( conditionA < conditionB ) { \
-		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-		printf( "TANTRUM_TEST_LESS_THAN( %f, %f ) has failed\n", (double) conditionA, (double) conditionB ); \
-		printf( "%s\n", #message ); \
-	} \
-} while( 0 )
+	TANTRUM_TEST_LESS_THAN_INTERNAL( conditionA, conditionB, false, message )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_LESS_THAN_OR_ABORT( conditionA, conditionB, message ) \
+	TANTRUM_TEST_LESS_THAN_INTERNAL( conditionA, conditionB, true, message )
 
 //==========================================================
 // FUNCTIONS - USER MODDING WELCOME
@@ -344,9 +463,10 @@ static void TantrumPrintTestExecutionInformation_UserModdable() {
 	}
 
 	uint32_t totalFound = g_tantrumTestContext.totalTestsFoundWithFilters;
-	printf( "Passed: %d ( %d%% )\n", g_tantrumTestContext.testsPassed, TantrumGetPercentInternal( g_tantrumTestContext.testsPassed, totalFound ) );
-	printf( "Failed: %d ( %d%% )\n", g_tantrumTestContext.testsFailed, TantrumGetPercentInternal( g_tantrumTestContext.testsFailed, totalFound ) );
-	printf( "Dodged: %d ( %d%% )\n", g_tantrumTestContext.testsDodged, TantrumGetPercentInternal( g_tantrumTestContext.testsDodged, totalFound ) );
+	printf( "Passed:   %d ( %d%% )\n", g_tantrumTestContext.testsPassed, TantrumGetPercentInternal( g_tantrumTestContext.testsPassed, totalFound ) );
+	printf( "Failed:   %d ( %d%% )\n", g_tantrumTestContext.testsFailed, TantrumGetPercentInternal( g_tantrumTestContext.testsFailed, totalFound ) );
+	printf( "Aborted:  %d ( %d%% )\n", g_tantrumTestContext.testsAborted, TantrumGetPercentInternal( g_tantrumTestContext.testsAborted, totalFound ) );
+	printf( "Dodged:   %d ( %d%% )\n", g_tantrumTestContext.testsDodged, TantrumGetPercentInternal( g_tantrumTestContext.testsDodged, totalFound ) );
 }
 
 //----------------------------------------------------------
