@@ -793,7 +793,7 @@ static void* TantrumGetProcAddressInternal( void* handle, const char* funcName )
 	assert( funcName );
 
 #ifdef _WIN32
-	void* proc = ( void* ) GetProcAddress( (HANDLE) handle, funcName );
+	void* proc = (void*) GetProcAddress( (HANDLE) handle, funcName );
 	assert( proc );
 	return proc;
 #elif defined( __APPLE__ ) || defined( __linux__ )	// defined( _WIN32 )
