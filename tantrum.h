@@ -8,6 +8,7 @@ extern "C" {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
 #pragma GCC diagnostic ignored "-Wreserved-id-macro"
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 #endif	// defined( __GNUC__ ) || defined( __clang__ )
 
 #if defined( __linux__ ) || defined( __APPLE__ )
@@ -92,6 +93,81 @@ typedef struct tantrumTestContext_t {
 	const char*		suiteFilter;
 	const char*		testFilter;
 } tantrumTestContext_t;
+
+//----------------------------------------------------------
+
+#if defined( _WIN32 )
+#define TANTRUM_COLOR_DEFAULT		0x07
+#define TANTRUM_COLOR_RED			0x0C
+#define TANTRUM_COLOR_GREEN			0x02
+#define TANTRUM_COLOR_YELLOW		0x0E
+
+typedef uint32_t					tantrumTextColor_t;
+#elif defined( __linux__ ) || defined( __APPLE__ )
+#define TANTRUM_COLOR_DEFAULT		"\x1B[0m"
+#define TANTRUM_COLOR_RED			"\033[0;31m"//"\x1B[31m"
+#define TANTRUM_COLOR_GREEN			"\033[0;32m"//"\x1B[32m"
+#define TANTRUM_COLOR_YELLOW		"\033[1;33m"
+
+typedef const char*					tantrumTextColor_t;
+#endif // defined( _WIN32 )
+
+static void TantrumSetTextColorInternal( const tantrumTextColor_t color ) {
+#if defined( _WIN32 )
+	SetConsoleTextAttribute( GetStdHandle( STD_OUTPUT_HANDLE ), (WORD) color );
+#elif defined( __APPLE__ ) || defined( __linux__ )
+	printf( "%s", color );
+#else
+#error Uncrecognised platform.  It appears Tantrum doesn't support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
+#endif
+}
+
+static void TantrumLogInternal( const char* fmt, ... ) {
+	assert( fmt );
+
+	va_list args;
+	va_start( args, fmt );
+	vprintf( fmt, args );
+	va_end( args );
+}
+
+static void TantrumLogWarningInternal( const char* fmt, ... ) {
+	assert( fmt );
+
+	va_list args;
+	va_start( args, fmt );
+
+	TantrumSetTextColorInternal( TANTRUM_COLOR_RED );
+
+	printf( "WARNING: " );
+
+	TantrumSetTextColorInternal( TANTRUM_COLOR_YELLOW );
+
+	vprintf( fmt, args );
+
+	TantrumSetTextColorInternal( TANTRUM_COLOR_DEFAULT );
+
+	va_end( args );
+}
+
+static void TantrumLogErrorInternal( const char* fmt, ... ) {
+	assert( fmt );
+
+	va_list args;
+	va_start( args, fmt );
+
+	TantrumSetTextColorInternal( TANTRUM_COLOR_RED );
+
+	printf( "ERROR: " );
+
+	TantrumSetTextColorInternal( TANTRUM_COLOR_YELLOW );
+
+	vprintf( fmt, args );
+
+	TantrumSetTextColorInternal( TANTRUM_COLOR_DEFAULT );
+
+	va_end( args );
+}
 
 //==========================================================
 // GLOBALS
@@ -279,7 +355,7 @@ static tantrumBool32 TantrumStringContainsInternal( const char* str, const char*
 #define TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ) \
 do { \
 	if( abortOnFail ) { \
-		printf( "=== THIS TEST IS BEING ABORTED ===\n" ); \
+		TantrumLogInternal( "=== THIS TEST IS BEING ABORTED ===\n" ); \
 		g_tantrumTestContext.testsAborted += 1;\
 		return; \
 	} \
@@ -291,8 +367,10 @@ do { \
 do { \
 	if ( !( condition ) ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-		printf( "TANTRUM_TEST_TRUE( %s ) has failed\n", #condition); \
-		printf( "%s\n", message ); \
+		TantrumLogErrorInternal( \
+			"TANTRUM_TEST_TRUE( %s ) has failed:\n%s\n", \
+			#condition, message \
+		); \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
 	} \
 } while( 0 )
@@ -313,8 +391,8 @@ do { \
 do { \
 	if ( ( condition ) ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-		printf( "TANTRUM_TEST_FALSE( %s ) has failed\n", #condition ); \
-		printf( "%s\n", message ); \
+		TantrumLogInternal( "TANTRUM_TEST_FALSE( %s ) has failed\n", #condition ); \
+		TantrumLogInternal( "%s\n", message ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
 	} \
@@ -336,8 +414,8 @@ do { \
 do { \
 	if ( TantrumFloatEqualsInternal( conditionA, conditionB, TANTRUM_DEFAULT_EPSILON ) ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-		printf( "TANTRUM_TEST_EQUAL( %f, %f ) has failed\n", (double) conditionA, (double) conditionB  ); \
-		printf( "%s\n", message ); \
+		TantrumLogInternal( "TANTRUM_TEST_EQUAL( %f, %f ) has failed\n", (double) conditionA, (double) conditionB  ); \
+		TantrumLogInternal( "%s\n", message ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
 	} \
@@ -359,8 +437,8 @@ do { \
 do { \
 	if ( TantrumFloatEqualsInternal( conditionA, conditionB, TANTRUM_DEFAULT_EPSILON ) ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-		printf( "TANTRUM_TEST_NOT_EQUAL( %f, %f ) has failed\n", (double) conditionA, (double) conditionB  ); \
-		printf( "%s\n", message ); \
+		TantrumLogInternal( "TANTRUM_TEST_NOT_EQUAL( %f, %f ) has failed\n", (double) conditionA, (double) conditionB  ); \
+		TantrumLogInternal( "%s\n", message ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
 	} \
@@ -382,8 +460,8 @@ do { \
 do { \
 	if ( TantrumFloatEqualsInternal( conditionA, conditionB, tolerance ) ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-		printf( "TANTRUM_TEST_ALMOST_EQUAL( %f, %f, %f ) has failed\n", (double) conditionA, (double) conditionB, (double) tolerance  ); \
-		printf( "%s\n", message ); \
+		TantrumLogInternal( "TANTRUM_TEST_ALMOST_EQUAL( %f, %f, %f ) has failed\n", (double) conditionA, (double) conditionB, (double) tolerance  ); \
+		TantrumLogInternal( "%s\n", message ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
 	} \
@@ -405,8 +483,8 @@ do { \
 do { \
 	if ( !TantrumFloatEqualsInternal( conditionA, conditionB, tolerance ) ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-		printf( "TANTRUM_TEST_NOT_ALMOST_EQUAL( %f, %f, %f ) has failed\n", (double) conditionA, (double) conditionB, (double) tolerance  ); \
-		printf( "%s\n", message ); \
+		TantrumLogInternal( "TANTRUM_TEST_NOT_ALMOST_EQUAL( %f, %f, %f ) has failed\n", (double) conditionA, (double) conditionB, (double) tolerance  ); \
+		TantrumLogInternal( "%s\n", message ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
 	} \
@@ -428,8 +506,8 @@ do { \
 do { \
 	if ( conditionA > conditionB ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-		printf( "TANTRUM_TEST_GREATER_THAN( %f, %f ) has failed\n", (double) conditionA, (double) conditionB  ); \
-		printf( "%s\n", message ); \
+		TantrumLogInternal( "TANTRUM_TEST_GREATER_THAN( %f, %f ) has failed\n", (double) conditionA, (double) conditionB  ); \
+		TantrumLogInternal( "%s\n", message ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
 	} \
@@ -451,8 +529,8 @@ do { \
 do { \
 	if ( conditionA < conditionB ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-		printf( "TANTRUM_TEST_LESS_THAN( %f, %f ) has failed\n", (double) conditionA, (double) conditionB  ); \
-		printf( "%s\n", message ); \
+		TantrumLogInternal( "TANTRUM_TEST_LESS_THAN( %f, %f ) has failed\n", (double) conditionA, (double) conditionB  ); \
+		TantrumLogInternal( "%s\n", message ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
 	} \
@@ -473,7 +551,7 @@ do { \
 //==========================================================
 
 static void TantrumPrintDivider_UserModdable() {
-	printf( "------------------------------------------------------------\n\n" );
+	TantrumLogInternal( "------------------------------------------------------------\n\n" );
 }
 
 //----------------------------------------------------------
@@ -481,11 +559,11 @@ static void TantrumPrintDivider_UserModdable() {
 static void TantrumPrintTestExecutionInformation_UserModdable() {
 	TantrumPrintDivider_UserModdable();
 
-	printf( "\n=== TANTRUM TESTING REPORT ===\n" );
-	printf( "Total tests defined: %d\n", g_tantrumTestContext.totalTestsDeclared );
+	TantrumLogInternal( "\n=== TANTRUM TESTING REPORT ===\n" );
+	TantrumLogInternal( "Total tests defined: %d\n", g_tantrumTestContext.totalTestsDeclared );
 
 	if( g_tantrumTestContext.isFilteringTests ) {
-		printf( "\t- Total tests matching filters: %d\n\t- Suite filter: %s\n\t- Test filter: %s\n\t- Partial results %s\n",
+		TantrumLogInternal( "\t- Total tests matching filters: %d\n\t- Suite filter: %s\n\t- Test filter: %s\n\t- Partial results %s\n",
 				g_tantrumTestContext.totalTestsFoundWithFilters,
 				g_tantrumTestContext.suiteFilter,
 				g_tantrumTestContext.testFilter,
@@ -493,10 +571,10 @@ static void TantrumPrintTestExecutionInformation_UserModdable() {
 	}
 
 	uint32_t totalFound = g_tantrumTestContext.totalTestsFoundWithFilters;
-	printf( "Passed:   %d ( %d%% )\n", g_tantrumTestContext.testsPassed, TantrumGetPercentInternal( g_tantrumTestContext.testsPassed, totalFound ) );
-	printf( "Failed:   %d ( %d%% )\n", g_tantrumTestContext.testsFailed, TantrumGetPercentInternal( g_tantrumTestContext.testsFailed, totalFound ) );
-	printf( "Aborted:  %d ( %d%% )\n", g_tantrumTestContext.testsAborted, TantrumGetPercentInternal( g_tantrumTestContext.testsAborted, totalFound ) );
-	printf( "Dodged:   %d ( %d%% )\n", g_tantrumTestContext.testsDodged, TantrumGetPercentInternal( g_tantrumTestContext.testsDodged, totalFound ) );
+	TantrumLogInternal( "Passed:   %d ( %d%% )\n", g_tantrumTestContext.testsPassed, TantrumGetPercentInternal( g_tantrumTestContext.testsPassed, totalFound ) );
+	TantrumLogInternal( "Failed:   %d ( %d%% )\n", g_tantrumTestContext.testsFailed, TantrumGetPercentInternal( g_tantrumTestContext.testsFailed, totalFound ) );
+	TantrumLogInternal( "Aborted:  %d ( %d%% )\n", g_tantrumTestContext.testsAborted, TantrumGetPercentInternal( g_tantrumTestContext.testsAborted, totalFound ) );
+	TantrumLogInternal( "Dodged:   %d ( %d%% )\n", g_tantrumTestContext.testsDodged, TantrumGetPercentInternal( g_tantrumTestContext.testsDodged, totalFound ) );
 }
 
 //----------------------------------------------------------
@@ -508,25 +586,26 @@ static void TantrumOnBeforeTest_UserModdable( const suiteTestInfo_t information 
 	}
 
 	if ( information.suiteNameStr ) {
-		printf( "TEST \t- \"%s\" : \"%s\"\n", information.suiteNameStr, information.testNameStr );
+		TantrumLogInternal( "TEST \t- \"%s\" : \"%s\"\n", information.suiteNameStr, information.testNameStr );
 	} else {
-		printf( "TEST \t- \"%s\"\n", information.testNameStr );
+		TantrumLogInternal( "TEST \t- \"%s\"\n", information.testNameStr );
 	}
 }
 
 //----------------------------------------------------------
 
-static void TantrumOnAfterTest_UserModdable( const suiteTestInfo_t information )
-{
+static void TantrumOnAfterTest_UserModdable( const suiteTestInfo_t information ) {
 	if ( information.testingFlag == TANTRUM_TEST_FLAG_SHOULD_RUN ) {
 		if ( g_tantrumTestContext.totalErrorsInCurrentTests > 0 ) {
-			printf( "TEST FAILED\n\n" );
+			TantrumLogErrorInternal( "TEST FAILED\n\n" );
 		} else {
-			printf( "TEST SUCCEEDED\n\n" );
+			TantrumSetTextColorInternal( TANTRUM_COLOR_GREEN );
+			TantrumLogInternal( "TEST SUCCEEDED\n\n" );
+			TantrumSetTextColorInternal( TANTRUM_COLOR_DEFAULT );
 		}
 	} else {
 		const char* dodgeReason = information.testingFlag == TANTRUM_TEST_FLAG_DEPRECATED ? "DEPRICATED" : "SHOULD_SKIP";
-		printf( "TEST FLAGGED \"%s\"\n\n", dodgeReason );
+		TantrumLogInternal( "TEST FLAGGED \"%s\"\n\n", dodgeReason );
 	}
 }
 
@@ -539,8 +618,7 @@ static void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 	char fullExePath[MAX_PATH];
 	DWORD fullExePathLength = GetModuleFileName( NULL, fullExePath, MAX_PATH );
 	if ( fullExePathLength == 0 ) {
-		// TODO(DM): TantrumPrintErrorInternal
-		printf( "ERROR: WinAPI call GetModuleFileName() failed: 0x%lX\n", GetLastError() );
+		TantrumLogErrorInternal( "WinAPI call GetModuleFileName() failed: 0x%lX\n", GetLastError() );
 		return;
 	}
 
@@ -552,7 +630,7 @@ static void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 	struct stat exeFileInfo = { 0 };
 	if ( lstat( exeFilenameVirtual, &exeFileInfo ) == -1 ) {
 		err = errno;
-		printf( "ERROR: lstat() failed: %s", strerror( err ) );
+		TantrumLogErrorInternal( "lstat() failed: %s", strerror( err ) );
 		return;
 	}
 
@@ -560,11 +638,13 @@ static void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 	ssize_t fullExePathLength = readlink( exeFilenameVirtual, fullExePath, (size_t) exeFileInfo.st_size + 1 );
 	err = errno;
 	if ( fullExePathLength == -1 ) {
-		printf( "ERROR: readlink() failed: %s", strerror( err ) );
+		TantrumLogErrorInternal( "readlink() failed: %s", strerror( err ) );
 		return;
 	}
 
 	fullExePath[exeFileInfo.st_size] = 0;
+
+	g_tantrumTestContext.programName = fullExePath;
 #else
 #error Uncrecognised platform.  It appears Tantrum doesn't support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
 #endif // _WIN32
@@ -600,8 +680,7 @@ static void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 	// if partial filtering was enabled but the user did not then specify a suite or test filter then they need to know about incorrect usage
 	if ( g_tantrumTestContext.partialFilter ) {
 		if ( !g_tantrumTestContext.suiteFilter && !g_tantrumTestContext.testFilter ) {
-			// TODO(DM): TantrumPrintErrorInternal
-			printf( "ERROR: Partial filtering (-p) was enabled but suite or test filtering (-s, -t) was not.\n" );
+			TantrumLogErrorInternal( "Partial filtering (-p) was enabled but suite or test filtering (-s, -t) was not.\n" );
 			return;
 		}
 	}
@@ -609,17 +688,64 @@ static void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 
 //----------------------------------------------------------
 
-static int TantrumExecuteAllTestsInternal() {
-	// make the exe load itself
+static void* TantrumLoadEXEHandleInternal( void ) {
 #if defined( _WIN32 )
 	HANDLE handle = LoadLibrary( g_tantrumTestContext.programName );
 	assert( handle );
+	return handle;
 #elif defined( __APPLE__ ) || defined( __linux__ )	// defined( _WIN32 )
 	void* handle = dlopen( NULL, RTLD_LAZY );
 	assert( handle );
+	return handle;
 #else	// defined( _WIN32 )
 #error Uncrecognised platform.  It appears Tantrum doesn't support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
 #endif // defined( _WIN32 )
+}
+
+//----------------------------------------------------------
+
+static void* TantrumGetProcAddressInternal( void* handle, const char* funcName ) {
+	assert( handle );
+	assert( funcName );
+
+#ifdef _WIN32
+	void* proc = GetProcAddress( (HANDLE) handle, funcName );
+	assert( proc );
+	return proc;
+#elif defined( __APPLE__ ) || defined( __linux__ )	// defined( _WIN32 )
+	void* proc = dlsym( handle, funcName );
+	assert( proc );
+	return proc;
+#else	// defined( _WIN32 )
+#error Uncrecognised platform.  It appears Tantrum doesn't support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
+#endif	// defined( _WIN32 )
+}
+
+//----------------------------------------------------------
+
+static void TantrumCloseEXEHandleInternal( void* handle ) {
+	assert( handle );
+
+#if defined( _WIN32 )
+	FreeLibrary( (HANDLE) handle );
+	handle = NULL;
+#elif defined( __APPLE__ ) || defined( __linux__ ) // _WIN32
+	int closeError = dlclose( handle );
+	if ( closeError ) {
+		TantrumLogErrorInternal( "%s.\n", dlerror() );
+	}
+
+	handle = NULL;
+#else	// _WIN32
+#error Uncrecognised platform.  It appears Tantrum doesn't support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
+#endif	// _WIN32
+}
+
+//----------------------------------------------------------
+
+static int TantrumExecuteAllTestsInternal() {
+	// make the exe load itself
+	void* handle = TantrumLoadEXEHandleInternal();
 
 	// DM: yeah yeah yeah, I know: fixed-length string arrays bad
 	// I'll write a tprintf at some point
@@ -629,16 +755,10 @@ static int TantrumExecuteAllTestsInternal() {
 	for ( uint32_t i = 0; i < g_tantrumTestContext.totalTestsDeclared; i++ ) {
 		snprintf( testFuncName, 1024, "tantrum_test_info_fetcher_%d", i );
 
-		printf( "Loading test func: %s\n", testFuncName );
+		TantrumLogInternal( "Loading test func: %s\n", testFuncName );
 
 		// get the test grabber functions out of the binary
-#ifdef _WIN32
-		testInfoGrabberFunc = (testInfoFetcherFunc_t) GetProcAddress( handle, testFuncName );
-#elif defined( __APPLE__ ) || defined( __linux__ )	// defined( _WIN32 )
-		testInfoGrabberFunc = (testInfoFetcherFunc_t) dlsym( handle, testFuncName );
-#else	// defined( _WIN32 )
-#error Uncrecognised platform.  It appears Tantrum doesn't support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
-#endif	// defined( _WIN32 )
+		testInfoGrabberFunc = (testInfoFetcherFunc_t) TantrumGetProcAddressInternal( handle, testFuncName );
 
 		if ( !testInfoGrabberFunc ) {
 			const char* platformErrorMsg = "";
@@ -646,7 +766,7 @@ static int TantrumExecuteAllTestsInternal() {
 			platformErrorMsg = "\nOn MacOS/Linux you need to explicitly allow dynamic symbol exporting (E.G.: on Clang use: \"-Wl,--export-dynamic\").\n";
 #endif
 
-			printf( "ERROR: Failed to find function %s.%s\n", testFuncName, platformErrorMsg );
+			TantrumLogErrorInternal( "Failed to find function %s.%s\n", testFuncName, platformErrorMsg );
 			return -1;
 		}
 
@@ -689,14 +809,7 @@ static int TantrumExecuteAllTestsInternal() {
 	TantrumPrintTestExecutionInformation_UserModdable();
 
 	// cleanup
-#if defined( _WIN32 )
-	FreeLibrary( handle );
-	handle = NULL;
-#elif defined( __APPLE__ ) || defined( __linux__ ) // _WIN32
-	dlclose( handle );
-#else	// _WIN32
-#error Uncrecognised platform.  It appears Tantrum doesn't support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
-#endif	// _WIN32
+	TantrumCloseEXEHandleInternal( handle );
 
 	return g_tantrumTestContext.testsFailed == 0 ? 0 : -1;
 }
