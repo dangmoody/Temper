@@ -40,7 +40,7 @@ extern "C" {
 #if defined( _WIN32 )
 #define TANTRUM_API	__declspec( dllexport )
 #elif defined( __APPLE__ ) || defined( __linux__ )
-#define TANTRUM_API	__attribute__((visibility("default")))
+#define TANTRUM_API	__attribute__( ( visibility( "default" ) ) )
 #else
 #error Uncrecognised platform.  It appears Tantrum doesn't support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
 #endif
