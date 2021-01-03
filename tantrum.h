@@ -670,7 +670,9 @@ static void TantrumOnBeforeTest_UserModdable( const suiteTestInfo_t information 
 static void TantrumOnAfterTest_UserModdable( const suiteTestInfo_t information ) {
 	if ( information.testingFlag == TANTRUM_TEST_FLAG_SHOULD_RUN ) {
 		if ( g_tantrumTestContext.totalErrorsInCurrentTests > 0 ) {
-			TANTRUM_LOG_ERROR( "TEST FAILED\n\n" );
+			TantrumSetTextColorInternal( TANTRUM_COLOR_RED );
+			TANTRUM_LOG( "TEST FAILED\n\n" );
+			TantrumSetTextColorInternal( TANTRUM_COLOR_DEFAULT );
 		} else {
 			TantrumSetTextColorInternal( TANTRUM_COLOR_GREEN );
 			TANTRUM_LOG( "TEST SUCCEEDED\n\n" );
@@ -678,7 +680,9 @@ static void TantrumOnAfterTest_UserModdable( const suiteTestInfo_t information )
 		}
 	} else {
 		const char* dodgeReason = information.testingFlag == TANTRUM_TEST_FLAG_DEPRECATED ? "DEPRICATED" : "SHOULD_SKIP";
+		TantrumSetTextColorInternal( TANTRUM_COLOR_YELLOW );
 		TANTRUM_LOG( "TEST FLAGGED \"%s\"\n\n", dodgeReason );
+		TantrumSetTextColorInternal( TANTRUM_COLOR_DEFAULT );
 	}
 }
 
@@ -830,7 +834,7 @@ static int TantrumExecuteAllTestsInternal() {
 	for ( uint32_t i = 0; i < g_tantrumTestContext.totalTestsDeclared; i++ ) {
 		snprintf( testFuncName, 1024, "tantrum_test_info_fetcher_%d", i );
 
-		TANTRUM_LOG( "Loading test func: %s\n", testFuncName );
+		//TANTRUM_LOG( "Loading test func: %s\n", testFuncName );
 
 		// get the test grabber functions out of the binary
 		testInfoGrabberFunc = (testInfoFetcherFunc_t) TantrumGetProcAddressInternal( handle, testFuncName );
