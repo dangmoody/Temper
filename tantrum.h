@@ -9,6 +9,7 @@ extern "C" {
 #pragma GCC diagnostic ignored "-Wunused-function"
 #pragma GCC diagnostic ignored "-Wreserved-id-macro"
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
+#pragma GCC diagnostic ignored "-Wdouble-promotion"
 #endif	// defined( __GNUC__ ) || defined( __clang__ )
 
 #if defined( __linux__ ) || defined( __APPLE__ )
@@ -180,7 +181,7 @@ static tantrumTestContext_t						g_tantrumTestContext;
 //==========================================================
 
 static uint32_t TantrumGetPercentInternal( uint32_t yourValue, uint32_t yourMax ) {
-	return (uint32_t) ( ( ( (double) yourValue ) / ( (double) yourMax ) ) * 100 );
+	return (uint32_t) ( ( ( (float) yourValue ) / ( (float) yourMax ) ) * 100 );
 }
 
 //----------------------------------------------------------
@@ -414,7 +415,7 @@ do { \
 do { \
 	if ( TantrumFloatEqualsInternal( conditionA, conditionB, TANTRUM_DEFAULT_EPSILON ) ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-		TantrumLogInternal( "TANTRUM_TEST_EQUAL( %f, %f ) has failed\n", (double) conditionA, (double) conditionB  ); \
+		TantrumLogInternal( "TANTRUM_TEST_EQUAL( %f, %f ) has failed\n", (double) conditionA, (double) conditionB ); \
 		TantrumLogInternal( "%s\n", message ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
@@ -437,7 +438,7 @@ do { \
 do { \
 	if ( TantrumFloatEqualsInternal( conditionA, conditionB, TANTRUM_DEFAULT_EPSILON ) ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-		TantrumLogInternal( "TANTRUM_TEST_NOT_EQUAL( %f, %f ) has failed\n", (double) conditionA, (double) conditionB  ); \
+		TantrumLogInternal( "TANTRUM_TEST_NOT_EQUAL( %f, %f ) has failed\n", (double) conditionA, (double) conditionB ); \
 		TantrumLogInternal( "%s\n", message ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
@@ -460,7 +461,7 @@ do { \
 do { \
 	if ( TantrumFloatEqualsInternal( conditionA, conditionB, tolerance ) ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-		TantrumLogInternal( "TANTRUM_TEST_ALMOST_EQUAL( %f, %f, %f ) has failed\n", (double) conditionA, (double) conditionB, (double) tolerance  ); \
+		TantrumLogInternal( "TANTRUM_TEST_ALMOST_EQUAL( %f, %f, %f ) has failed\n", (double) conditionA, (double) conditionB, (double) tolerance ); \
 		TantrumLogInternal( "%s\n", message ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
@@ -483,7 +484,7 @@ do { \
 do { \
 	if ( !TantrumFloatEqualsInternal( conditionA, conditionB, tolerance ) ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-		TantrumLogInternal( "TANTRUM_TEST_NOT_ALMOST_EQUAL( %f, %f, %f ) has failed\n", (double) conditionA, (double) conditionB, (double) tolerance  ); \
+		TantrumLogInternal( "TANTRUM_TEST_NOT_ALMOST_EQUAL( %f, %f, %f ) has failed\n", (double) conditionA, (double) conditionB, (double) tolerance ); \
 		TantrumLogInternal( "%s\n", message ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
@@ -506,7 +507,7 @@ do { \
 do { \
 	if ( conditionA > conditionB ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-		TantrumLogInternal( "TANTRUM_TEST_GREATER_THAN( %f, %f ) has failed\n", (double) conditionA, (double) conditionB  ); \
+		TantrumLogInternal( "TANTRUM_TEST_GREATER_THAN( %f, %f ) has failed\n", (double) conditionA, (double) conditionB ); \
 		TantrumLogInternal( "%s\n", message ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
@@ -529,7 +530,7 @@ do { \
 do { \
 	if ( conditionA < conditionB ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-		TantrumLogInternal( "TANTRUM_TEST_LESS_THAN( %f, %f ) has failed\n", (double) conditionA, (double) conditionB  ); \
+		TantrumLogInternal( "TANTRUM_TEST_LESS_THAN( %f, %f ) has failed\n", (double) conditionA, (double) conditionB ); \
 		TantrumLogInternal( "%s\n", message ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
