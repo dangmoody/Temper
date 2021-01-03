@@ -571,10 +571,16 @@ static void TantrumPrintTestExecutionInformation_UserModdable() {
 	}
 
 	uint32_t totalFound = g_tantrumTestContext.totalTestsFoundWithFilters;
-	TantrumLogInternal( "Passed:   %d ( %d%% )\n", g_tantrumTestContext.testsPassed, TantrumGetPercentInternal( g_tantrumTestContext.testsPassed, totalFound ) );
-	TantrumLogInternal( "Failed:   %d ( %d%% )\n", g_tantrumTestContext.testsFailed, TantrumGetPercentInternal( g_tantrumTestContext.testsFailed, totalFound ) );
-	TantrumLogInternal( "Aborted:  %d ( %d%% )\n", g_tantrumTestContext.testsAborted, TantrumGetPercentInternal( g_tantrumTestContext.testsAborted, totalFound ) );
-	TantrumLogInternal( "Dodged:   %d ( %d%% )\n", g_tantrumTestContext.testsDodged, TantrumGetPercentInternal( g_tantrumTestContext.testsDodged, totalFound ) );
+	TantrumLogInternal(
+		"Passed:   %d ( %d%% )\n"
+		"Failed:   %d ( %d%% )\n"
+		"Aborted:  %d ( %d%% )\n"
+		"Dodged:   %d ( %d%% )\n",
+		g_tantrumTestContext.testsPassed,  TantrumGetPercentInternal( g_tantrumTestContext.testsPassed, totalFound  ),
+		g_tantrumTestContext.testsFailed,  TantrumGetPercentInternal( g_tantrumTestContext.testsFailed, totalFound  ),
+		g_tantrumTestContext.testsAborted, TantrumGetPercentInternal( g_tantrumTestContext.testsAborted, totalFound ),
+		g_tantrumTestContext.testsDodged,  TantrumGetPercentInternal( g_tantrumTestContext.testsDodged, totalFound  )
+	);
 }
 
 //----------------------------------------------------------
