@@ -350,10 +350,10 @@ static tantrumBool32 TantrumStringContainsInternal( const char* str, const char*
 	/*3. Stash this function and run info in a struct unique to this.*/ \
 	typedef struct TANTRUM_CONCAT_INTERNAL( testName, _ParametricTestInfo ) { \
 		TANTRUM_CONCAT_INTERNAL( testName, _FuncType ) Callback; \
-		tantrumTestFlag_t testingFlag; \
-		uint32_t pad0; \
-		const char* testNameStr; \
-		const char* suiteNameStr; \
+		tantrumTestFlag_t	testingFlag; \
+		uint32_t			pad0; \
+		const char*			testNameStr; \
+		const char*			suiteNameStr; \
 	} TANTRUM_CONCAT_INTERNAL( testName, _ParametricTestInfo ); \
 \
 	/*4. Create a global instance of this new struct for us to access and write data about this test to.*/ \
@@ -391,7 +391,9 @@ static tantrumBool32 TantrumStringContainsInternal( const char* str, const char*
 	void ( parametricInvokationName )( void ); \
 \
 	/*2. Define this test body immediately*/ \
-	void ( parametricInvokationName )( void ) { TANTRUM_CONCAT_INTERNAL( nameOfTestToCall, _GlobalParametricInfo ).Callback( __VA_ARGS__ ); } \
+	void ( parametricInvokationName )( void ) { \
+		TANTRUM_CONCAT_INTERNAL( nameOfTestToCall, _GlobalParametricInfo ).Callback( __VA_ARGS__ ); \
+	} \
 \
 	/*3. Create a testName_TestInfo struct that will just wrap the test information meta data.*/ \
 	typedef struct TANTRUM_CONCAT_INTERNAL( parametricInvokationName, _TestInfo ) { \
