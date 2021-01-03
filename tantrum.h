@@ -413,7 +413,10 @@ static tantrumBool32 TantrumStringContainsInternal( const char* str, const char*
 		TANTRUM_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation.testNameStr = #parametricInvokationName; \
 		TANTRUM_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation.testingFlag = TANTRUM_CONCAT_INTERNAL( nameOfTestToCall, _GlobalParametricInfo ).testingFlag; \
 		return TANTRUM_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation; \
-	}
+	} \
+\
+	/* leave this at the end so the macro can end with a semicolon */ \
+	suiteTestInfo_t TANTRUM_API TANTRUM_CONCAT_INTERNAL( tantrum_test_info_fetcher_, counter )( void )
 
 #define TANTRUM_INVOKE_PARAMETRIC_TEST( nameOfTestToCall, parametricInvokationName, ... ) \
 	TANTRUM_INVOKE_PARAMETRIC_TEST_INTERNAL( __COUNTER__, nameOfTestToCall, parametricInvokationName, __VA_ARGS__ )

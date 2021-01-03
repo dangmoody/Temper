@@ -46,10 +46,10 @@ TANTRUM_DECLARE_PARAMETRIC_SUITE_TEST( AdditionSuite, AdditionPowerSet, TANTRUM_
 	TANTRUM_TEST_EQUAL( result, expected, "Addition function is broken" );
 }
 
-TANTRUM_INVOKE_PARAMETRIC_TEST( AdditionPowerSet, AddTest0, 5, 15.f, 20.f )
-TANTRUM_INVOKE_PARAMETRIC_TEST( AdditionPowerSet, AddTest1, 7, 3.f, 10.f )
-TANTRUM_INVOKE_PARAMETRIC_TEST( AdditionPowerSet, AddTest2, -9.1f, 14.6f, 7.5f ) // expecting this to fail
-TANTRUM_INVOKE_PARAMETRIC_TEST( AdditionPowerSet, AddTest3, -63.f, 2.f, -61.f )
+TANTRUM_INVOKE_PARAMETRIC_TEST( AdditionPowerSet, AddTest0, 5, 15.f, 20.f );
+TANTRUM_INVOKE_PARAMETRIC_TEST( AdditionPowerSet, AddTest1, 7, 3.f, 10.f );
+TANTRUM_INVOKE_PARAMETRIC_TEST( AdditionPowerSet, AddTest2, -9.1f, 14.6f, 7.5f ); // expecting this to fail
+TANTRUM_INVOKE_PARAMETRIC_TEST( AdditionPowerSet, AddTest3, -63.f, 2.f, -61.f );
 
 TANTRUM_DECLARE_PARAMETRIC_TEST( SubtractionPowerSet, TANTRUM_TEST_FLAG_DEPRECATED, float left, float right, float expected )
 {
@@ -57,9 +57,9 @@ TANTRUM_DECLARE_PARAMETRIC_TEST( SubtractionPowerSet, TANTRUM_TEST_FLAG_DEPRECAT
 	TANTRUM_TEST_EQUAL( result, expected, "Subtraction function is broken" );
 }
 
-TANTRUM_INVOKE_PARAMETRIC_TEST( SubtractionPowerSet, SubTest0, 4, 4.f, 0.f )
-TANTRUM_INVOKE_PARAMETRIC_TEST( SubtractionPowerSet, SubTest1, 4, 2.f, 2.f )
-TANTRUM_INVOKE_PARAMETRIC_TEST( SubtractionPowerSet, SubTest2, -9.1f, 14.6f, -23.7f )
+TANTRUM_INVOKE_PARAMETRIC_TEST( SubtractionPowerSet, SubTest0, 4, 4.f, 0.f );
+TANTRUM_INVOKE_PARAMETRIC_TEST( SubtractionPowerSet, SubTest1, 4, 2.f, 2.f );
+TANTRUM_INVOKE_PARAMETRIC_TEST( SubtractionPowerSet, SubTest2, -9.1f, 14.6f, -23.7f );
 
 static void TestAbortTestCase( float a, float b, char* message )
 {
