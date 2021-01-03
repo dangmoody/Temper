@@ -49,6 +49,63 @@ extern "C" {
 #endif
 
 //==========================================================
+// Public API
+//==========================================================
+
+// MY: I'd like to eventually add more security around this,
+// such as ensuring it's only ever called/used once and thowing
+// an error if it isn't. Maybe also (SOMEHOW) ensuring no test
+// ever has a higher count.
+#define TANTRUM_SETUP()									g_tantrumTestContext.totalTestsDeclared = __COUNTER__
+
+//----------------------------------------------------------
+
+#define TANTRUM_RUN_ALL_TESTS()							TantrumExecuteAllTestsInternal()
+
+//----------------------------------------------------------
+
+#define TANTRUM_RUN_ALL_TESTS_WITH_ARGS( argc, argv )	TantrumExecuteAllTestsWithArgumentsInternal( argc, argv )
+
+//==========================================================
+// User-Overridable Preprocessor defines
+//
+// By default, Tantrum will use it's own internal implementations for things.
+// But you can override them to help hook Tantrum into your codebase.
+//==========================================================
+
+#ifndef TANTRUM_EXIT_SUCCESS
+#define TANTRUM_EXIT_SUCCESS			EXIT_SUCCESS
+#endif
+
+#ifndef TANTRUM_EXIT_FAILURE
+#define TANTRUM_EXIT_FAILURE			EXIT_FAILURE
+#endif
+
+#ifndef TANTRUM_LOG
+#define TANTRUM_LOG						TantrumLogInternal
+#endif
+
+#ifndef TANTRUM_LOG_WARNING
+#define TANTRUM_LOG_WARNING				TantrumLogWarningInternal
+#endif
+
+#ifndef TANTRUM_LOG_ERROR
+#define TANTRUM_LOG_ERROR				TantrumLogErrorInternal
+#endif
+
+#ifndef TANTRUM_FLOAT_EQUALS_INTERNAL
+#define TANTRUM_FLOAT_EQUALS_INTERNAL	TantrumFloatEqualsInternal
+#endif
+
+#ifndef TANTRUM_STRING_EQUALS
+#define TANTRUM_STRING_EQUALS			TantrumStringEqualsInternal
+#endif
+
+#ifndef TANTRUM_STRING_CONTAINS
+#define TANTRUM_STRING_CONTAINS			TantrumStringContainsInternal
+#endif
+
+//==========================================================
 // STRUCTS
 //==========================================================
 
@@ -114,45 +171,6 @@ typedef uint32_t						tantrumTextColor_t;
 
 typedef const char*						tantrumTextColor_t;
 #endif // defined( _WIN32 )
-
-//==========================================================
-// Preprocessor - User-Overridable
-//
-// By default, Tantrum will run it's own internal implementations of the functions that these macros call.
-// But you can override these to help hook Tantrum into your codebase.
-//==========================================================
-
-#ifndef TANTRUM_EXIT_SUCCESS
-#define TANTRUM_EXIT_SUCCESS			EXIT_SUCCESS
-#endif
-
-#ifndef TANTRUM_EXIT_FAILURE
-#define TANTRUM_EXIT_FAILURE			EXIT_FAILURE
-#endif
-
-#ifndef TANTRUM_LOG
-#define TANTRUM_LOG						TantrumLogInternal
-#endif
-
-#ifndef TANTRUM_LOG_WARNING
-#define TANTRUM_LOG_WARNING				TantrumLogWarningInternal
-#endif
-
-#ifndef TANTRUM_LOG_ERROR
-#define TANTRUM_LOG_ERROR				TantrumLogErrorInternal
-#endif
-
-#ifndef TANTRUM_FLOAT_EQUALS_INTERNAL
-#define TANTRUM_FLOAT_EQUALS_INTERNAL	TantrumFloatEqualsInternal
-#endif
-
-#ifndef TANTRUM_STRING_EQUALS
-#define TANTRUM_STRING_EQUALS			TantrumStringEqualsInternal
-#endif
-
-#ifndef TANTRUM_STRING_CONTAINS
-#define TANTRUM_STRING_CONTAINS			TantrumStringContainsInternal
-#endif
 
 //==========================================================
 // GLOBALS
@@ -236,7 +254,7 @@ static uint32_t TantrumGetPercentInternal( uint32_t yourValue, uint32_t yourMax 
 //----------------------------------------------------------
 
 static bool TantrumFloatEqualsInternal( const float a, const float b, const float epsilon ) {
-	return fabsf( a - b ) > epsilon;
+	return fabsf( a - b ) <= epsilon;
 }
 
 //----------------------------------------------------------
@@ -399,12 +417,12 @@ static tantrumBool32 TantrumStringContainsInternal( const char* str, const char*
 	TANTRUM_INVOKE_PARAMETRIC_TEST_INTERNAL( __COUNTER__, nameOfTestToCall, parametricInvokationName, __VA_ARGS__ )
 
 //==========================================================
-// PREPROCESSORS - CONDITION TESTING
+// Public API - Condition Testing
 //==========================================================
 
 #define TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ) \
 do { \
-	if( abortOnFail ) { \
+	if ( abortOnFail ) { \
 		TANTRUM_LOG( "=== THIS TEST IS BEING ABORTED ===\n" ); \
 		g_tantrumTestContext.testsAborted += 1; \
 		return; \
@@ -418,10 +436,8 @@ do { \
 	if ( !( condition ) ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
 \
-		TANTRUM_LOG_ERROR( \
-			"TANTRUM_TEST_TRUE( %s ) has failed:\n%s\n", \
-			#condition, message \
-		); \
+		TANTRUM_LOG_ERROR( "TANTRUM_TEST_TRUE( %s ) has failed:\n%s\n", #condition, message ); \
+\
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
 	} \
 } while( 0 )
@@ -443,8 +459,7 @@ do { \
 	if ( ( condition ) ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
 \
-		TANTRUM_LOG( "TANTRUM_TEST_FALSE( %s ) has failed\n", #condition ); \
-		TANTRUM_LOG( "%s\n", message ); \
+		TANTRUM_LOG_ERROR( "TANTRUM_TEST_FALSE( %s ) has failed\n%s\n", #condition, message ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
 	} \
@@ -464,11 +479,10 @@ do { \
 
 #define TANTRUM_TEST_EQUAL_INTERNAL( conditionA, conditionB, abortOnFail, message ) \
 do { \
-	if ( TANTRUM_FLOAT_EQUALS_INTERNAL( conditionA, conditionB, TANTRUM_DEFAULT_EPSILON ) ) { \
+	if ( !TANTRUM_FLOAT_EQUALS_INTERNAL( conditionA, conditionB, TANTRUM_DEFAULT_EPSILON ) ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
 \
-		TANTRUM_LOG( "TANTRUM_TEST_EQUAL( %f, %f ) has failed\n", (double) conditionA, (double) conditionB ); \
-		TANTRUM_LOG( "%s\n", message ); \
+		TANTRUM_LOG_ERROR( "TANTRUM_TEST_EQUAL( %f, %f ) has failed\n%s\n", (double) conditionA, (double) conditionB, message ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
 	} \
@@ -488,11 +502,10 @@ do { \
 
 #define TANTRUM_TEST_NOT_EQUAL_INTERNAL( conditionA, conditionB, abortOnFail, message ) \
 do { \
-	if ( TANTRUM_FLOAT_EQUALS_INTERNAL( conditionA, conditionB, TANTRUM_DEFAULT_EPSILON ) ) { \
+	if ( !TANTRUM_FLOAT_EQUALS_INTERNAL( conditionA, conditionB, TANTRUM_DEFAULT_EPSILON ) ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
 \
-		TANTRUM_LOG( "TANTRUM_TEST_NOT_EQUAL( %f, %f ) has failed\n", (double) conditionA, (double) conditionB ); \
-		TANTRUM_LOG( "%s\n", message ); \
+		TANTRUM_LOG( "TANTRUM_TEST_NOT_EQUAL( %f, %f ) has failed\n%s\n", (double) conditionA, (double) conditionB, message ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
 	} \
@@ -512,11 +525,10 @@ do { \
 
 #define TANTRUM_TEST_ALMOST_EQUAL_INTERNAL( conditionA, conditionB, tolerance, abortOnFail, message ) \
 do { \
-	if ( TANTRUM_FLOAT_EQUALS_INTERNAL( conditionA, conditionB, tolerance ) ) { \
+	if ( !TANTRUM_FLOAT_EQUALS_INTERNAL( conditionA, conditionB, tolerance ) ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
 \
-		TANTRUM_LOG( "TANTRUM_TEST_ALMOST_EQUAL( %f, %f, %f ) has failed\n", (double) conditionA, (double) conditionB, (double) tolerance ); \
-		TANTRUM_LOG( "%s\n", message ); \
+		TANTRUM_LOG_ERROR( "TANTRUM_TEST_ALMOST_EQUAL( %f, %f, %f ) has failed\n%s\n", (double) conditionA, (double) conditionB, (double) tolerance, message ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
 	} \
@@ -539,11 +551,7 @@ do { \
 	if ( !TANTRUM_FLOAT_EQUALS( conditionA, conditionB, tolerance ) ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
 \
-		TANTRUM_LOG( \
-			"TANTRUM_TEST_NOT_ALMOST_EQUAL( %f, %f, %f ) has failed\n" \
-			"%s\n", \
-			(double) conditionA, (double) conditionB, (double) tolerance, message \
-		); \
+		TANTRUM_LOG( "TANTRUM_TEST_NOT_ALMOST_EQUAL( %f, %f, %f ) has failed\n%s\n", (double) conditionA, (double) conditionB, (double) tolerance, message ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
 	} \
@@ -566,11 +574,7 @@ do { \
 	if ( conditionA > conditionB ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
 \
-		TANTRUM_LOG( \
-			"TANTRUM_TEST_GREATER_THAN( %f, %f ) has failed\n" \
-			"%s\n", \
-			(double) conditionA, (double) conditionB, message \
-		); \
+		TANTRUM_LOG( "TANTRUM_TEST_GREATER_THAN( %f, %f ) has failed\n%s\n", (double) conditionA, (double) conditionB, message ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
 	} \
@@ -593,12 +597,7 @@ do { \
 	if ( conditionA < conditionB ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
 \
-		TANTRUM_LOG( \
-			"TANTRUM_TEST_LESS_THAN( %f, %f ) has failed\n" \
-			"%s\n", \
-			(double) conditionA, (double) conditionB, \
-			message \
-		); \
+		TANTRUM_LOG( "TANTRUM_TEST_LESS_THAN( %f, %f ) has failed\n%s\n", (double) conditionA, (double) conditionB, message ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
 	} \
@@ -630,7 +629,7 @@ static void TantrumPrintTestExecutionInformation_UserModdable() {
 	TANTRUM_LOG( "\n=== TANTRUM TESTING REPORT ===\n" );
 	TANTRUM_LOG( "Total tests defined: %d\n", g_tantrumTestContext.totalTestsDeclared );
 
-	if( g_tantrumTestContext.isFilteringTests ) {
+	if ( g_tantrumTestContext.isFilteringTests ) {
 		TANTRUM_LOG( "\t- Total tests matching filters: %d\n\t- Suite filter: %s\n\t- Test filter: %s\n\t- Partial results %s\n",
 				g_tantrumTestContext.totalTestsFoundWithFilters,
 				g_tantrumTestContext.suiteFilter,
@@ -684,7 +683,9 @@ static void TantrumOnAfterTest_UserModdable( const suiteTestInfo_t information )
 }
 
 //==========================================================
-// FUNCTIONS - PRIVATE API
+// Internal Functions
+//
+// You as the user probably don't want to be directly touching these.
 //==========================================================
 
 static void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
@@ -894,24 +895,6 @@ static int TantrumExecuteAllTestsWithArgumentsInternal( int argc, char** argv ) 
 	TantrumHandleCommandLineArgumentsInternal( argc, argv );
 	return TantrumExecuteAllTestsInternal();
 }
-
-//==========================================================
-// PREPROCESSORS - USER API / SETUP
-//==========================================================
-
-// MY: I'd like to eventually add more security around this,
-// such as ensuring it's only ever called/used once and thowing
-// an error if it isn't. Maybe also (SOMEHOW) ensuring no test
-// ever has a higher count.
-#define TANTRUM_SETUP()									g_tantrumTestContext.totalTestsDeclared = __COUNTER__
-
-//----------------------------------------------------------
-
-#define TANTRUM_RUN_ALL_TESTS()							TantrumExecuteAllTestsInternal()
-
-//----------------------------------------------------------
-
-#define TANTRUM_RUN_ALL_TESTS_WITH_ARGS( argc, argv )	TantrumExecuteAllTestsWithArgumentsInternal( argc, argv )
 
 //----------------------------------------------------------
 
