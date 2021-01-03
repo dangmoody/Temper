@@ -484,8 +484,11 @@ do { \
 do { \
 	if ( !TantrumFloatEqualsInternal( conditionA, conditionB, tolerance ) ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-		TantrumLogInternal( "TANTRUM_TEST_NOT_ALMOST_EQUAL( %f, %f, %f ) has failed\n", (double) conditionA, (double) conditionB, (double) tolerance ); \
-		TantrumLogInternal( "%s\n", message ); \
+		TantrumLogInternal( \
+			"TANTRUM_TEST_NOT_ALMOST_EQUAL( %f, %f, %f ) has failed\n" \
+			"%s\n", \
+			(double) conditionA, (double) conditionB, (double) tolerance, message \
+		); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
 	} \
@@ -507,8 +510,11 @@ do { \
 do { \
 	if ( conditionA > conditionB ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-		TantrumLogInternal( "TANTRUM_TEST_GREATER_THAN( %f, %f ) has failed\n", (double) conditionA, (double) conditionB ); \
-		TantrumLogInternal( "%s\n", message ); \
+		TantrumLogInternal( \
+			"TANTRUM_TEST_GREATER_THAN( %f, %f ) has failed\n" \
+			"%s\n", \
+			(double) conditionA, (double) conditionB, message \
+		); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
 	} \
@@ -530,8 +536,12 @@ do { \
 do { \
 	if ( conditionA < conditionB ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-		TantrumLogInternal( "TANTRUM_TEST_LESS_THAN( %f, %f ) has failed\n", (double) conditionA, (double) conditionB ); \
-		TantrumLogInternal( "%s\n", message ); \
+		TantrumLogInternal( \
+			"TANTRUM_TEST_LESS_THAN( %f, %f ) has failed\n" \
+			"%s\n", \
+			(double) conditionA, (double) conditionB, \
+			message \
+		); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
 	} \
