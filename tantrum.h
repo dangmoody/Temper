@@ -88,6 +88,14 @@ extern "C" {
 #define TANTRUM_EXIT_FAILURE			EXIT_FAILURE
 #endif
 
+#ifndef TANTRUM_ASSERT_INTERNAL
+#define TANTRUM_ASSERT_INTERNAL			assert
+#endif
+
+#ifndef TANTRUM_SNPRINTF
+#define TANTRUM_SNPRINTF				snprintf
+#endif
+
 #ifndef TANTRUM_LOG
 #define TANTRUM_LOG						TantrumLogInternal
 #endif
@@ -202,7 +210,7 @@ static void TantrumSetTextColorInternal( const tantrumTextColor_t color ) {
 //----------------------------------------------------------
 
 static void TantrumLogInternal( const char* fmt, ... ) {
-	assert( fmt );
+	TANTRUM_ASSERT_INTERNAL( fmt );
 
 	va_list args;
 	va_start( args, fmt );
@@ -213,7 +221,7 @@ static void TantrumLogInternal( const char* fmt, ... ) {
 //----------------------------------------------------------
 
 static void TantrumLogWarningInternal( const char* fmt, ... ) {
-	assert( fmt );
+	TANTRUM_ASSERT_INTERNAL( fmt );
 
 	va_list args;
 	va_start( args, fmt );
@@ -234,7 +242,7 @@ static void TantrumLogWarningInternal( const char* fmt, ... ) {
 //----------------------------------------------------------
 
 static void TantrumLogErrorInternal( const char* fmt, ... ) {
-	assert( fmt );
+	TANTRUM_ASSERT_INTERNAL( fmt );
 
 	va_list args;
 	va_start( args, fmt );
@@ -267,8 +275,8 @@ static bool TantrumFloatEqualsInternal( const float a, const float b, const floa
 //----------------------------------------------------------
 
 static const char* TantrumGetNextArgInternal( const int argIndex, const int argc, char** argv ) {
-	assert( argc );
-	assert( argv );
+	TANTRUM_ASSERT_INTERNAL( argc );
+	TANTRUM_ASSERT_INTERNAL( argv );
 
 	return ( argIndex + 1 < argc ) ? argv[argIndex + 1] : NULL;
 }
@@ -781,12 +789,12 @@ static void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 
 static void* TantrumLoadEXEHandleInternal( void ) {
 #if defined( _WIN32 )
-	HANDLE handle = LoadLibrary( g_tantrumTestContext.programName );
-	assert( handle );
+	HMODULE handle = LoadLibrary( g_tantrumTestContext.programName );
+	TANTRUM_ASSERT_INTERNAL( handle );
 	return handle;
 #elif defined( __APPLE__ ) || defined( __linux__ )	// defined( _WIN32 )
 	void* handle = dlopen( NULL, RTLD_LAZY );
-	assert( handle );
+	TANTRUM_ASSERT_INTERNAL( handle );
 	return handle;
 #else	// defined( _WIN32 )
 #error Uncrecognised platform.  It appears Tantrum does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
@@ -796,16 +804,16 @@ static void* TantrumLoadEXEHandleInternal( void ) {
 //----------------------------------------------------------
 
 static void* TantrumGetProcAddressInternal( void* handle, const char* funcName ) {
-	assert( handle );
-	assert( funcName );
+	TANTRUM_ASSERT_INTERNAL( handle );
+	TANTRUM_ASSERT_INTERNAL( funcName );
 
 #ifdef _WIN32
-	void* proc = (void*) GetProcAddress( (HANDLE) handle, funcName );
-	assert( proc );
+	void* proc = (void*) GetProcAddress( (HMODULE) handle, funcName );
+	TANTRUM_ASSERT_INTERNAL( proc );
 	return proc;
 #elif defined( __APPLE__ ) || defined( __linux__ )	// defined( _WIN32 )
 	void* proc = dlsym( handle, funcName );
-	assert( proc );
+	TANTRUM_ASSERT_INTERNAL( proc );
 	return proc;
 #else	// defined( _WIN32 )
 #error Uncrecognised platform.  It appears Tantrum does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
@@ -815,10 +823,10 @@ static void* TantrumGetProcAddressInternal( void* handle, const char* funcName )
 //----------------------------------------------------------
 
 static void TantrumCloseEXEHandleInternal( void* handle ) {
-	assert( handle );
+	TANTRUM_ASSERT_INTERNAL( handle );
 
 #if defined( _WIN32 )
-	FreeLibrary( (HANDLE) handle );
+	FreeLibrary( (HMODULE) handle );
 	handle = NULL;
 #elif defined( __APPLE__ ) || defined( __linux__ ) // _WIN32
 	int closeError = dlclose( handle );
@@ -838,13 +846,12 @@ static int TantrumExecuteAllTestsInternal() {
 	// make the exe load itself
 	void* handle = TantrumLoadEXEHandleInternal();
 
-	// DM: yeah yeah yeah, I know: fixed-length string arrays bad
-	// I'll write a tprintf at some point
+	// TODO(DM): TantrumTPrintf()
 	char testFuncName[1024];
 	testInfoFetcherFunc_t testInfoGrabberFunc = NULL;
 
 	for ( uint32_t i = 0; i < g_tantrumTestContext.totalTestsDeclared; i++ ) {
-		snprintf( testFuncName, 1024, "tantrum_test_info_fetcher_%d", i );
+		TANTRUM_SNPRINTF( testFuncName, 1024, "tantrum_test_info_fetcher_%d", i );
 
 		//TANTRUM_LOG( "Loading test func: %s\n", testFuncName );
 
