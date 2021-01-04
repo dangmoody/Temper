@@ -4,14 +4,21 @@
 extern "C" {
 #endif
 
-#if defined( __GNUC__ ) || defined( __clang__ )
+#if defined( __clang__ )
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function"
+#pragma clang diagnostic ignored "-Wreserved-id-macro"
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
+#pragma clang diagnostic ignored "-Wdouble-promotion"
+#pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
+#elif defined( __GNUC__ )	// defined( __clang__ )
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
-#pragma GCC diagnostic ignored "-Wreserved-id-macro"
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
-#pragma GCC diagnostic ignored "-Wdouble-promotion"
-#pragma GCC diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
-#endif	// defined( __GNUC__ ) || defined( __clang__ )
+// DM: only disabling this one on gcc to avoid a warning that gets generated when trying to convert function pointers to void*
+// if anyone knows of a better way to get around that without disabling all pedantic warnings I'd love to hear about it
+// submit an issue telling me how: https://github.com/dangmoody/Tantrum/issues
+#pragma GCC diagnostic ignored "-Wpedantic"
+#endif	// defined( __clang__ )
 
 #if defined( __linux__ ) || defined( __APPLE__ )
 #pragma push_macro( "_POSIX_C_SOURCE" )
@@ -45,7 +52,7 @@ extern "C" {
 #elif defined( __APPLE__ ) || defined( __linux__ )
 #define TANTRUM_API	__attribute__( ( visibility( "default" ) ) )
 #else
-#error Uncrecognised platform.  It appears Tantrum doesn't support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
+#error Uncrecognised platform.  It appears Tantrum does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
 #endif
 
 //==========================================================
@@ -188,7 +195,7 @@ static void TantrumSetTextColorInternal( const tantrumTextColor_t color ) {
 #elif defined( __APPLE__ ) || defined( __linux__ )
 	printf( "%s", color );
 #else
-#error Uncrecognised platform.  It appears Tantrum doesn't support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
+#error Uncrecognised platform.  It appears Tantrum does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
 #endif
 }
 
@@ -730,7 +737,7 @@ static void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 
 	g_tantrumTestContext.programName = fullExePath;
 #else
-#error Uncrecognised platform.  It appears Tantrum doesn't support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
+#error Uncrecognised platform.  It appears Tantrum does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
 #endif // _WIN32
 
 	// parse command line args
@@ -782,7 +789,7 @@ static void* TantrumLoadEXEHandleInternal( void ) {
 	assert( handle );
 	return handle;
 #else	// defined( _WIN32 )
-#error Uncrecognised platform.  It appears Tantrum doesn't support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
+#error Uncrecognised platform.  It appears Tantrum does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
 #endif // defined( _WIN32 )
 }
 
@@ -801,7 +808,7 @@ static void* TantrumGetProcAddressInternal( void* handle, const char* funcName )
 	assert( proc );
 	return proc;
 #else	// defined( _WIN32 )
-#error Uncrecognised platform.  It appears Tantrum doesn't support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
+#error Uncrecognised platform.  It appears Tantrum does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
 #endif	// defined( _WIN32 )
 }
 
@@ -821,7 +828,7 @@ static void TantrumCloseEXEHandleInternal( void* handle ) {
 
 	handle = NULL;
 #else	// _WIN32
-#error Uncrecognised platform.  It appears Tantrum doesn't support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
+#error Uncrecognised platform.  It appears Tantrum does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
 #endif	// _WIN32
 }
 
@@ -911,7 +918,9 @@ static int TantrumExecuteAllTestsWithArgumentsInternal( int argc, char** argv ) 
 #pragma pop_macro( "_POSIX_C_SOURCE" )
 #endif
 
-#if defined( __GNUC__ ) || defined( __clang__ )
+#if defined( __clang__ )
+#pragma clang diagnostic pop
+#elif defined( __GNUC__ )
 #pragma GCC diagnostic pop
 #endif // defined( __GNUC__ ) || defined( __clang__ )
 
