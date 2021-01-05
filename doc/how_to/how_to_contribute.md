@@ -11,9 +11,14 @@ Building The Project
 --------------------
 1. Clone the git repo.
 2. If on Windows:
-	* If you want to use Visual Studio run `.\scripts\generate_vs2019.bat`
-	* If you don't want to use Visual Studio then open your text editor at the project root folder.
-	* If not using Visual Studio, run `.\scripts\build_demo.bat demos\<demo name> debug` (for example) to build a demo.
+	* If you want to use Visual Studio:
+		* Make sure you have Visual Studio 2019 installed.
+		* Run `.\scripts\generate_vs2019.bat`.
+	* If you do NOT want to use Visual Studio: 
+		* Run `.\scripts\build_clang_gcc.bat` to build a demo for Clang/GCC.
+		* Run `.\scripts\build_msvc.bat` to build a demo for MSVC.
+3. If on MacOS/Linux:
+	* Run `.\scripts\build_clang_gcc.sh` to build a demo for Clang/GCC.
 
 
 How To Add A Demo
