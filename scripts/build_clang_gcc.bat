@@ -86,6 +86,11 @@ REM echo CONFIG: !config!
 REM echo SOURCE FILES: !source_files!
 REM echo.
 
+set std=
+if /I [!compiler:~-2!] NEQ [++] (
+	set std=-std=c99
+)
+
 set symbols=
 if /I [!config!]==[debug] (
 	set symbols=-g
@@ -128,7 +133,7 @@ pushd %cwd%
 pushd ..
 
 REM echo !compiler! -std=c99 -o %build_dir%\\!output_filename! !symbols! !optimisation! !defines! %warninglevels% !ignorewarnings! !source_files!
-!compiler! -std=c99 -o %build_dir%\\!output_filename! !symbols! !optimisation! !defines! %warninglevels% !ignorewarnings! !source_files!
+!compiler! !std! -o %build_dir%\\!output_filename! !symbols! !optimisation! !defines! %warninglevels% !ignorewarnings! !source_files!
 
 popd
 popd
