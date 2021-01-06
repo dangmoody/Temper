@@ -1,8 +1,8 @@
-generated_project_files_root = "..\\..\\vs2019-gen"
-folder_demos = "demos\\"
-folder_3rdparty = "3rdparty\\"
-folder_tools = "tools\\"
-folder_scripts = "scripts\\"
+g_generated_project_files_root = "..\\..\\vs2019-gen"
+g_folder_demos = "demos\\"
+g_folder_3rdparty = "3rdparty\\"
+g_folder_tools = "tools\\"
+g_folder_scripts = "scripts\\"
 
 -- get length of array
 -- DM: lua doesnt define this!?
@@ -18,9 +18,9 @@ end
 
 
 workspace( "Tantrum" )
-	location( generated_project_files_root )
+	location( g_generated_project_files_root )
 
-	platforms { "win64" }
+	platforms { "win64-clang", "win64-clang++", "win64-gcc", "win64-g++", "win64-msvc" }
 	configurations { "debug", "release" }
 
 	startproject( "demos" )
@@ -38,16 +38,68 @@ workspace( "Tantrum" )
 88      .a8P   "8b,   ,aa  88      88      88  "8a,   ,a8"  aa    ]8I  
 88888888Y"'     `"Ybbd8"'  88      88      88   `"YbbdP"'   `"YbbdP"'  
 ]]
+
+function set_binaries_and_build_commands( demo_name, compiler, compiler_define )
+	if ( compiler ~= "clang" ) and ( compiler ~= "clang++" ) and ( compiler ~= "gcc" ) and ( compiler ~= "g++" ) and ( compiler ~= "msvc" ) then
+		print( "ERROR: Compiler \"" .. compiler .. "\" is not a valid compiler name to generate a project for.  Please use one of the correct ones.\n" )
+		return
+	end
+
+	kind( "MakeFile" )
+
+	if compiler == "msvc" then
+		filter ( "platforms:win64-msvc" )
+			buildcommands (
+				"..\\" .. g_folder_scripts .. "build_msvc.bat --output " .. demo_name .. ".exe" .. " --config %{cfg.buildcfg} --source " .. g_folder_demos .. demo_name .. "\\" .. demo_name .. ".c"
+			)
+
+			rebuildcommands (
+				"..\\" .. g_folder_scripts .. "build_msvc.bat --output " .. demo_name .. ".exe" .. " --config %{cfg.buildcfg} --source " .. g_folder_demos .. demo_name .. "\\" .. demo_name .. ".c"
+			)
+
+			cleancommands (
+				"..\\" .. g_folder_scripts .. "clean.bat"
+			)
+
+			defines {
+			}
+		filter {}
+	else
+		filter ( "platforms:win64-" .. compiler )
+			buildcommands (
+				"..\\" .. g_folder_scripts .. "build_clang_gcc.bat --output " .. demo_name .. ".exe" .. " --compiler " .. compiler .. " --config %{cfg.buildcfg} --source " .. g_folder_demos .. demo_name .. "\\" .. demo_name .. ".c"
+			)
+
+			rebuildcommands (
+				"..\\" .. g_folder_scripts .. "build_clang_gcc.bat --output " .. demo_name .. ".exe" .. " --compiler " .. compiler .. " --config %{cfg.buildcfg} --source " .. g_folder_demos .. demo_name .. "\\" .. demo_name .. ".c"
+			)
+
+			cleancommands (
+				"..\\" .. g_folder_scripts .. "clean.bat"
+			)
+
+			defines {
+				compiler_define
+			}
+		filter {}
+	end
+
+	-- required because VS will create these folders if they don't exist
+	targetdir( "..\\..\\bin\\win64\\" .. compiler .. "\\%{cfg.buildcfg}\\" .. g_folder_demos )
+	objdir( "!..\\..\\bin\\win64\\" .. compiler .. "\\%{cfg.buildcfg}\\" .. g_folder_demos .. "intermediate" )
+
+	debugcommand( "..\\..\\bin\\win64\\" .. compiler .. "\\%{cfg.buildcfg}\\" .. g_folder_demos .. demo_name .. ".exe" )
+end
+
 function make_demo_project( demo_name )
 	project( demo_name )
-	location( generated_project_files_root )
+	location( g_generated_project_files_root )
 
 	files {
-		"..\\..\\" .. folder_demos .. demo_name .. "\\**.h",
-		"..\\..\\" .. folder_demos .. demo_name .. "\\**.c",
-		"..\\..\\" .. folder_demos .. demo_name .. "\\**.cpp",
-		"..\\..\\" .. folder_demos .. demo_name .. "\\**.h",
-		"..\\..\\" .. folder_demos .. demo_name .. "\\**.inl"
+		"..\\..\\" .. g_folder_demos .. demo_name .. "\\**.c",
+		"..\\..\\" .. g_folder_demos .. demo_name .. "\\**.h",
+		"..\\..\\" .. g_folder_demos .. demo_name .. "\\**.cpp",
+		"..\\..\\" .. g_folder_demos .. demo_name .. "\\**.inl"
 	}
 
 	defines {
@@ -59,33 +111,13 @@ function make_demo_project( demo_name )
 	syslibdirs {
 	}
 
-	-- required because VS will create these folders if they don't exist
-	targetdir( "..\\..\\bin\\%{cfg.platform}\\%{cfg.buildcfg}\\" .. folder_demos )
-	objdir( "..\\..\\bin\\%{cfg.platform}\\%{cfg.buildcfg}\\" .. folder_demos .. "intermediate" )
-
 	debugdir( "$(SolutionDir)..\\" )
 
-	debugcommand( "..\\..\\bin\\%{cfg.platform}\\%{cfg.buildcfg}\\" .. folder_demos .. demo_name .. ".exe" )
-
-	filter "platforms:win64"
-		kind( "MakeFile" )
-
-		buildcommands (
-			"..\\" .. folder_scripts .. "\\build_demo.bat " .. demo_name .. " %{cfg.buildcfg}"
-		)
-
-		rebuildcommands (
-			"..\\" .. folder_scripts .. "\\build_demo.bat " .. demo_name .. " %{cfg.buildcfg}"
-		)
-
-		cleancommands (
-			"..\\" .. folder_scripts .. "\\clean.bat"
-		)
-
-		defines {
-			"__clang__"	-- required, build system wont generate this for you
-		}
-	filter {}
+	set_binaries_and_build_commands( demo_name, "clang", "__clang__" )
+	set_binaries_and_build_commands( demo_name, "clang++", "__clang__" )
+	set_binaries_and_build_commands( demo_name, "gcc", "__GNUC__" )
+	set_binaries_and_build_commands( demo_name, "g++", "__GNUC__" )
+	set_binaries_and_build_commands( demo_name, "msvc", "" )
 
 	filter "configurations:debug"
 		defines {
@@ -99,7 +131,8 @@ function make_demo_project( demo_name )
 	filter {}
 end
 
-demos_names = {
+
+g_demos_names = {
 	"basic_c",
 	"basic_suites_c",
 	"filtering",
@@ -107,7 +140,7 @@ demos_names = {
 }
 
 group( "demos" )
-demos_names_length = array_length( demos_names )
-for i = 1, demos_names_length do
-	make_demo_project( demos_names[i] )
+g_demos_names_length = array_length( g_demos_names )
+for i = 1, g_demos_names_length do
+	make_demo_project( g_demos_names[i] )
 end
