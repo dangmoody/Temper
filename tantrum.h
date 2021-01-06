@@ -90,6 +90,12 @@ extern "C" {
 #error Uncrecognised platform.  It appears Tantrum does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
 #endif
 
+#ifdef __cplusplus
+#define TANTRUM_EXTERN_C extern "C"
+#else
+#define TANTRUM_EXTERN_C
+#endif
+
 //==========================================================
 // Public API
 //==========================================================
@@ -366,7 +372,7 @@ static tantrumBool32 TantrumStringContainsInternal( const char* str, const char*
 \
 	/*4. Create our invoker_n function. This is what the runner will loop over to grab the test function as well as all the information concerning it*/ \
 	/* HACK(DM): I shouldn't have to add extern "C" before each declaration here to make this work for c++ compiled binaries.  I already did that at the top of the header! How is that NOT a compiler bug!? */ \
-	extern "C" suiteTestInfo_t TANTRUM_API TANTRUM_CONCAT_INTERNAL( tantrum_test_info_fetcher_, counter )( void ); \
+	TANTRUM_EXTERN_C suiteTestInfo_t TANTRUM_API TANTRUM_CONCAT_INTERNAL( tantrum_test_info_fetcher_, counter )( void ); \
 	suiteTestInfo_t TANTRUM_CONCAT_INTERNAL( tantrum_test_info_fetcher_, counter )( void ) { \
 		TANTRUM_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.callback = testName; \
 		TANTRUM_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.suiteNameStr = suiteNameString; \
@@ -413,7 +419,7 @@ static tantrumBool32 TantrumStringContainsInternal( const char* str, const char*
 \
 	/*5. Define an info binding function to tie all this information into the struct*/ \
 	/* HACK(DM): I shouldn't have to add extern "C" before each declaration here to make this work for c++ compiled binaries.  I already did that at the top of the header! How is that NOT a compiler bug!? */ \
-	extern "C" void TANTRUM_API TANTRUM_CONCAT_INTERNAL( testName, _ParametricTestInfoBinder )( void ); \
+	TANTRUM_EXTERN_C void TANTRUM_API TANTRUM_CONCAT_INTERNAL( testName, _ParametricTestInfoBinder )( void ); \
 	void TANTRUM_CONCAT_INTERNAL( testName, _ParametricTestInfoBinder )( void ) { \
 		TANTRUM_CONCAT_INTERNAL( testName, _GlobalParametricInfo ).Callback = testName; \
 		TANTRUM_CONCAT_INTERNAL( testName, _GlobalParametricInfo ).testingFlag = runFlag; \
@@ -458,7 +464,7 @@ static tantrumBool32 TantrumStringContainsInternal( const char* str, const char*
 \
 	/*5. Create our invoker_n function. This is what the runner will loop over to grab the test function as well as all the information concerning it*/ \
 	/* HACK(DM): I shouldn't have to add extern "C" before each declaration here to make this work for c++ compiled binaries.  I already did that at the top of the header! How is that NOT a compiler bug!? */ \
-	extern "C" suiteTestInfo_t TANTRUM_API TANTRUM_CONCAT_INTERNAL( tantrum_test_info_fetcher_, counter )( void ); \
+	TANTRUM_EXTERN_C suiteTestInfo_t TANTRUM_API TANTRUM_CONCAT_INTERNAL( tantrum_test_info_fetcher_, counter )( void ); \
 	suiteTestInfo_t TANTRUM_CONCAT_INTERNAL( tantrum_test_info_fetcher_, counter )( void ) { \
 		TANTRUM_CONCAT_INTERNAL( nameOfTestToCall, _ParametricTestInfoBinder )();/*Make it so we can grab the needed information out of the test function's global info*/\
 		TANTRUM_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation.callback = parametricInvokationName; \
