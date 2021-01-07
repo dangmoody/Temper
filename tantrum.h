@@ -756,13 +756,13 @@ static void TantrumOnAfterTest_UserModdable( const suiteTestInfo_t information )
 // You as the user probably don't want to be directly touching these.
 //==========================================================
 
-static void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
+static bool TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 #if defined( _WIN32 )
 	char fullExePath[MAX_PATH];
 	DWORD fullExePathLength = GetModuleFileName( NULL, fullExePath, MAX_PATH );
 	if ( fullExePathLength == 0 ) {
 		TANTRUM_LOG_ERROR( "WinAPI call GetModuleFileName() failed: 0x%lX\n", GetLastError() );
-		return;
+		return false;
 	}
 
 	g_tantrumTestContext.programName = fullExePath;
@@ -774,7 +774,7 @@ static void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 	if ( lstat( exeFilenameVirtual, &exeFileInfo ) == -1 ) {
 		err = errno;
 		TANTRUM_LOG_ERROR( "lstat() failed: %s", strerror( err ) );
-		return;
+		return false;
 	}
 
 	char fullExePath[PATH_MAX];
@@ -782,7 +782,7 @@ static void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 	err = errno;
 	if ( fullExePathLength == -1 ) {
 		TANTRUM_LOG_ERROR( "readlink() failed: %s", strerror( err ) );
-		return;
+		return false;
 	}
 
 	fullExePath[exeFileInfo.st_size] = 0;
@@ -824,9 +824,11 @@ static void TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 	if ( g_tantrumTestContext.partialFilter ) {
 		if ( !g_tantrumTestContext.suiteFilter && !g_tantrumTestContext.testFilter ) {
 			TANTRUM_LOG_ERROR( "Partial filtering (-p) was enabled but suite or test filtering (-s, -t) was not.\n" );
-			return;
+			return false;
 		}
 	}
+
+	return true;
 }
 
 //----------------------------------------------------------
@@ -959,7 +961,10 @@ static int TantrumExecuteAllTestsInternal() {
 //----------------------------------------------------------
 
 static int TantrumExecuteAllTestsWithArgumentsInternal( int argc, char** argv ) {
-	TantrumHandleCommandLineArgumentsInternal( argc, argv );
+	if ( !TantrumHandleCommandLineArgumentsInternal( argc, argv ) ) {
+		return TANTRUM_EXIT_FAILURE;
+	}
+
 	return TantrumExecuteAllTestsInternal();
 }
 
