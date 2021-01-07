@@ -197,7 +197,7 @@ typedef struct tantrumTestContext_t {
 	uint32_t		testsPassed;
 	uint32_t		testsFailed;
 	uint32_t		testsAborted;
-	uint32_t		testsDodged;
+	uint32_t		testsSkipped;
 	uint32_t		totalTestsDeclared; // Gets set in the main function with a preprocessor
 	uint32_t		totalTestsFoundWithFilters;
 	uint32_t		totalTestsExecuted;
@@ -706,11 +706,11 @@ static void TantrumPrintTestExecutionInformation_UserModdable() {
 		"Passed:   %d ( %d%% )\n"
 		"Failed:   %d ( %d%% )\n"
 		"Aborted:  %d ( %d%% )\n"
-		"Dodged:   %d ( %d%% )\n",
+		"Skipped:  %d ( %d%% )\n",
 		g_tantrumTestContext.testsPassed,  TantrumGetPercentInternal( g_tantrumTestContext.testsPassed, totalFound  ),
 		g_tantrumTestContext.testsFailed,  TantrumGetPercentInternal( g_tantrumTestContext.testsFailed, totalFound  ),
 		g_tantrumTestContext.testsAborted, TantrumGetPercentInternal( g_tantrumTestContext.testsAborted, totalFound ),
-		g_tantrumTestContext.testsDodged,  TantrumGetPercentInternal( g_tantrumTestContext.testsDodged, totalFound  )
+		g_tantrumTestContext.testsSkipped, TantrumGetPercentInternal( g_tantrumTestContext.testsSkipped, totalFound  )
 	);
 }
 
@@ -743,9 +743,9 @@ static void TantrumOnAfterTest_UserModdable( const suiteTestInfo_t information )
 			TantrumSetTextColorInternal( TANTRUM_COLOR_DEFAULT );
 		}
 	} else {
-		const char* dodgeReason = information.testingFlag == TANTRUM_TEST_FLAG_DEPRECATED ? "DEPRICATED" : "SHOULD_SKIP";
+		const char* skipReason = information.testingFlag == TANTRUM_TEST_FLAG_DEPRECATED ? "DEPRICATED" : "SHOULD_SKIP";
 		TantrumSetTextColorInternal( TANTRUM_COLOR_YELLOW );
-		TANTRUM_LOG( "TEST FLAGGED \"%s\"\n\n", dodgeReason );
+		TANTRUM_LOG( "TEST FLAGGED \"%s\"\n\n", skipReason );
 		TantrumSetTextColorInternal( TANTRUM_COLOR_DEFAULT );
 	}
 }
@@ -942,7 +942,7 @@ static int TantrumExecuteAllTestsInternal() {
 						g_tantrumTestContext.testsPassed += 1;
 					}
 				} else {
-					g_tantrumTestContext.testsDodged += 1;
+					g_tantrumTestContext.testsSkipped += 1;
 				}
 
 				TantrumOnAfterTest_UserModdable( information );
