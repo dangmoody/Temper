@@ -892,7 +892,9 @@ static int TantrumExecuteAllTestsInternal() {
 	// make the exe load itself
 	void* handle = TantrumLoadEXEHandleInternal();
 
-	// TODO(DM): TantrumTPrintf()
+	// DM: I have never seen a function name exceed 64 characters, let alone 1024
+	// so this shouldn't be a problem
+	// I wonder if it's possible we could perhaps make this string length constant an overridable #define ?
 	char testFuncName[1024];
 	testInfoFetcherFunc_t testInfoGrabberFunc = NULL;
 
