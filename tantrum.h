@@ -46,6 +46,7 @@ extern "C" {
 #pragma clang diagnostic ignored "-Wformat-nonliteral"
 #pragma clang diagnostic ignored "-Wdouble-promotion"
 #pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
+#pragma clang diagnostic ignored "-Wcovered-switch-default"
 #elif defined( __GNUC__ )	// defined( __clang__ )
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
@@ -104,7 +105,14 @@ extern "C" {
 // such as ensuring it's only ever called/used once and thowing
 // an error if it isn't. Maybe also (SOMEHOW) ensuring no test
 // ever has a higher count.
-#define TANTRUM_SETUP()									g_tantrumTestContext.totalTestsDeclared = __COUNTER__
+#define TANTRUM_SETUP() \
+do { \
+	g_tantrumTestContext.totalTestsDeclared = __COUNTER__; \
+\
+	g_tantrumTestContext.timeUnit = TANTRUM_TIME_UNIT_MS; \
+\
+	QueryPerformanceFrequency( &g_tantrumTestContext.timestampFrequency ); \
+} while ( 0 )
 
 //----------------------------------------------------------
 
@@ -175,6 +183,14 @@ typedef enum tantrumTestFlag_t {
 	TANTRUM_TEST_FLAG_DEPRECATED
 } tantrumTestFlag_t;
 
+typedef enum tantrumTimeUnit_t {
+	TANTRUM_TIME_UNIT_CLOCKS			= 0,
+	TANTRUM_TIME_UNIT_NS,
+	TANTRUM_TIME_UNIT_US,
+	TANTRUM_TIME_UNIT_MS,
+	TANTRUM_TIME_UNIT_SECONDS
+} tantrumTimeUnit_t;
+
 //----------------------------------------------------------
 
 typedef void( *testCallback_t )( void );
@@ -184,6 +200,7 @@ typedef tantrumBool32 ( *tantrumStringCompareFunc_t )( const char*, const char* 
 typedef struct suiteTestInfo_t {
 	testCallback_t		callback;
 	tantrumTestFlag_t	testingFlag;
+	double				testTimeTaken;
 	uint32_t			pad0;
 	const char*			testNameStr;
 	const char*			suiteNameStr;
@@ -194,20 +211,24 @@ typedef suiteTestInfo_t( *testInfoFetcherFunc_t )( void );
 //----------------------------------------------------------
 
 typedef struct tantrumTestContext_t {
-	uint32_t		testsPassed;
-	uint32_t		testsFailed;
-	uint32_t		testsAborted;
-	uint32_t		testsSkipped;
-	uint32_t		totalTestsDeclared; // Gets set in the main function with a preprocessor
-	uint32_t		totalTestsFoundWithFilters;
-	uint32_t		totalTestsExecuted;
-	uint32_t		totalErrorsInCurrentTests;
-	tantrumBool32	partialFilter;
-	tantrumBool32	isFilteringTests;
-	const char*		programName;
-	const char*		suiteFilterPrevious;
-	const char*		suiteFilter;
-	const char*		testFilter;
+#ifdef _WIN32
+	LARGE_INTEGER		timestampFrequency;
+#endif
+	uint32_t			testsPassed;
+	uint32_t			testsFailed;
+	uint32_t			testsAborted;
+	uint32_t			testsSkipped;
+	uint32_t			totalTestsDeclared; // Gets set in the main function with a preprocessor
+	uint32_t			totalTestsFoundWithFilters;
+	uint32_t			totalTestsExecuted;
+	uint32_t			totalErrorsInCurrentTests;
+	tantrumBool32		partialFilter;
+	tantrumBool32		isFilteringTests;
+	tantrumTimeUnit_t	timeUnit;
+	const char*			programName;
+	const char*			suiteFilterPrevious;
+	const char*			suiteFilter;
+	const char*			testFilter;
 } tantrumTestContext_t;
 
 //----------------------------------------------------------
@@ -731,15 +752,33 @@ static void TantrumOnBeforeTest_UserModdable( const suiteTestInfo_t information 
 
 //----------------------------------------------------------
 
+static const char* TantrumGetTimeUnitStringInternal( void ) {
+	switch ( g_tantrumTestContext.timeUnit ) {
+		case TANTRUM_TIME_UNIT_CLOCKS:	return "clocks";
+		case TANTRUM_TIME_UNIT_NS:		return "ns";
+		case TANTRUM_TIME_UNIT_US:		return "us";
+		case TANTRUM_TIME_UNIT_MS:		return "ms";
+		case TANTRUM_TIME_UNIT_SECONDS:	return "seconds";
+
+		default:
+			TANTRUM_ASSERT_INTERNAL( false && "Tantrum test context time unit was invalid somehow!?" );
+			return NULL;
+	}
+}
+
+//----------------------------------------------------------
+
 static void TantrumOnAfterTest_UserModdable( const suiteTestInfo_t information ) {
 	if ( information.testingFlag == TANTRUM_TEST_FLAG_SHOULD_RUN ) {
+		const char* timeUnitStr = TantrumGetTimeUnitStringInternal();
+
 		if ( g_tantrumTestContext.totalErrorsInCurrentTests > 0 ) {
 			TantrumSetTextColorInternal( TANTRUM_COLOR_RED );
-			TANTRUM_LOG( "TEST FAILED\n\n" );
+			TANTRUM_LOG( "TEST FAILED (%f %s)\n\n", information.testTimeTaken, timeUnitStr );
 			TantrumSetTextColorInternal( TANTRUM_COLOR_DEFAULT );
 		} else {
 			TantrumSetTextColorInternal( TANTRUM_COLOR_GREEN );
-			TANTRUM_LOG( "TEST SUCCEEDED\n\n" );
+			TANTRUM_LOG( "TEST SUCCEEDED (%f %s)\n\n", information.testTimeTaken, timeUnitStr );
 			TantrumSetTextColorInternal( TANTRUM_COLOR_DEFAULT );
 		}
 	} else {
@@ -799,6 +838,7 @@ static bool TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 		if ( TANTRUM_STRING_EQUALS( arg, "-s" ) ) {
 			const char* nextArg = TantrumGetNextArgInternal( argIndex, argc, argv );
 			// TODO(DM): if nextArg == NULL then error that the suite filter wasnt set and show usage to help user
+
 			g_tantrumTestContext.suiteFilter = nextArg;
 			g_tantrumTestContext.isFilteringTests = true;
 
@@ -808,6 +848,7 @@ static bool TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 		if ( TANTRUM_STRING_EQUALS( arg, "-t" ) ) {
 			const char* nextArg = TantrumGetNextArgInternal( argIndex, argc, argv );
 			// TODO(DM): if nextArg == NULL then error that the test filter wasnt set and show usage to help user
+
 			g_tantrumTestContext.testFilter = nextArg;
 			g_tantrumTestContext.isFilteringTests = true;
 
@@ -818,12 +859,45 @@ static bool TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 			g_tantrumTestContext.partialFilter = true;
 			continue;
 		}
+
+		if ( TANTRUM_STRING_EQUALS( arg, "--time-unit" ) ) {
+			const char* nextArg = TantrumGetNextArgInternal( argIndex, argc, argv );
+			// TODO(DM): if nextArg == NULL then error that the time unit wasnt set and show usage to help user
+
+			if ( TANTRUM_STRING_EQUALS( nextArg, "seconds" ) ) {
+				g_tantrumTestContext.timeUnit = TANTRUM_TIME_UNIT_SECONDS;
+			} else if ( TANTRUM_STRING_EQUALS( nextArg, "ms" ) ) {
+				g_tantrumTestContext.timeUnit = TANTRUM_TIME_UNIT_MS;
+			} else if ( TANTRUM_STRING_EQUALS( nextArg, "us" ) ) {
+				g_tantrumTestContext.timeUnit = TANTRUM_TIME_UNIT_US;
+			} else if ( TANTRUM_STRING_EQUALS( nextArg, "ns" ) ) {
+				g_tantrumTestContext.timeUnit = TANTRUM_TIME_UNIT_NS;
+			} else if ( TANTRUM_STRING_EQUALS( nextArg, "clocks" ) ) {
+				g_tantrumTestContext.timeUnit = TANTRUM_TIME_UNIT_CLOCKS;
+			} else {
+				TANTRUM_LOG_ERROR(
+					"Invalid time unit \"%s\" specified.  Please select from one of the following:\n"
+					"\t- seconds\n"
+					"\t- ms\n"
+					"\t- us\n"
+					"\t- ns\n"
+					"\t- clocks\n"
+					"\n",
+					nextArg
+				);
+				// TODO(DM): TantrumShowUsageInternal() again...
+				return false;
+			}
+
+			continue;
+		}
 	}
 
 	// if partial filtering was enabled but the user did not then specify a suite or test filter then they need to know about incorrect usage
 	if ( g_tantrumTestContext.partialFilter ) {
 		if ( !g_tantrumTestContext.suiteFilter && !g_tantrumTestContext.testFilter ) {
-			TANTRUM_LOG_ERROR( "Partial filtering (-p) was enabled but suite or test filtering (-s, -t) was not.\n" );
+			TANTRUM_LOG_ERROR( "Partial filtering (-p) was enabled but suite or test filtering (-s, -t) was not.\n\n" );
+			// TODO(DM): TantrumShowUsageInternal() again...
 			return false;
 		}
 	}
@@ -874,7 +948,7 @@ static void TantrumCloseEXEHandleInternal( void* handle ) {
 #if defined( _WIN32 )
 	FreeLibrary( (HMODULE) handle );
 	handle = NULL;
-#elif defined( __APPLE__ ) || defined( __linux__ ) // _WIN32
+#elif defined( __APPLE__ ) || defined( __linux__ )	// _WIN32
 	int closeError = dlclose( handle );
 	if ( closeError ) {
 		TANTRUM_LOG_ERROR( "%s.\n", dlerror() );
@@ -884,6 +958,43 @@ static void TantrumCloseEXEHandleInternal( void* handle ) {
 #else	// _WIN32
 #error Uncrecognised platform.  It appears Tantrum does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
 #endif	// _WIN32
+}
+
+//----------------------------------------------------------
+
+static double TantrumGetTimestampInternal( void ) {
+#if defined( _WIN32 )
+	LARGE_INTEGER now;
+	QueryPerformanceCounter( &now );
+
+	switch ( g_tantrumTestContext.timeUnit ) {
+		case TANTRUM_TIME_UNIT_CLOCKS:	return (double) ( now.QuadPart );
+		case TANTRUM_TIME_UNIT_NS:		return (double) ( ( now.QuadPart * 1000000000 ) / g_tantrumTestContext.timestampFrequency.QuadPart );
+		case TANTRUM_TIME_UNIT_US:		return (double) ( ( now.QuadPart * 1000000 ) / g_tantrumTestContext.timestampFrequency.QuadPart );
+		case TANTRUM_TIME_UNIT_MS:		return (double) ( ( now.QuadPart * 1000 ) / g_tantrumTestContext.timestampFrequency.QuadPart );
+		case TANTRUM_TIME_UNIT_SECONDS:	return (double) ( ( now.QuadPart ) / g_tantrumTestContext.timestampFrequency.QuadPart );
+	}
+#elif defined( __APPLE__ ) || defined( __linux__ )	// defined( _WIN32 )
+	struct timespec now;
+	clock_gettime( CLOCK_MONOTONIC, &now );
+
+	int64_t clocks = (int64_t) ( now.tv_sec * 1000000000 + now.tv_nsec );
+
+	switch ( g_tantrumTestContext.timeUnit ) {
+		case TANTRUM_TIME_UNIT_CLOCKS:	return (double) clocks;
+		case TANTRUM_TIME_UNIT_NS:		return (double) clocks;
+		case TANTRUM_TIME_UNIT_US:		return (double) clocks / 1000.0;
+		case TANTRUM_TIME_UNIT_MS:		return (double) clocks / 1000000.0;
+		case TANTRUM_TIME_UNIT_SECONDS:	return (double) clocks / 1000000000.0;
+	}
+#else	// defined( _WIN32 )
+#error Uncrecognised platform.  It appears Tantrum does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
+#endif	// defined( _WIN32 )
+
+	// should never get here
+	TANTRUM_ASSERT_INTERNAL( false && "Unrecognised time unit passed into TemperGetTimestampInternal().\n" );
+
+	return 0.0;
 }
 
 //----------------------------------------------------------
@@ -935,7 +1046,13 @@ static int TantrumExecuteAllTestsInternal() {
 				// MY : I'm not checking the flag first as it'd still be helpful for search queries to see if the test even appears
 				if ( information.testingFlag == TANTRUM_TEST_FLAG_SHOULD_RUN ) {
 					g_tantrumTestContext.totalErrorsInCurrentTests = 0;
+
+					double start = TantrumGetTimestampInternal();
 					information.callback();
+					double end = TantrumGetTimestampInternal();
+
+					information.testTimeTaken = end - start;
+
 					g_tantrumTestContext.totalTestsExecuted += 1;
 
 					if ( g_tantrumTestContext.totalErrorsInCurrentTests > 0 ) {
