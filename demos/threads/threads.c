@@ -61,10 +61,16 @@ TEST_FUNC() {
 	printf( "Oh baby here we go!\n" );
 }
 
+#ifdef _WIN32
+#define TANTRUM_EXIT_TEST()	ExitThread( 1 )
+#else
+#error add me
+#endif
+
 static void TestNumbers( const uint32_t a, const uint32_t b ) {
 	if ( a == b ) {
 		printf( "TEST FAILED.  EXITING...\n" );
-		ExitThread( 1 );	// TANTRUM_EXIT_TEST()
+		TANTRUM_EXIT_TEST();
 	}
 
 	printf( "We passed! %d, %d\n", a, b );
