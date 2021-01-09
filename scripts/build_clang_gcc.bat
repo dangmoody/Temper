@@ -111,12 +111,6 @@ if /I [!config!]==[release] (
 	set defines=!defines! -DNDEBUG
 )
 
-set build_dir=bin\\win64\\!compiler!\\!config!\\demos
-
-if not exist %build_dir% (
-	mkdir %build_dir%
-)
-
 set warninglevels=""
 if [!compiler!]==[clang] (
 	set warninglevels=-Werror -Wall -Wextra -Weverything -Wpedantic
@@ -131,6 +125,12 @@ if [!compiler!]==[clang] (
 
 pushd %cwd%
 pushd ..
+
+set build_dir=bin\\win64\\!compiler!\\!config!\\demos
+
+if not exist %build_dir% (
+	mkdir %build_dir%
+)
 
 REM echo !compiler! -std=c99 -o %build_dir%\\!output_filename! !symbols! !optimisation! !defines! %warninglevels% !ignorewarnings! !source_files!
 !compiler! !std! -o %build_dir%\\!output_filename! !symbols! !optimisation! !defines! %warninglevels% !ignorewarnings! !source_files!

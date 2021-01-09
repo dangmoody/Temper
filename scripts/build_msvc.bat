@@ -76,8 +76,6 @@ REM echo CONFIG: !config!
 REM echo SOURCE FILES: !source_files!
 REM echo.
 
-set build_dir=bin\\win64\\!compiler!\\!config!\\demos
-
 set symbols=
 REM if /I [!config!]==[debug] (
 REM 	set symbols=
@@ -98,16 +96,18 @@ if /I [!config!]==[release] (
 	set defines=!defines! -DNDEBUG
 )
 
-if not exist %build_dir% (
-	mkdir %build_dir%
-)
-
 set warninglevels=/W4
 
 set ignorewarnings=
 
 pushd %cwd%
 pushd ..
+
+set build_dir=bin\\win64\\!compiler!\\!config!\\demos
+
+if not exist %build_dir% (
+	mkdir %build_dir%
+)
 
 call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
 
