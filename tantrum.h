@@ -782,7 +782,7 @@ static void TantrumOnAfterTest_UserModdable( const suiteTestInfo_t information )
 			TantrumSetTextColorInternal( TANTRUM_COLOR_DEFAULT );
 		}
 	} else {
-		const char* skipReason = information.testingFlag == TANTRUM_TEST_FLAG_DEPRECATED ? "DEPRICATED" : "SHOULD_SKIP";
+		const char* skipReason = information.testingFlag == TANTRUM_TEST_FLAG_DEPRECATED ? "DEPRECATED" : "SHOULD_SKIP";
 		TantrumSetTextColorInternal( TANTRUM_COLOR_YELLOW );
 		TANTRUM_LOG( "TEST FLAGGED \"%s\"\n\n", skipReason );
 		TantrumSetTextColorInternal( TANTRUM_COLOR_DEFAULT );
