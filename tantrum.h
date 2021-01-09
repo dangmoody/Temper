@@ -184,7 +184,7 @@ typedef tantrumBool32 ( *tantrumStringCompareFunc_t )( const char*, const char* 
 typedef struct suiteTestInfo_t {
 	testCallback_t		callback;
 	tantrumTestFlag_t	testingFlag;
-	uint32_t			pad0;
+	bool				isExpectedToFail;
 	const char*			testNameStr;
 	const char*			suiteNameStr;
 } suiteTestInfo_t;
@@ -356,7 +356,7 @@ static tantrumBool32 TantrumStringContainsInternal( const char* str, const char*
 
 //----------------------------------------------------------
 
-#define TANTRUM_DEFINE_TEST_INTERNAL( counter, suiteNameString, testName, runFlag ) \
+#define TANTRUM_DEFINE_TEST_INTERNAL( counter, suiteNameString, testName, testExpectedToFail, runFlag ) \
 \
 	/*1. Create a function with a name matching the test.*/ \
 	void ( testName )( void ); \
@@ -376,6 +376,7 @@ static tantrumBool32 TantrumStringContainsInternal( const char* str, const char*
 	suiteTestInfo_t TANTRUM_CONCAT_INTERNAL( tantrum_test_info_fetcher_, counter )( void ) { \
 		TANTRUM_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.callback = testName; \
 		TANTRUM_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.suiteNameStr = suiteNameString; \
+		TANTRUM_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.isExpectedToFail = testExpectedToFail; \
 		TANTRUM_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.testNameStr = #testName; \
 		TANTRUM_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.testingFlag = runFlag; \
 		return TANTRUM_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation; \
@@ -386,17 +387,27 @@ static tantrumBool32 TantrumStringContainsInternal( const char* str, const char*
 
 //----------------------------------------------------------
 
+#ifdef TANTRUM_SELF_TEST_ENABLED
+#define TANTRUM_TEST( testName, testExpectedToFail, runFlag ) \
+	TANTRUM_DEFINE_TEST_INTERNAL( __COUNTER__, NULL, testName, testExpectedToFail, runFlag )
+#else
 #define TANTRUM_TEST( testName, runFlag ) \
-	TANTRUM_DEFINE_TEST_INTERNAL( __COUNTER__, NULL, testName, runFlag )
+	TANTRUM_DEFINE_TEST_INTERNAL( __COUNTER__, NULL, testName, false, runFlag )
+#endif //TANTRUM_SELF_TEST_ENABLED
 
 //----------------------------------------------------------
 
+#ifdef TANTRUM_SELF_TEST_ENABLED
+#define TANTRUM_SUITE_TEST( suiteName, testName, testExpectedToFail, runFlag ) \
+	TANTRUM_DEFINE_TEST_INTERNAL( __COUNTER__, #suiteName, testName, testExpectedToFail, runFlag )
+#else
 #define TANTRUM_SUITE_TEST( suiteName, testName, runFlag ) \
-	TANTRUM_DEFINE_TEST_INTERNAL( __COUNTER__, #suiteName, testName, runFlag )
+	TANTRUM_DEFINE_TEST_INTERNAL( __COUNTER__, #suiteName, testName, false, runFlag )
+#endif //TANTRUM_SELF_TEST_ENABLED
 
 //----------------------------------------------------------
 
-#define TANTRUM_DECLARE_PARAMETRIC_SUITE_TEST_INTERNAL( suiteName, testName, runFlag, ... )\
+#define TANTRUM_DECLARE_PARAMETRIC_SUITE_TEST_INTERNAL( suiteName, testName, testExpectedToFail, runFlag, ... )\
 \
 	/*1. Create a function with a name matching the test with the provided parameters.*/\
 	void ( testName )( __VA_ARGS__ ); \
@@ -408,7 +419,7 @@ static tantrumBool32 TantrumStringContainsInternal( const char* str, const char*
 	typedef struct TANTRUM_CONCAT_INTERNAL( testName, _ParametricTestInfo ) { \
 		TANTRUM_CONCAT_INTERNAL( testName, _FuncType ) Callback; \
 		tantrumTestFlag_t	testingFlag; \
-		uint32_t			pad0; \
+		bool				isExpectedToFail; \
 		const char*			testNameStr; \
 		const char*			suiteNameStr; \
 	} TANTRUM_CONCAT_INTERNAL( testName, _ParametricTestInfo ); \
@@ -423,6 +434,7 @@ static tantrumBool32 TantrumStringContainsInternal( const char* str, const char*
 	void TANTRUM_CONCAT_INTERNAL( testName, _ParametricTestInfoBinder )( void ) { \
 		TANTRUM_CONCAT_INTERNAL( testName, _GlobalParametricInfo ).Callback = testName; \
 		TANTRUM_CONCAT_INTERNAL( testName, _GlobalParametricInfo ).testingFlag = runFlag; \
+		TANTRUM_CONCAT_INTERNAL( testName, _GlobalParametricInfo ).isExpectedToFail = testExpectedToFail; \
 		TANTRUM_CONCAT_INTERNAL( testName, _GlobalParametricInfo ).testNameStr = #testName; \
 		TANTRUM_CONCAT_INTERNAL( testName, _GlobalParametricInfo ).suiteNameStr = suiteName; \
 	}\
@@ -432,18 +444,28 @@ static tantrumBool32 TantrumStringContainsInternal( const char* str, const char*
 
 //----------------------------------------------------------
 
+#ifdef TANTRUM_SELF_TEST_ENABLED
+#define TANTRUM_DECLARE_PARAMETRIC_TEST( testName, testExpectedToFail, runFlag, ... )\
+	TANTRUM_DECLARE_PARAMETRIC_SUITE_TEST_INTERNAL( NULL, testName, testExpectedToFail, runFlag, __VA_ARGS__ )
+#else
 #define TANTRUM_DECLARE_PARAMETRIC_TEST( testName, runFlag, ... )\
-	TANTRUM_DECLARE_PARAMETRIC_SUITE_TEST_INTERNAL( NULL, testName, runFlag, __VA_ARGS__ )
+	TANTRUM_DECLARE_PARAMETRIC_SUITE_TEST_INTERNAL( NULL, testName, false, runFlag, __VA_ARGS__ )
+#endif //TANTRUM_SELF_TEST_ENABLED
 
 //----------------------------------------------------------
 
+#ifdef TANTRUM_SELF_TEST_ENABLED
+#define TANTRUM_DECLARE_PARAMETRIC_SUITE_TEST( suiteName, testName, testExpectedToFail, runFlag, ... )\
+	TANTRUM_DECLARE_PARAMETRIC_SUITE_TEST_INTERNAL( #suiteName, testName, testExpectedToFail, runFlag, __VA_ARGS__ )
+#else
 #define TANTRUM_DECLARE_PARAMETRIC_SUITE_TEST( suiteName, testName, runFlag, ... )\
-	TANTRUM_DECLARE_PARAMETRIC_SUITE_TEST_INTERNAL( #suiteName, testName, runFlag, __VA_ARGS__ )
+	TANTRUM_DECLARE_PARAMETRIC_SUITE_TEST_INTERNAL( #suiteName, testName, false, runFlag, __VA_ARGS__ )
+#endif //TANTRUM_SELF_TEST_ENABLED
 
 //----------------------------------------------------------
 
 // TODO: make this macro end with a semicolon
-#define TANTRUM_INVOKE_PARAMETRIC_TEST_INTERNAL( counter, nameOfTestToCall, parametricInvokationName, ... ) \
+#define TANTRUM_INVOKE_PARAMETRIC_TEST_INTERNAL( counter, nameOfTestToCall, parametricInvokationName, testExpectedToFail, ... ) \
 \
 	/*1. Create a function with a name matching the test.*/ \
 	void ( parametricInvokationName )( void ); \
@@ -469,6 +491,7 @@ static tantrumBool32 TantrumStringContainsInternal( const char* str, const char*
 		TANTRUM_CONCAT_INTERNAL( nameOfTestToCall, _ParametricTestInfoBinder )();/*Make it so we can grab the needed information out of the test function's global info*/\
 		TANTRUM_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation.callback = parametricInvokationName; \
 		TANTRUM_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation.suiteNameStr = TANTRUM_CONCAT_INTERNAL( nameOfTestToCall, _GlobalParametricInfo ).suiteNameStr; \
+		TANTRUM_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation.isExpectedToFail = testExpectedToFail; \
 		TANTRUM_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation.testNameStr = #parametricInvokationName; \
 		TANTRUM_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation.testingFlag = TANTRUM_CONCAT_INTERNAL( nameOfTestToCall, _GlobalParametricInfo ).testingFlag; \
 		return TANTRUM_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation; \
@@ -477,8 +500,15 @@ static tantrumBool32 TantrumStringContainsInternal( const char* str, const char*
 	/* leave this at the end so the macro can end with a semicolon */ \
 	suiteTestInfo_t TANTRUM_API TANTRUM_CONCAT_INTERNAL( tantrum_test_info_fetcher_, counter )( void )
 
+//----------------------------------------------------------
+
+#ifdef TANTRUM_SELF_TEST_ENABLED
+#define TANTRUM_INVOKE_PARAMETRIC_TEST( nameOfTestToCall, parametricInvokationName, testExpectedToFail, ... ) \
+	TANTRUM_INVOKE_PARAMETRIC_TEST_INTERNAL( __COUNTER__, nameOfTestToCall, parametricInvokationName, testExpectedToFail, __VA_ARGS__ )
+#else
 #define TANTRUM_INVOKE_PARAMETRIC_TEST( nameOfTestToCall, parametricInvokationName, ... ) \
-	TANTRUM_INVOKE_PARAMETRIC_TEST_INTERNAL( __COUNTER__, nameOfTestToCall, parametricInvokationName, __VA_ARGS__ )
+	TANTRUM_INVOKE_PARAMETRIC_TEST_INTERNAL( __COUNTER__, nameOfTestToCall, parametricInvokationName, false, __VA_ARGS__ )
+#endif // TANTRUM_SELF_TEST_ENABLED
 
 //==========================================================
 // Public API - Condition Testing
@@ -934,7 +964,7 @@ static int TantrumExecuteAllTestsInternal() {
 					information.callback();
 					g_tantrumTestContext.totalTestsExecuted += 1;
 
-					if ( g_tantrumTestContext.totalErrorsInCurrentTests > 0 ) {
+					if ( g_tantrumTestContext.totalErrorsInCurrentTests > 0 && !information.isExpectedToFail ) {
 						g_tantrumTestContext.testsFailed += 1;
 					} else {
 						g_tantrumTestContext.testsPassed += 1;
