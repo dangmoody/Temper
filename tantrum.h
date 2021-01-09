@@ -200,12 +200,9 @@ typedef tantrumBool32 ( *tantrumStringCompareFunc_t )( const char*, const char* 
 typedef struct suiteTestInfo_t {
 	testCallback_t		callback;
 	tantrumTestFlag_t	testingFlag;
-<<<<<<< HEAD
 	bool				isExpectedToFail;
-=======
 	double				testTimeTaken;
-	uint32_t			pad0;
->>>>>>> a7140c420b30cdbf534ec090afd30e947b8be4ad
+	// MY: TODO - fix padding
 	const char*			testNameStr;
 	const char*			suiteNameStr;
 } suiteTestInfo_t;
