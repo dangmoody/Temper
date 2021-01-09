@@ -1,0 +1,97 @@
+
+
+
+
+
+/* Colors */
+
+:root {
+    
+        --theme-color: #80301e;
+        --theme-color-dim: #e6a698;
+        --theme-color-dimmer: #ebb8ac;
+        --theme-color-dimmest: #f0c9c1;
+    
+}
+
+a { color: #662718; }
+.accent { background-color: #662718; }
+.user-bar { border-bottom-color: #662718; }
+header .content-title .subtitle { border-top-color: #662718; }
+
+
+a, .thread:before, button, .button, input[type=button], input[type=submit] { 
+    color: #903622; 
+}
+a:hover, button:hover, .button:hover, input[type=button]:hover, input[type=submit]:hover { 
+    color: #b9462c; 
+}
+
+.unread .avatar-icon { border: 2px solid #903622; }
+
+
+
+    #search_form_input_homepage { color: #662718; }
+    #search_form_input_homepage::-webkit-input-placeholder { color: #662718; }
+    #search_form_input_homepage:-moz-placeholder { color: #662718; }
+    #search_form_input_homepage::-moz-placeholder { color: #662718; }
+    #search_form_input_homepage:-ms-input-placeholder { color: #662718; }
+
+
+
+    header .menu-bar .logo { background-color: #80301e; }
+    header .menu-bar .logo:hover { background-color: #8c3521; }
+    header { border-bottom-color:#4a1c11; }
+    .post .action.button { border-bottom-color:#80301e; }
+    :root {
+        --input-lite-border: #80301e;
+    }
+
+    header #unfold-btn-fx { background-color: #521f13; }
+    header #unfold-btn-fx:hover { background-color: #41190f; }
+
+    .forum .thread:nth-of-type(odd) { background-color:#f2edec; }
+    .blog .post:nth-of-type(even) { background-color:#f2edec; }
+
+
+:root {
+
+    --background-even-background: #f2edec;
+
+}
+
+/* Assets */
+
+header .menu-bar .hmdev-logo {
+    background-image:url("/static/logo_nounder.svg");
+}
+header .menu-bar .hmdev-logo .underscore {
+    background-image:url("/static/logo_underscore.svg");
+}
+
+header .menu-bar .hmdev-logo.project {
+    background-image:url("/static/logo_net.svg");
+}
+
+.links .thing#projects {
+    background-image:url("/static/themes/light/project_thing.svg");
+}
+
+.links .thing#discussion {
+    background-image:url("/static/themes/light/discuss_thing.svg");
+}
+
+.links .thing#blogs {
+    background-image:url("/static/themes/light/blog_thing.svg");
+}
+
+
+.half.light {
+    background-image:url("/static/themes/light/accent_top_a.svg");
+}
+
+.half.dark {
+    background-image:url("/static/themes/dark/accent_top_a.svg");
+}
+
+
