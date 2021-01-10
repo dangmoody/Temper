@@ -86,17 +86,18 @@ TEST_FUNC() {
 typedef void ( *testFunc_t )( void );
 
 typedef struct threadData_t {
-	HANDLE		handle;
-	const char*	funcName;
+	testFunc_t	testFunc;
 } threadData_t;
 
 static unsigned long ThreadProc( void* data ) {
+	assert( data );
+
 	threadData_t* threadData = (threadData_t*) data;
 
-	testFunc_t testFunc = (testFunc_t) GetProcAddress( threadData->handle, threadData->funcName );
-	assert( testFunc );
+	assert( threadData );
+	assert( threadData->testFunc );
 
-	testFunc();
+	threadData->testFunc();
 
 	return 0;
 }
@@ -124,14 +125,19 @@ int main( int argc, char** argv ) {
 		//printf( "RUNNING TEST: %s.\n", testFuncName );
 
 		threadData_t threadData;
-		threadData.handle = handle;
-		threadData.funcName = testFuncName;
+
+		threadData.testFunc = (testFunc_t) GetProcAddress( handle, testFuncName );
+		assert( threadData.testFunc );
 
 		HANDLE testThread = CreateThread( NULL, 0, ThreadProc, &threadData, 0, NULL );
 		assert( testThread );
 
 		DWORD result = WaitForMultipleObjects( 1, &testThread, TRUE, UINT32_MAX );
 		assert( result == WAIT_OBJECT_0 );
+
+		DWORD exitCode = (DWORD) -1;
+		BOOL gotExitCode = GetExitCodeThread( testThread, &exitCode );
+		assert( gotExitCode );
 
 		CloseHandle( testThread );
 		testThread = NULL;
