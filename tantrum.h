@@ -97,6 +97,14 @@ extern "C" {
 #define TANTRUM_EXTERN_C
 #endif
 
+#if defined( _WIN32 )
+#define TANTRUM_MAX_PATH	MAX_PATH
+#elif defined( __APPLE__ ) || defined( __linux__ )	// _WIN32
+#define TANTRUM_MAX_PATH	PATH_MAX
+#else	// _WIN32
+#error Uncrecognised platform.  It appears Tantrum does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
+#endif	// _WIN32
+
 //==========================================================
 // Public API
 //==========================================================
@@ -225,7 +233,7 @@ typedef struct tantrumTestContext_t {
 	tantrumBool32		partialFilter;
 	tantrumBool32		isFilteringTests;
 	tantrumTimeUnit_t	timeUnit;
-	const char*			programName;
+	char				programName[TANTRUM_MAX_PATH];
 	const char*			suiteFilterPrevious;
 	const char*			suiteFilter;
 	const char*			testFilter;
@@ -826,41 +834,6 @@ static void TantrumOnAfterTest_UserModdable( const suiteTestInfo_t information )
 //==========================================================
 
 static bool TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
-#if defined( _WIN32 )
-	char fullExePath[MAX_PATH];
-	DWORD fullExePathLength = GetModuleFileName( NULL, fullExePath, MAX_PATH );
-	if ( fullExePathLength == 0 ) {
-		TANTRUM_LOG_ERROR( "WinAPI call GetModuleFileName() failed: 0x%lX\n", GetLastError() );
-		return false;
-	}
-
-	g_tantrumTestContext.programName = fullExePath;
-#elif defined( __APPLE__ ) || defined( __linux__ ) // _WIN32
-	int err = 0;
-
-	const char* exeFilenameVirtual = "/proc/self/exe";
-	struct stat exeFileInfo = { 0 };
-	if ( lstat( exeFilenameVirtual, &exeFileInfo ) == -1 ) {
-		err = errno;
-		TANTRUM_LOG_ERROR( "lstat() failed: %s", strerror( err ) );
-		return false;
-	}
-
-	char fullExePath[PATH_MAX];
-	ssize_t fullExePathLength = readlink( exeFilenameVirtual, fullExePath, (size_t) exeFileInfo.st_size + 1 );
-	err = errno;
-	if ( fullExePathLength == -1 ) {
-		TANTRUM_LOG_ERROR( "readlink() failed: %s", strerror( err ) );
-		return false;
-	}
-
-	fullExePath[exeFileInfo.st_size] = 0;
-
-	g_tantrumTestContext.programName = fullExePath;
-#else
-#error Uncrecognised platform.  It appears Tantrum does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
-#endif // _WIN32
-
 	// parse command line args
 	for ( int argIndex = 0; argIndex < argc; argIndex++ ) {
 		const char* arg = argv[argIndex];
@@ -1029,7 +1002,46 @@ static double TantrumGetTimestampInternal( void ) {
 
 //----------------------------------------------------------
 
+static bool TantrumGetFullEXEPathInternal( void ) {
+#if defined( _WIN32 )
+	DWORD fullExePathLength = GetModuleFileName( NULL, g_tantrumTestContext.programName, MAX_PATH );
+	if ( fullExePathLength == 0 ) {
+		TANTRUM_LOG_ERROR( "WinAPI call GetModuleFileName() failed: 0x%lX\n", GetLastError() );
+		return false;
+	}
+
+	g_tantrumTestContext.programName[fullExePathLength] = 0;
+#elif defined( __APPLE__ ) || defined( __linux__ )	// _WIN32
+	int err = 0;
+
+	const char* exeFilenameVirtual = "/proc/self/exe";
+	struct stat exeFileInfo = { 0 };
+	if ( lstat( exeFilenameVirtual, &exeFileInfo ) == -1 ) {
+		err = errno;
+		TANTRUM_LOG_ERROR( "lstat() failed: %s", strerror( err ) );
+		return false;
+	}
+
+	ssize_t fullExePathLength = readlink( exeFilenameVirtual, g_tantrumTestContext.programName, (size_t) exeFileInfo.st_size + 1 );
+	err = errno;
+	if ( fullExePathLength == -1 ) {
+		TANTRUM_LOG_ERROR( "readlink() failed: %s", strerror( err ) );
+		return false;
+	}
+
+	g_tantrumTestContext.programName[exeFileInfo.st_size] = 0;
+#else	// _WIN32
+#error Uncrecognised platform.  It appears Tantrum does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
+#endif	// _WIN32
+
+	return true;
+}
+
 static int TantrumExecuteAllTestsInternal() {
+	if ( !TantrumGetFullEXEPathInternal() ) {
+		return TANTRUM_EXIT_FAILURE;
+	}
+
 	// make the exe load itself
 	void* handle = TantrumLoadEXEHandleInternal();
 
