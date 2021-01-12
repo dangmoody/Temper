@@ -27,9 +27,3 @@ int main( int argc, char** argv ) {
 	TANTRUM_SETUP();
 	return TANTRUM_RUN_ALL_TESTS_WITH_ARGS( argc, argv );
 }
-
-
-int main( int argc, char** argv ) {
-	TANTRUM_SETUP();
-	return TANTRUM_RUN_ALL_TESTS_WITH_ARGS( argc, argv );
-}
