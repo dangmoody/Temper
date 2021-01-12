@@ -92,7 +92,7 @@ extern "C" {
 #endif
 
 #ifdef __cplusplus
-#define TANTRUM_EXTERN_C extern "C"
+#define TANTRUM_EXTERN_C	extern "C"
 #else
 #define TANTRUM_EXTERN_C
 #endif
@@ -132,6 +132,226 @@ do { \
 //----------------------------------------------------------
 
 #define TANTRUM_RUN_ALL_TESTS_WITH_ARGS( argc, argv )	TantrumExecuteAllTestsWithArgumentsInternal( argc, argv )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_TRUE( condition ) \
+	TantrumTestTrueInternal( condition, "TANTRUM_TEST_TRUE(" #condition ")", false, NULL, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_TRUE_M( condition, message ) \
+	TantrumTestTrueInternal( condition, "TANTRUM_TEST_TRUE_M(" #condition ")", false, message, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_TRUE_OR_ABORT( condition ) \
+	TantrumTestTrueInternal( condition, "TANTRUM_TEST_TRUE_OR_ABORT( " #condition " )", true, NULL, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_TRUE_OR_ABORT_M( condition, message ) \
+	TantrumTestTrueInternal( condition, "TANTRUM_TEST_TRUE_OR_ABORT_M( " #condition " )", true, message, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_FALSE( condition ) \
+	TantrumTestTrueInternal( !condition, "TANTRUM_TEST_FALSE(" #condition ")", false, NULL, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_FALSE_M( condition, message ) \
+	TantrumTestTrueInternal( !condition, "TANTRUM_TEST_FALSE_M(" #condition ")", false, message, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_FALSE_OR_ABORT( condition ) \
+	TantrumTestTrueInternal( !condition, "TANTRUM_TEST_FALSE_OR_ABORT(" #condition ")", true, NULL, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_FALSE_OR_ABORT_M( condition, message ) \
+	TantrumTestTrueInternal( !condition, "TANTRUM_TEST_FALSE_OR_ABORT_M(" #condition ")", true, message, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_EQUAL( conditionA, conditionB ) \
+	TantrumTestTrueInternal( conditionA == conditionB, "TANTRUM_TEST_EQUAL(" #conditionA ", " #conditionB ")", false, NULL, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_EQUAL_M( conditionA, conditionB, message ) \
+	TantrumTestTrueInternal( conditionA == conditionB, "TANTRUM_TEST_EQUAL_M(" #conditionA ", " #conditionB ")", false, message, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_EQUAL_OR_ABORT( conditionA, conditionB ) \
+	TantrumTestTrueInternal( conditionA == conditionB, "TANTRUM_TEST_EQUAL_OR_ABORT(" #conditionA ", " #conditionB ")", true, NULL, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_EQUAL_OR_ABORT_M( conditionA, conditionB, message ) \
+	TantrumTestTrueInternal( conditionA == conditionB, "TANTRUM_TEST_EQUAL_OR_ABORT_M(" #conditionA ", " #conditionB ")", true, message, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_NOT_EQUAL( conditionA, conditionB ) \
+	TantrumTestTrueInternal( conditionA != conditionB, "TANTRUM_TEST_NOT_EQUAL(" #conditionA ", " #conditionB ")", false, NULL, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_NOT_EQUAL_M( conditionA, conditionB, message ) \
+	TantrumTestTrueInternal( conditionA != conditionB, "TANTRUM_TEST_NOT_EQUAL_M(" #conditionA ", " #conditionB ")", false, message, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_NOT_EQUAL_OR_ABORT( conditionA, conditionB ) \
+	TantrumTestTrueInternal( conditionA != conditionB, "TANTRUM_TEST_NOT_EQUAL_OR_ABORT(" #conditionA ", " #conditionB ")", true, NULL, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_NOT_EQUAL_OR_ABORT_M( conditionA, conditionB, message ) \
+	TantrumTestTrueInternal( conditionA != conditionB, "TANTRUM_TEST_NOT_EQUAL_OR_ABORT_M(" #conditionA ", " #conditionB ")", true, message, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_FLOAT_EQUAL( conditionA, conditionB ) \
+	TantrumTestTrueInternal( TANTRUM_FLOAT_EQUALS_INTERNAL( conditionA, conditionB, TANTRUM_DEFAULT_EPSILON ), "TANTRUM_TEST_FLOAT_EQUAL(" #conditionA ", " #conditionB ")", false, NULL, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_FLOAT_EQUAL_M( conditionA, conditionB, message ) \
+	TantrumTestTrueInternal( TANTRUM_FLOAT_EQUALS_INTERNAL( conditionA, conditionB, TANTRUM_DEFAULT_EPSILON ), "TANTRUM_TEST_FLOAT_EQUAL_M(" #conditionA ", " #conditionB ")", false, message, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_FLOAT_EQUAL_OR_ABORT( conditionA, conditionB ) \
+	TantrumTestTrueInternal( TANTRUM_FLOAT_EQUALS_INTERNAL( conditionA, conditionB, TANTRUM_DEFAULT_EPSILON ), "TANTRUM_TEST_FLOAT_EQUAL_OR_ABORT(" #conditionA ", " #conditionB ")", true, NULL, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_FLOAT_EQUAL_OR_ABORT_M( conditionA, conditionB, message ) \
+	TantrumTestTrueInternal( TANTRUM_FLOAT_EQUALS_INTERNAL( conditionA, conditionB, TANTRUM_DEFAULT_EPSILON ), "TANTRUM_TEST_FLOAT_EQUAL_OR_ABORT_M(" #conditionA ", " #conditionB ")", true, message, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_ALMOST_EQUAL( conditionA, conditionB, tolerance ) \
+	TantrumTestTrueInternal( TANTRUM_FLOAT_EQUALS_INTERNAL( conditionA, conditionB, tolerance ), "TANTRUM_TEST_ALMOST_EQUAL(" #conditionA ", " #conditionB ", " #tolerance ")", false, NULL, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_ALMOST_EQUAL_M( conditionA, conditionB, tolerance, message ) \
+	TantrumTestTrueInternal( TANTRUM_FLOAT_EQUALS_INTERNAL( conditionA, conditionB, tolerance ), "TANTRUM_TEST_ALMOST_EQUAL_M(" #conditionA ", " #conditionB ", " #tolerance ")", false, message, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_ALMOST_EQUAL_OR_ABORT( conditionA, conditionB, tolerance ) \
+	TantrumTestTrueInternal( TANTRUM_FLOAT_EQUALS_INTERNAL( conditionA, conditionB, tolerance ), "TANTRUM_TEST_ALMOST_EQUAL_OR_ABORT(" #conditionA ", " #conditionB ", " #tolerance ")", true, NULL, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_ALMOST_EQUAL_OR_ABORT_M( conditionA, conditionB, tolerance, message ) \
+	TantrumTestTrueInternal( TANTRUM_FLOAT_EQUALS_INTERNAL( conditionA, conditionB, tolerance ), "TANTRUM_TEST_ALMOST_EQUAL_OR_ABORT_M(" #conditionA ", " #conditionB ", " #tolerance ")", true, message, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_NOT_ALMOST_EQUAL( conditionA, conditionB, tolerance ) \
+	TantrumTestTrueInternal( !TANTRUM_FLOAT_EQUALS_INTERNAL( conditionA, conditionB, tolerance ), "TANTRUM_TEST_NOT_ALMOST_EQUAL(" #conditionA ", " #conditionB ", " #tolerance ")", false, NULL, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_NOT_ALMOST_EQUAL_M( conditionA, conditionB, tolerance, message ) \
+	TantrumTestTrueInternal( !TANTRUM_FLOAT_EQUALS_INTERNAL( conditionA, conditionB, tolerance ), "TANTRUM_TEST_NOT_ALMOST_EQUAL_M(" #conditionA ", " #conditionB ", " #tolerance ")", false, message, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_NOT_ALMOST_EQUAL_OR_ABORT( conditionA, conditionB, tolerance ) \
+	TantrumTestTrueInternal( !TANTRUM_FLOAT_EQUALS_INTERNAL( conditionA, conditionB, tolerance ), "TANTRUM_TEST_NOT_ALMOST_EQUAL_OR_ABORT(" #conditionA ", " #conditionB ", " #tolerance ")", true, NULL, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_NOT_ALMOST_EQUAL_OR_ABORT_M( conditionA, conditionB, tolerance, message ) \
+	TantrumTestTrueInternal( !TANTRUM_FLOAT_EQUALS_INTERNAL( conditionA, conditionB, tolerance ), "TANTRUM_TEST_NOT_ALMOST_EQUAL_OR_ABORT_M(" #conditionA ", " #conditionB ", " #tolerance ")", true, message, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_GREATER_THAN( conditionA, conditionB ) \
+	TantrumTestTrueInternal( conditionA > conditionB, "TANTRUM_TEST_GREATER_THAN(" #conditionA " > " #conditionB ")", false, NULL, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_GREATER_THAN_M( conditionA, conditionB, message ) \
+	TantrumTestTrueInternal( conditionA > conditionB, "TANTRUM_TEST_GREATER_THAN_M(" #conditionA " > " #conditionB ")", false, message, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_GREATER_THAN_OR_ABORT( conditionA, conditionB ) \
+	TantrumTestTrueInternal( conditionA > conditionB, "TANTRUM_TEST_GREATER_THAN_OR_ABORT(" #conditionA " > " #conditionB ")", true, NULL, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_GREATER_THAN_OR_ABORT_M( conditionA, conditionB, message ) \
+	TantrumTestTrueInternal( conditionA > conditionB, "TANTRUM_TEST_GREATER_THAN_OR_ABORT_M(" #conditionA " > " #conditionB ")", true, message, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_GREATER_OR_EQUAL_THAN( conditionA, conditionB ) \
+	TantrumTestTrueInternal( conditionA >= conditionB, "TANTRUM_TEST_GREATER_OR_EQUAL_THAN(" #conditionA " >= " #conditionB ")", false, NULL, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_GREATER_OR_EQUAL_THAN_M( conditionA, conditionB, message ) \
+	TantrumTestTrueInternal( conditionA >= conditionB, "TANTRUM_TEST_GREATER_OR_EQUAL_THAN_M(" #conditionA " >= " #conditionB ")", false, message, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_GREATER_OR_EQUAL_THAN_OR_ABORT( conditionA, conditionB ) \
+	TantrumTestTrueInternal( conditionA >= conditionB, "TANTRUM_TEST_GREATER_OR_EQUAL_THAN_OR_ABORT(" #conditionA " >= " #conditionB ")", true, NULL, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_GREATER_OR_EQUAL_THAN_OR_ABORT_M( conditionA, conditionB, message ) \
+	TantrumTestTrueInternal( conditionA >= conditionB, "TANTRUM_TEST_GREATER_OR_EQUAL_THAN_OR_ABORT_M(" #conditionA " >= " #conditionB ")", true, message, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_LESS_THAN( conditionA, conditionB ) \
+	TantrumTestTrueInternal( conditionA < conditionB, "TANTRUM_TEST_LESS_THAN(" #conditionA " < " #conditionB ")", false, NULL, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_LESS_THAN_M( conditionA, conditionB, message ) \
+	TantrumTestTrueInternal( conditionA < conditionB, "TANTRUM_TEST_LESS_THAN_M(" #conditionA " < " #conditionB ")", false, message, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_LESS_THAN_OR_ABORT( conditionA, conditionB ) \
+	TantrumTestTrueInternal( conditionA < conditionB, "TANTRUM_TEST_LESS_THAN_OR_ABORT(" #conditionA " < " #conditionB ")", true, NULL, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_LESS_THAN_OR_ABORT_M( conditionA, conditionB, message ) \
+	TantrumTestTrueInternal( conditionA < conditionB, "TANTRUM_TEST_LESS_THAN_OR_ABORT_M(" #conditionA " < " #conditionB ")", true, message, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_LESS_OR_EQUAL_THAN( conditionA, conditionB ) \
+	TantrumTestTrueInternal( conditionA <= conditionB, "TANTRUM_TEST_LESS_OR_EQUAL_THAN(" #conditionA " <= " #conditionB ")", false, NULL, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_LESS_OR_EQUAL_THAN_M( conditionA, conditionB, message ) \
+	TantrumTestTrueInternal( conditionA <= conditionB, "TANTRUM_TEST_LESS_OR_EQUAL_THAN_M(" #conditionA " <= " #conditionB ")", false, message, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_LESS_OR_EQUAL_THAN_OR_ABORT( conditionA, conditionB ) \
+	TantrumTestTrueInternal( conditionA <= conditionB, "TANTRUM_TEST_LESS_OR_EQUAL_THAN_OR_ABORT(" #conditionA " <= " #conditionB ")", true, NULL, __FILE__, __LINE__ )
+
+//----------------------------------------------------------
+
+#define TANTRUM_TEST_LESS_OR_EQUAL_THAN_OR_ABORT_M( conditionA, conditionB, message ) \
+	TantrumTestTrueInternal( conditionA <= conditionB, "TANTRUM_TEST_LESS_OR_EQUAL_THAN_OR_ABORT_M(" #conditionA " <= " #conditionB ")", true, message, __FILE__, __LINE__ )
 
 //==========================================================
 // User-Overridable Preprocessor defines
@@ -181,7 +401,7 @@ do { \
 #endif
 
 //==========================================================
-// STRUCTS
+// TYPES
 //==========================================================
 
 typedef uint32_t tantrumBool32;
@@ -547,205 +767,6 @@ static tantrumBool32 TantrumStringContainsInternal( const char* str, const char*
 #define TANTRUM_INVOKE_PARAMETRIC_TEST( nameOfTestToCall, parametricInvokationName, ... ) \
 	TANTRUM_INVOKE_PARAMETRIC_TEST_INTERNAL( __COUNTER__, nameOfTestToCall, parametricInvokationName, false, __VA_ARGS__ )
 #endif // TANTRUM_SELF_TEST_ENABLED
-
-//==========================================================
-// Public API - Condition Testing
-//==========================================================
-
-#define TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ) \
-do { \
-	if ( abortOnFail ) { \
-		TANTRUM_LOG( "=== THIS TEST IS BEING ABORTED ===\n" ); \
-\
-		g_tantrumTestContext.testsAborted += 1; \
-\
-		TANTRUM_EXIT_TEST_THREAD_INTERNAL(); \
-	} \
-} while( 0 )
-
-//----------------------------------------------------------
-
-#define TANTRUM_TEST_TRUE_INTERNAL( condition, conditionStr, abortOnFail, message, file, line ) \
-do { \
-	if ( !( condition ) ) { \
-		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-\
-		TANTRUM_LOG( "%s at %s line %d.\n", conditionStr, file, line ); \
-\
-		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
-	} \
-} while ( 0 )
-
-//----------------------------------------------------------
-
-#define TANTRUM_TEST_TRUE( condition, message ) \
-	TANTRUM_TEST_TRUE_INTERNAL( condition, false, message, __FILE__, __LINE__ )
-
-//----------------------------------------------------------
-
-#define TANTRUM_TEST_TRUE_OR_ABORT( condition, message ) \
-	TANTRUM_TEST_TRUE_INTERNAL( condition, true, message, __FILE__, __LINE__ )
-
-//----------------------------------------------------------
-
-#define TANTRUM_TEST_FALSE_INTERNAL( condition, abortOnFail, message, file, line ) \
-do { \
-	if ( ( condition ) ) { \
-		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-\
-		TANTRUM_LOG_ERROR( "TANTRUM_TEST_FALSE( %s ) has failed at %s line %d\n%s\n", #condition, file, line, message ); \
-\
-		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
-	} \
-} while( 0 )
-
-//----------------------------------------------------------
-
-#define TANTRUM_TEST_FALSE( condition, message ) \
-	TANTRUM_TEST_FALSE_INTERNAL( condition, false, message, __FILE__, __LINE__ )
-
-//----------------------------------------------------------
-
-#define TANTRUM_TEST_FALSE_OR_ABORT( condition, message ) \
-	TANTRUM_TEST_FALSE_INTERNAL( condition, true, message, __FILE__, __LINE__ )
-
-//----------------------------------------------------------
-
-#define TANTRUM_TEST_EQUAL_INTERNAL( conditionA, conditionB, abortOnFail, message, file, line ) \
-do { \
-	if ( !TANTRUM_FLOAT_EQUALS_INTERNAL( conditionA, conditionB, TANTRUM_DEFAULT_EPSILON ) ) { \
-		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-\
-		TANTRUM_LOG_ERROR( "TANTRUM_TEST_EQUAL( %f, %f ) has failed at %s line %d\n%s\n", (double) conditionA, (double) conditionB, file, line, message ); \
-\
-		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
-	} \
-} while( 0 )
-
-//----------------------------------------------------------
-
-#define TANTRUM_TEST_EQUAL( conditionA, conditionB, message ) \
-	TANTRUM_TEST_EQUAL_INTERNAL( conditionA, conditionB, false, message, __FILE__, __LINE__ )
-
-//----------------------------------------------------------
-
-#define TANTRUM_TEST_EQUAL_OR_ABORT( conditionA, conditionB, message ) \
-	TANTRUM_TEST_EQUAL_INTERNAL( conditionA, conditionB, true, message, __FILE__, __LINE__ )
-
-//----------------------------------------------------------
-
-#define TANTRUM_TEST_NOT_EQUAL_INTERNAL( conditionA, conditionB, abortOnFail, message, file, line ) \
-do { \
-	if ( !TANTRUM_FLOAT_EQUALS_INTERNAL( conditionA, conditionB, TANTRUM_DEFAULT_EPSILON ) ) { \
-		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-\
-		TANTRUM_LOG( "TANTRUM_TEST_NOT_EQUAL( %f, %f ) has failed at %s line %d\n%s\n", (double) conditionA, (double) conditionB, file, line, message ); \
-\
-		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
-	} \
-} while( 0 )
-
-//----------------------------------------------------------
-
-#define TANTRUM_TEST_NOT_EQUAL( conditionA, conditionB, message ) \
-	TANTRUM_TEST_NOT_EQUAL_INTERNAL( conditionA, conditionB, false, message, __FILE__, __LINE__ )
-
-//----------------------------------------------------------
-
-#define TANTRUM_TEST_NOT_EQUAL_OR_ABORT( conditionA, conditionB, message ) \
-	TANTRUM_TEST_NOT_EQUAL_INTERNAL( conditionA, conditionB, true, message, __FILE__, __LINE__ )
-
-//----------------------------------------------------------
-
-#define TANTRUM_TEST_ALMOST_EQUAL_INTERNAL( conditionA, conditionB, tolerance, abortOnFail, message, file, line ) \
-do { \
-	if ( !TANTRUM_FLOAT_EQUALS_INTERNAL( conditionA, conditionB, tolerance ) ) { \
-		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-\
-		TANTRUM_LOG_ERROR( "TANTRUM_TEST_ALMOST_EQUAL( %f, %f, %f ) has failed at %s line %d\n%s\n", (double) conditionA, (double) conditionB, (double) tolerance, file, line, message ); \
-\
-		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
-	} \
-} while( 0 )
-
-//----------------------------------------------------------
-
-#define TANTRUM_TEST_ALMOST_EQUAL( conditionA, conditionB, tolerance, message ) \
-	TANTRUM_TEST_ALMOST_EQUAL_INTERNAL( conditionA, conditionB, tolerance, false, message, __FILE__, __LINE__ )
-
-//----------------------------------------------------------
-
-#define TANTRUM_TEST_ALMOST_EQUAL_OR_ABORT( conditionA, conditionB, tolerance, message ) \
-	TANTRUM_TEST_ALMOST_EQUAL_INTERNAL( conditionA, conditionB, tolerance, true, message, __FILE__, __LINE__ )
-
-//----------------------------------------------------------
-
-#define TANTRUM_TEST_NOT_ALMOST_EQUAL_INTERNAL( conditionA, conditionB, tolerance, abortOnFail, message, file, line ) \
-do { \
-	if ( !TANTRUM_FLOAT_EQUALS( conditionA, conditionB, tolerance ) ) { \
-		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-\
-		TANTRUM_LOG( "TANTRUM_TEST_NOT_ALMOST_EQUAL( %f, %f, %f ) has failed at %s line %d\n%s\n", (double) conditionA, (double) conditionB, (double) tolerance, file, line, message ); \
-\
-		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
-	} \
-} while( 0 )
-
-//----------------------------------------------------------
-
-#define TANTRUM_TEST_NOT_ALMOST_EQUAL( conditionA, conditionB, tolerance, message ) \
-	TANTRUM_TEST_NOT_ALMOST_EQUAL_INTERNAL( conditionA, conditionB, tolerance, false, message, __FILE__, __LINE__ )
-
-//----------------------------------------------------------
-
-#define TANTRUM_TEST_NOT_ALMOST_EQUAL_OR_ABORT( conditionA, conditionB, tolerance, message ) \
-	TANTRUM_TEST_NOT_ALMOST_EQUAL_INTERNAL( conditionA, conditionB, tolerance, true, message, __FILE__, __LINE__ )
-
-//----------------------------------------------------------
-
-#define TANTRUM_TEST_GREATER_THAN_INTERNAL( conditionA, conditionB, abortOnFail, message, file, line ) \
-do { \
-	if ( conditionA > conditionB ) { \
-		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-\
-		TANTRUM_LOG( "TANTRUM_TEST_GREATER_THAN( %f, %f ) has failed at %s line %d\n%s\n", (double) conditionA, (double) conditionB, file, line, message ); \
-\
-		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
-	} \
-} while( 0 )
-
-//----------------------------------------------------------
-
-#define TANTRUM_TEST_GREATER_THAN( conditionA, conditionB, message ) \
-	TANTRUM_TEST_GREATER_THAN_INTERNAL( conditionA, conditionB, false, message, __FILE__, __LINE__ )
-
-//----------------------------------------------------------
-
-#define TANTRUM_TEST_GREATER_THAN_OR_ABORT( conditionA, conditionB, message ) \
-	TANTRUM_TEST_GREATER_THAN_INTERNAL( conditionA, conditionB, true, message, __FILE__, __LINE__ )
-
-//----------------------------------------------------------
-
-#define TANTRUM_TEST_LESS_THAN_INTERNAL( conditionA, conditionB, abortOnFail, message, file, line ) \
-do { \
-	if ( conditionA < conditionB ) { \
-		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
-\
-		TANTRUM_LOG( "TANTRUM_TEST_LESS_THAN( %f, %f ) has failed at %s line %d\n%s\n", (double) conditionA, (double) conditionB, file, line, message ); \
-\
-		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
-	} \
-} while( 0 )
-
-//----------------------------------------------------------
-
-#define TANTRUM_TEST_LESS_THAN( conditionA, conditionB, message ) \
-	TANTRUM_TEST_LESS_THAN_INTERNAL( conditionA, conditionB, false, message, __FILE__, __LINE__ )
-
-//----------------------------------------------------------
-
-#define TANTRUM_TEST_LESS_THAN_OR_ABORT( conditionA, conditionB, message ) \
-	TANTRUM_TEST_LESS_THAN_INTERNAL( conditionA, conditionB, true, message, __FILE__, __LINE__ )
 
 //==========================================================
 // FUNCTIONS - USER MODDING WELCOME
@@ -1123,6 +1144,50 @@ static void TantrumRunTestThreadInternal( suiteTestInfo_t* information ) {
 #else	// defined( _WIN32 )
 #error Uncrecognised platform.  It appears Tantrum does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
 #endif	// defined( _WIN32 )
+}
+
+//----------------------------------------------------------
+
+// DM: this only gets called inside TantrumTestTrueInternal()
+// so could this function get removed?
+static void TantrumAbortTestOnFailInternal( const bool abortOnFail ) {
+	if ( abortOnFail ) {
+		TANTRUM_LOG( "=== THIS TEST IS BEING ABORTED ===\n" );
+
+		g_tantrumTestContext.testsAborted += 1;
+
+		TANTRUM_EXIT_TEST_THREAD_INTERNAL();
+	}
+}
+
+//----------------------------------------------------------
+
+static void TantrumTestTrueInternal( const bool condition, const char* conditionStr, const bool abortOnFail, const char* message, const char* file, const uint32_t line ) {
+	if ( !( condition ) ) {
+		g_tantrumTestContext.totalErrorsInCurrentTests += 1;
+
+		// DM: could probably make this user-overridable
+		{
+			const char* newLine = NULL;
+			const char* actualMessage = NULL;
+
+			if ( message ) {
+				actualMessage = message;
+				newLine = "\n";
+			} else {
+				actualMessage = "";
+				newLine = "";
+			}
+
+			TantrumSetTextColorInternal( TANTRUM_COLOR_RED );
+			TANTRUM_LOG( "FAILED: " );
+			TantrumSetTextColorInternal( TANTRUM_COLOR_YELLOW );
+			TANTRUM_LOG( "%s at %s line %d.\n%s%s", conditionStr, file, line, actualMessage, newLine );
+			TantrumSetTextColorInternal( TANTRUM_COLOR_DEFAULT );
+		}
+
+		TantrumAbortTestOnFailInternal( abortOnFail );
+	}
 }
 
 //----------------------------------------------------------
