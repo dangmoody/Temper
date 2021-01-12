@@ -249,9 +249,9 @@ typedef struct tantrumTestContext_t {
 
 typedef uint32_t						tantrumTextColor_t;
 #elif defined( __linux__ ) || defined( __APPLE__ )
-#define TANTRUM_COLOR_DEFAULT			"\033[0m"//"\x1B[0m"
-#define TANTRUM_COLOR_RED				"\033[0;31m"//"\x1B[31m"
-#define TANTRUM_COLOR_GREEN				"\033[0;32m"//"\x1B[32m"
+#define TANTRUM_COLOR_DEFAULT			"\033[0m"
+#define TANTRUM_COLOR_RED				"\033[0;31m"
+#define TANTRUM_COLOR_GREEN				"\033[0;32m"
 #define TANTRUM_COLOR_YELLOW			"\033[1;33m"
 
 typedef const char*						tantrumTextColor_t;
