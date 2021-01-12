@@ -47,7 +47,7 @@ function set_binaries_and_build_commands( demo_name, compiler, compiler_define )
 
 	kind( "MakeFile" )
 
-	if compiler == "msvc" then
+	if ( compiler == "msvc" ) then
 		filter ( "platforms:win64-msvc" )
 			buildcommands (
 				"..\\" .. g_folder_scripts .. "build_msvc.bat --output " .. demo_name .. ".exe" .. " --config %{cfg.buildcfg} --source " .. g_folder_demos .. demo_name .. "\\" .. demo_name .. ".c"
@@ -63,6 +63,12 @@ function set_binaries_and_build_commands( demo_name, compiler, compiler_define )
 
 			defines {
 			}
+
+			-- required because VS will create these folders if they don't exist
+			targetdir( "..\\..\\bin\\win64\\" .. compiler .. "\\%{cfg.buildcfg}\\" .. g_folder_demos )
+			objdir( "!..\\..\\bin\\win64\\" .. compiler .. "\\%{cfg.buildcfg}\\" .. g_folder_demos .. "intermediate" )
+
+			debugcommand( "..\\..\\bin\\win64\\" .. compiler .. "\\%{cfg.buildcfg}\\" .. g_folder_demos .. demo_name .. ".exe" )
 		filter {}
 	else
 		filter ( "platforms:win64-" .. compiler )
@@ -81,14 +87,14 @@ function set_binaries_and_build_commands( demo_name, compiler, compiler_define )
 			defines {
 				compiler_define
 			}
+
+			-- required because VS will create these folders if they don't exist
+			targetdir( "..\\..\\bin\\win64\\" .. compiler .. "\\%{cfg.buildcfg}\\" .. g_folder_demos )
+			objdir( "!..\\..\\bin\\win64\\" .. compiler .. "\\%{cfg.buildcfg}\\" .. g_folder_demos .. "intermediate" )
+
+			debugcommand( "..\\..\\bin\\win64\\" .. compiler .. "\\%{cfg.buildcfg}\\" .. g_folder_demos .. demo_name .. ".exe" )
 		filter {}
 	end
-
-	-- required because VS will create these folders if they don't exist
-	targetdir( "..\\..\\bin\\win64\\" .. compiler .. "\\%{cfg.buildcfg}\\" .. g_folder_demos )
-	objdir( "!..\\..\\bin\\win64\\" .. compiler .. "\\%{cfg.buildcfg}\\" .. g_folder_demos .. "intermediate" )
-
-	debugcommand( "..\\..\\bin\\win64\\" .. compiler .. "\\%{cfg.buildcfg}\\" .. g_folder_demos .. demo_name .. ".exe" )
 end
 
 function make_demo_project( demo_name )
