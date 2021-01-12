@@ -120,6 +120,9 @@ do { \
 	g_tantrumTestContext.timeUnit = TANTRUM_TIME_UNIT_MS; \
 \
 	QueryPerformanceFrequency( &g_tantrumTestContext.timestampFrequency ); \
+\
+	g_tantrumTestContext.suiteFilter = NULL; \
+	g_tantrumTestContext.testFilter = NULL; \
 } while ( 0 )
 
 //----------------------------------------------------------
@@ -230,8 +233,7 @@ typedef struct tantrumTestContext_t {
 	uint32_t			totalTestsFoundWithFilters;
 	uint32_t			totalTestsExecuted;
 	uint32_t			totalErrorsInCurrentTests;
-	tantrumBool32		partialFilter;					// TODO(DM): replace with flags
-	tantrumBool32		isFilteringTests;				// TODO(DM): replace with flags
+	tantrumBool32		partialFilter;
 	tantrumTimeUnit_t	timeUnit;
 	char				programName[TANTRUM_MAX_PATH];
 	const char*			suiteFilterPrevious;
@@ -761,7 +763,7 @@ static void TantrumPrintTestExecutionInformation_UserModdable() {
 	TANTRUM_LOG( "\n=== TANTRUM TESTING REPORT ===\n" );
 	TANTRUM_LOG( "Total tests defined: %d\n", g_tantrumTestContext.totalTestsDeclared );
 
-	if ( g_tantrumTestContext.isFilteringTests ) {
+	if ( g_tantrumTestContext.suiteFilter || g_tantrumTestContext.testFilter ) {
 		TANTRUM_LOG( "\t- Total tests matching filters: %d\n\t- Suite filter: %s\n\t- Test filter: %s\n\t- Partial results %s\n",
 				g_tantrumTestContext.totalTestsFoundWithFilters,
 				g_tantrumTestContext.suiteFilter,
@@ -856,7 +858,6 @@ static bool TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 			// TODO(DM): if nextArg == NULL then error that the suite filter wasnt set and show usage to help user
 
 			g_tantrumTestContext.suiteFilter = nextArg;
-			g_tantrumTestContext.isFilteringTests = true;
 
 			continue;
 		}
@@ -866,7 +867,6 @@ static bool TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 			// TODO(DM): if nextArg == NULL then error that the test filter wasnt set and show usage to help user
 
 			g_tantrumTestContext.testFilter = nextArg;
-			g_tantrumTestContext.isFilteringTests = true;
 
 			continue;
 		}
