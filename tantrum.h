@@ -1149,7 +1149,7 @@ static int TantrumExecuteAllTestsInternal() {
 
 		//TANTRUM_LOG( "Loading test func: %s\n", testFuncName );
 
-		// get the test grabber functions out of the binary
+		// get the test grabber function out of the binary
 		testInfoFetcherFunc_t funcInfoGrabber = (testInfoFetcherFunc_t) TantrumGetProcAddressInternal( handle, testFuncName );
 
 		if ( !funcInfoGrabber ) {
