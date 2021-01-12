@@ -70,6 +70,7 @@ extern "C" {
 #include <errno.h>
 #include <sys/stat.h>
 #include <linux/limits.h>
+#include <time.h>
 #endif
 
 #include <stdio.h>
@@ -599,7 +600,7 @@ static tantrumBool32 TantrumStringContainsInternal( const char* str, const char*
 //==========================================================
 
 #if defined( _WIN32 )
-#define TANTRUM_EXIT_TEST_THREAD_INTERNAL()		ExitThread( 1 )
+#define TANTRUM_EXIT_TEST_THREAD_INTERNAL()		ExitThread( TANTRUM_EXIT_FAILURE )
 #else
 #error add me
 #endif
