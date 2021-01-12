@@ -142,7 +142,8 @@ g_demos_names = {
 	"basic_c",
 	"basic_suites_c",
 	"filtering",
-	"scale_test_c"
+	"scale_test_c",
+	"threads"
 }
 
 group( "demos" )
