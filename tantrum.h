@@ -452,7 +452,8 @@ typedef struct tantrumTestContext_t {
 	uint32_t			totalTestsDeclared; // Gets set in the main function with a preprocessor
 	uint32_t			totalTestsFoundWithFilters;
 	uint32_t			totalTestsExecuted;
-	uint32_t			totalErrorsInCurrentTests;
+	uint32_t			currentTestErrorCount;
+	tantrumBool32		currentTestWasAborted;
 	tantrumBool32		partialFilter;
 	tantrumTimeUnit_t	timeUnit;
 	char				programName[TANTRUM_MAX_PATH];
@@ -846,7 +847,11 @@ static void TantrumOnAfterTest_UserModdable( const suiteTestInfo_t* information 
 	if ( information->testingFlag == TANTRUM_TEST_FLAG_SHOULD_RUN ) {
 		const char* timeUnitStr = TantrumGetTimeUnitStringInternal();
 
-		if ( g_tantrumTestContext.totalErrorsInCurrentTests > 0 ) {
+		if ( g_tantrumTestContext.currentTestWasAborted ) {
+			TantrumSetTextColorInternal( TANTRUM_COLOR_RED );
+			TANTRUM_LOG( "=== THIS TEST WAS ABORTED - TIME FROM START TO ABORT: %f %s ===\n\n", information->testTimeTaken, timeUnitStr );
+			TantrumSetTextColorInternal( TANTRUM_COLOR_DEFAULT );
+		} else if ( g_tantrumTestContext.currentTestErrorCount > 0 ) {
 			TantrumSetTextColorInternal( TANTRUM_COLOR_RED );
 			TANTRUM_LOG( "TEST FAILED (%f %s)\n\n", information->testTimeTaken, timeUnitStr );
 			TantrumSetTextColorInternal( TANTRUM_COLOR_DEFAULT );
@@ -1090,35 +1095,9 @@ static unsigned long TantrumThreadProcInternal( void* data ) {
 	suiteTestInfo_t* information = (suiteTestInfo_t*) data;
 	TANTRUM_ASSERT_INTERNAL( information );
 
-	unsigned long exitCode = 0;
+	information->callback();
 
-	TantrumOnBeforeTest_UserModdable( information );
-
-	// MY : I'm not checking the flag first as it'd still be helpful for search queries to see if the test even appears
-	if ( information->testingFlag == TANTRUM_TEST_FLAG_SHOULD_RUN ) {
-		g_tantrumTestContext.totalErrorsInCurrentTests = 0;
-
-		double start = TantrumGetTimestampInternal();
-		information->callback();
-		double end = TantrumGetTimestampInternal();
-
-		information->testTimeTaken = end - start;
-
-		g_tantrumTestContext.totalTestsExecuted += 1;
-
-		if ( g_tantrumTestContext.totalErrorsInCurrentTests > 0 && !information->isExpectedToFail ) {
-			g_tantrumTestContext.testsFailed += 1;
-			exitCode = 1;
-		} else {
-			g_tantrumTestContext.testsPassed += 1;
-		}
-	} else {
-		g_tantrumTestContext.testsSkipped += 1;
-	}
-
-	TantrumOnAfterTest_UserModdable( information );
-
-	return exitCode;
+	return 0;
 }
 
 //----------------------------------------------------------
@@ -1130,8 +1109,11 @@ static void TantrumRunTestThreadInternal( suiteTestInfo_t* information ) {
 	HANDLE testThread = CreateThread( NULL, 0, TantrumThreadProcInternal, information, 0, NULL );
 	TANTRUM_ASSERT_INTERNAL( testThread );
 
+	double start = TantrumGetTimestampInternal();
 	DWORD result = WaitForMultipleObjects( 1, &testThread, TRUE, UINT32_MAX );
 	TANTRUM_ASSERT_INTERNAL( result == WAIT_OBJECT_0 );
+	double end = TantrumGetTimestampInternal();
+	information->testTimeTaken = end - start;
 
 	DWORD exitCode = (DWORD) -1;
 	BOOL gotExitCode = GetExitCodeThread( testThread, &exitCode );
@@ -1152,9 +1134,8 @@ static void TantrumRunTestThreadInternal( suiteTestInfo_t* information ) {
 // so could this function get removed?
 static void TantrumAbortTestOnFailInternal( const bool abortOnFail ) {
 	if ( abortOnFail ) {
-		TANTRUM_LOG( "=== THIS TEST IS BEING ABORTED ===\n" );
-
 		g_tantrumTestContext.testsAborted += 1;
+		g_tantrumTestContext.currentTestWasAborted = true;
 
 		TANTRUM_EXIT_TEST_THREAD_INTERNAL();
 	}
@@ -1164,7 +1145,7 @@ static void TantrumAbortTestOnFailInternal( const bool abortOnFail ) {
 
 static void TantrumTestTrueInternal( const bool condition, const char* conditionStr, const bool abortOnFail, const char* message, const char* file, const uint32_t line ) {
 	if ( !( condition ) ) {
-		g_tantrumTestContext.totalErrorsInCurrentTests += 1;
+		g_tantrumTestContext.currentTestErrorCount += 1;
 
 		// DM: could probably make this user-overridable
 		{
@@ -1231,7 +1212,29 @@ static int TantrumExecuteAllTestsInternal() {
 			if ( isFilteredTest || !g_tantrumTestContext.testFilter ) {
 				g_tantrumTestContext.totalTestsFoundWithFilters += 1;
 
-				TantrumRunTestThreadInternal( &information );
+				TantrumOnBeforeTest_UserModdable( &information );
+
+				// MY : I'm not checking the flag first as it'd still be helpful for search queries to see if the test even appears
+				if ( information.testingFlag == TANTRUM_TEST_FLAG_SHOULD_RUN )
+				{
+					g_tantrumTestContext.currentTestErrorCount = 0;
+
+					TantrumRunTestThreadInternal( &information );
+
+					g_tantrumTestContext.totalTestsExecuted += 1;
+
+					if ( g_tantrumTestContext.currentTestErrorCount > 0 && !information.isExpectedToFail ) {
+						g_tantrumTestContext.testsFailed += 1;
+					}
+					else {
+						g_tantrumTestContext.testsPassed += 1;
+					}
+				}
+				else {
+					g_tantrumTestContext.testsSkipped += 1;
+				}
+
+				TantrumOnAfterTest_UserModdable( &information );
 			}
 		}
 	}
