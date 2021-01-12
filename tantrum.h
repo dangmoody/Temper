@@ -206,7 +206,7 @@ typedef enum tantrumTimeUnit_t {
 
 typedef void( *testCallback_t )( void );
 
-typedef tantrumBool32 ( *tantrumStringCompareFunc_t )( const char*, const char* );
+typedef tantrumBool32 ( *tantrumStringCompareFunc_t )( const char* lhs, const char* rhs );
 
 typedef struct suiteTestInfo_t {
 	testCallback_t		callback;
