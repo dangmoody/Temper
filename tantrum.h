@@ -501,7 +501,6 @@ static tantrumBool32 TantrumStringContainsInternal( const char* str, const char*
 
 //----------------------------------------------------------
 
-// TODO: make this macro end with a semicolon
 #define TANTRUM_INVOKE_PARAMETRIC_TEST_INTERNAL( counter, nameOfTestToCall, parametricInvokationName, testExpectedToFail, ... ) \
 \
 	/*1. Create a function with a name matching the test.*/ \
