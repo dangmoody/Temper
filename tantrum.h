@@ -118,7 +118,7 @@ extern "C" {
 do { \
 	g_tantrumTestContext.totalTestsDeclared = __COUNTER__; \
 \
-	g_tantrumTestContext.timeUnit = TANTRUM_TIME_UNIT_MS; \
+	g_tantrumTestContext.timeUnit = TANTRUM_TIME_UNIT_US; \
 \
 	QueryPerformanceFrequency( &g_tantrumTestContext.timestampFrequency ); \
 \
@@ -455,6 +455,8 @@ typedef struct tantrumTestContext_t {
 	uint32_t			totalTestsExecuted;
 	uint32_t			currentTestErrorCount;
 	tantrumBool32		currentTestWasAborted;
+	double				currentTestStartTime;
+	double				currentTestEndTime;
 	tantrumBool32		partialFilter;
 	tantrumTimeUnit_t	timeUnit;
 	char				programName[TANTRUM_MAX_PATH];
@@ -812,9 +814,9 @@ static void TantrumPrintTestExecutionInformation_UserModdable() {
 static const char* TantrumGetTimeUnitStringInternal( void ) {
 	switch ( g_tantrumTestContext.timeUnit ) {
 		case TANTRUM_TIME_UNIT_CLOCKS:	return "clocks";
-		case TANTRUM_TIME_UNIT_NS:		return "ns";
-		case TANTRUM_TIME_UNIT_US:		return "us";
-		case TANTRUM_TIME_UNIT_MS:		return "ms";
+		case TANTRUM_TIME_UNIT_NS:		return "nanoseconds";
+		case TANTRUM_TIME_UNIT_US:		return "microseconds";
+		case TANTRUM_TIME_UNIT_MS:		return "milliseconds";
 		case TANTRUM_TIME_UNIT_SECONDS:	return "seconds";
 
 		default:
@@ -850,15 +852,15 @@ static void TantrumOnAfterTest_UserModdable( const suiteTestInfo_t* information 
 
 		if ( g_tantrumTestContext.currentTestWasAborted ) {
 			TantrumSetTextColorInternal( TANTRUM_COLOR_RED );
-			TANTRUM_LOG( "=== THIS TEST WAS ABORTED - TIME FROM START TO ABORT: %f %s ===\n\n", information->testTimeTaken, timeUnitStr );
+			TANTRUM_LOG( "=== TEST ABORTED (%.3f %s) ===\n\n", g_tantrumTestContext.currentTestEndTime - g_tantrumTestContext.currentTestStartTime, timeUnitStr );
 			TantrumSetTextColorInternal( TANTRUM_COLOR_DEFAULT );
 		} else if ( g_tantrumTestContext.currentTestErrorCount > 0 ) {
 			TantrumSetTextColorInternal( TANTRUM_COLOR_RED );
-			TANTRUM_LOG( "TEST FAILED (%f %s)\n\n", information->testTimeTaken, timeUnitStr );
+			TANTRUM_LOG( "TEST FAILED (%.3f %s)\n\n", g_tantrumTestContext.currentTestEndTime - g_tantrumTestContext.currentTestStartTime, timeUnitStr );
 			TantrumSetTextColorInternal( TANTRUM_COLOR_DEFAULT );
 		} else {
 			TantrumSetTextColorInternal( TANTRUM_COLOR_GREEN );
-			TANTRUM_LOG( "TEST SUCCEEDED (%f %s)\n\n", information->testTimeTaken, timeUnitStr );
+			TANTRUM_LOG( "TEST SUCCEEDED (%.3f %s)\n\n", g_tantrumTestContext.currentTestEndTime - g_tantrumTestContext.currentTestStartTime, timeUnitStr );
 			TantrumSetTextColorInternal( TANTRUM_COLOR_DEFAULT );
 		}
 	} else {
@@ -1021,10 +1023,10 @@ static double TantrumGetTimestampInternal( void ) {
 
 	switch ( g_tantrumTestContext.timeUnit ) {
 		case TANTRUM_TIME_UNIT_CLOCKS:	return (double) ( now.QuadPart );
-		case TANTRUM_TIME_UNIT_NS:		return (double) ( ( now.QuadPart * 1000000000 ) / g_tantrumTestContext.timestampFrequency.QuadPart );
-		case TANTRUM_TIME_UNIT_US:		return (double) ( ( now.QuadPart * 1000000 ) / g_tantrumTestContext.timestampFrequency.QuadPart );
-		case TANTRUM_TIME_UNIT_MS:		return (double) ( ( now.QuadPart * 1000 ) / g_tantrumTestContext.timestampFrequency.QuadPart );
-		case TANTRUM_TIME_UNIT_SECONDS:	return (double) ( ( now.QuadPart ) / g_tantrumTestContext.timestampFrequency.QuadPart );
+		case TANTRUM_TIME_UNIT_NS:		return (double) ( ( (double)now.QuadPart * 1000000000.f ) / (double) g_tantrumTestContext.timestampFrequency.QuadPart );
+		case TANTRUM_TIME_UNIT_US:		return (double) ( ( (double)now.QuadPart * 1000000.f ) / (double) g_tantrumTestContext.timestampFrequency.QuadPart );
+		case TANTRUM_TIME_UNIT_MS:		return (double) ( ( (double)now.QuadPart * 1000.f ) / (double) g_tantrumTestContext.timestampFrequency.QuadPart );
+		case TANTRUM_TIME_UNIT_SECONDS:	return (double) ( ( (double)now.QuadPart ) / (double) g_tantrumTestContext.timestampFrequency.QuadPart );
 	}
 #elif defined( __APPLE__ ) || defined( __linux__ )	// defined( _WIN32 )
 	struct timespec now;
@@ -1096,7 +1098,9 @@ static unsigned long TantrumThreadProcInternal( void* data ) {
 	suiteTestInfo_t* information = (suiteTestInfo_t*) data;
 	TANTRUM_ASSERT_INTERNAL( information );
 
+	g_tantrumTestContext.currentTestStartTime = TantrumGetTimestampInternal();
 	information->callback();
+	g_tantrumTestContext.currentTestEndTime = TantrumGetTimestampInternal();
 
 	return 0;
 }
@@ -1110,11 +1114,8 @@ static void TantrumRunTestThreadInternal( suiteTestInfo_t* information ) {
 	HANDLE testThread = CreateThread( NULL, 0, TantrumThreadProcInternal, information, 0, NULL );
 	TANTRUM_ASSERT_INTERNAL( testThread );
 
-	double start = TantrumGetTimestampInternal();
 	DWORD result = WaitForMultipleObjects( 1, &testThread, TRUE, UINT32_MAX );
 	TANTRUM_ASSERT_INTERNAL( result == WAIT_OBJECT_0 );
-	double end = TantrumGetTimestampInternal();
-	information->testTimeTaken = end - start;
 
 	DWORD exitCode = (DWORD) -1;
 	BOOL gotExitCode = GetExitCodeThread( testThread, &exitCode );
@@ -1135,6 +1136,7 @@ static void TantrumRunTestThreadInternal( suiteTestInfo_t* information ) {
 // so could this function get removed?
 static void TantrumAbortTestOnFailInternal( const bool abortOnFail ) {
 	if ( abortOnFail ) {
+		g_tantrumTestContext.currentTestEndTime = TantrumGetTimestampInternal();
 		g_tantrumTestContext.testsAborted += 1;
 		g_tantrumTestContext.currentTestWasAborted = true;
 
@@ -1221,6 +1223,8 @@ static int TantrumExecuteAllTestsInternal() {
 					g_tantrumTestContext.currentTestErrorCount = 0;
 
 					TantrumRunTestThreadInternal( &information );
+
+					information.testTimeTaken = g_tantrumTestContext.currentTestEndTime - g_tantrumTestContext.currentTestStartTime;
 
 					g_tantrumTestContext.totalTestsExecuted += 1;
 
