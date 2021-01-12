@@ -156,22 +156,22 @@ do { \
 //----------------------------------------------------------
 
 #define TANTRUM_TEST_FALSE( condition ) \
-	TantrumTestTrueInternal( !condition, "TANTRUM_TEST_FALSE(" #condition ")", false, NULL, __FILE__, __LINE__ )
+	TantrumTestTrueInternal( !(condition), "TANTRUM_TEST_FALSE(" #condition ")", false, NULL, __FILE__, __LINE__ )
 
 //----------------------------------------------------------
 
 #define TANTRUM_TEST_FALSE_M( condition, message ) \
-	TantrumTestTrueInternal( !condition, "TANTRUM_TEST_FALSE_M(" #condition ")", false, message, __FILE__, __LINE__ )
+	TantrumTestTrueInternal( !(condition), "TANTRUM_TEST_FALSE_M(" #condition ")", false, message, __FILE__, __LINE__ )
 
 //----------------------------------------------------------
 
 #define TANTRUM_TEST_FALSE_OR_ABORT( condition ) \
-	TantrumTestTrueInternal( !condition, "TANTRUM_TEST_FALSE_OR_ABORT(" #condition ")", true, NULL, __FILE__, __LINE__ )
+	TantrumTestTrueInternal( !(condition), "TANTRUM_TEST_FALSE_OR_ABORT(" #condition ")", true, NULL, __FILE__, __LINE__ )
 
 //----------------------------------------------------------
 
 #define TANTRUM_TEST_FALSE_OR_ABORT_M( condition, message ) \
-	TantrumTestTrueInternal( !condition, "TANTRUM_TEST_FALSE_OR_ABORT_M(" #condition ")", true, message, __FILE__, __LINE__ )
+	TantrumTestTrueInternal( !(condition), "TANTRUM_TEST_FALSE_OR_ABORT_M(" #condition ")", true, message, __FILE__, __LINE__ )
 
 //----------------------------------------------------------
 
