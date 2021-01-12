@@ -230,8 +230,8 @@ typedef struct tantrumTestContext_t {
 	uint32_t			totalTestsFoundWithFilters;
 	uint32_t			totalTestsExecuted;
 	uint32_t			totalErrorsInCurrentTests;
-	tantrumBool32		partialFilter;
-	tantrumBool32		isFilteringTests;
+	tantrumBool32		partialFilter;					// TODO(DM): replace with flags
+	tantrumBool32		isFilteringTests;				// TODO(DM): replace with flags
 	tantrumTimeUnit_t	timeUnit;
 	char				programName[TANTRUM_MAX_PATH];
 	const char*			suiteFilterPrevious;
@@ -372,6 +372,14 @@ static tantrumBool32 TantrumStringContainsInternal( const char* str, const char*
 //==========================================================
 // PREPROCESSORS - TANTRUM INTERNAL
 //==========================================================
+
+#if defined( _WIN32 )
+#define TANTRUM_EXIT_TEST_THREAD_INTERNAL()		ExitThread( 1 )
+#else
+#error add me
+#endif
+
+//----------------------------------------------------------
 
 #define TANTRUM_DEFAULT_EPSILON					0.00001f
 
@@ -547,23 +555,25 @@ static tantrumBool32 TantrumStringContainsInternal( const char* str, const char*
 do { \
 	if ( abortOnFail ) { \
 		TANTRUM_LOG( "=== THIS TEST IS BEING ABORTED ===\n" ); \
+\
 		g_tantrumTestContext.testsAborted += 1; \
-		return; \
+\
+		TANTRUM_EXIT_TEST_THREAD_INTERNAL(); \
 	} \
 } while( 0 )
 
 //----------------------------------------------------------
 
-#define TANTRUM_TEST_TRUE_INTERNAL( condition, abortOnFail, message, file, line ) \
+#define TANTRUM_TEST_TRUE_INTERNAL( condition, conditionStr, abortOnFail, message, file, line ) \
 do { \
 	if ( !( condition ) ) { \
 		g_tantrumTestContext.totalErrorsInCurrentTests += 1; \
 \
-		TANTRUM_LOG_ERROR( "TANTRUM_TEST_TRUE( %s ) has failed at %s line %d:\n%s\n", #condition, file, line, message ); \
+		TANTRUM_LOG( "%s at %s line %d.\n", conditionStr, file, line ); \
 \
 		TANTRUM_ABORT_TEST_ON_FAIL( abortOnFail ); \
 	} \
-} while( 0 )
+} while ( 0 )
 
 //----------------------------------------------------------
 
@@ -769,23 +779,8 @@ static void TantrumPrintTestExecutionInformation_UserModdable() {
 		g_tantrumTestContext.testsPassed,  TantrumGetPercentInternal( g_tantrumTestContext.testsPassed, totalFound  ),
 		g_tantrumTestContext.testsFailed,  TantrumGetPercentInternal( g_tantrumTestContext.testsFailed, totalFound  ),
 		g_tantrumTestContext.testsAborted, TantrumGetPercentInternal( g_tantrumTestContext.testsAborted, totalFound ),
-		g_tantrumTestContext.testsSkipped, TantrumGetPercentInternal( g_tantrumTestContext.testsSkipped, totalFound  )
+		g_tantrumTestContext.testsSkipped, TantrumGetPercentInternal( g_tantrumTestContext.testsSkipped, totalFound )
 	);
-}
-
-//----------------------------------------------------------
-
-static void TantrumOnBeforeTest_UserModdable( const suiteTestInfo_t information ) {
-	if ( !TANTRUM_STRING_EQUALS( g_tantrumTestContext.suiteFilterPrevious, information.suiteNameStr ) ) {
-		TantrumPrintDivider_UserModdable();
-		g_tantrumTestContext.suiteFilterPrevious = information.suiteNameStr;
-	}
-
-	if ( information.suiteNameStr ) {
-		TANTRUM_LOG( "TEST \t- \"%s\" : \"%s\"\n", information.suiteNameStr, information.testNameStr );
-	} else {
-		TANTRUM_LOG( "TEST \t- \"%s\"\n", information.testNameStr );
-	}
 }
 
 //----------------------------------------------------------
@@ -806,21 +801,40 @@ static const char* TantrumGetTimeUnitStringInternal( void ) {
 
 //----------------------------------------------------------
 
-static void TantrumOnAfterTest_UserModdable( const suiteTestInfo_t information ) {
-	if ( information.testingFlag == TANTRUM_TEST_FLAG_SHOULD_RUN ) {
+static void TantrumOnBeforeTest_UserModdable( const suiteTestInfo_t* information ) {
+	TANTRUM_ASSERT_INTERNAL( information );
+
+	if ( !TANTRUM_STRING_EQUALS( g_tantrumTestContext.suiteFilterPrevious, information->suiteNameStr ) ) {
+		TantrumPrintDivider_UserModdable();
+		g_tantrumTestContext.suiteFilterPrevious = information->suiteNameStr;
+	}
+
+	if ( information->suiteNameStr ) {
+		TANTRUM_LOG( "TEST \t- \"%s\" : \"%s\"\n", information->suiteNameStr, information->testNameStr );
+	} else {
+		TANTRUM_LOG( "TEST \t- \"%s\"\n", information->testNameStr );
+	}
+}
+
+//----------------------------------------------------------
+
+static void TantrumOnAfterTest_UserModdable( const suiteTestInfo_t* information ) {
+	TANTRUM_ASSERT_INTERNAL( information );
+
+	if ( information->testingFlag == TANTRUM_TEST_FLAG_SHOULD_RUN ) {
 		const char* timeUnitStr = TantrumGetTimeUnitStringInternal();
 
 		if ( g_tantrumTestContext.totalErrorsInCurrentTests > 0 ) {
 			TantrumSetTextColorInternal( TANTRUM_COLOR_RED );
-			TANTRUM_LOG( "TEST FAILED (%f %s)\n\n", information.testTimeTaken, timeUnitStr );
+			TANTRUM_LOG( "TEST FAILED (%f %s)\n\n", information->testTimeTaken, timeUnitStr );
 			TantrumSetTextColorInternal( TANTRUM_COLOR_DEFAULT );
 		} else {
 			TantrumSetTextColorInternal( TANTRUM_COLOR_GREEN );
-			TANTRUM_LOG( "TEST SUCCEEDED (%f %s)\n\n", information.testTimeTaken, timeUnitStr );
+			TANTRUM_LOG( "TEST SUCCEEDED (%f %s)\n\n", information->testTimeTaken, timeUnitStr );
 			TantrumSetTextColorInternal( TANTRUM_COLOR_DEFAULT );
 		}
 	} else {
-		const char* skipReason = information.testingFlag == TANTRUM_TEST_FLAG_DEPRECATED ? "DEPRECATED" : "SHOULD_SKIP";
+		const char* skipReason = information->testingFlag == TANTRUM_TEST_FLAG_DEPRECATED ? "DEPRECATED" : "SHOULD_SKIP";
 		TantrumSetTextColorInternal( TANTRUM_COLOR_YELLOW );
 		TANTRUM_LOG( "TEST FLAGGED \"%s\"\n\n", skipReason );
 		TantrumSetTextColorInternal( TANTRUM_COLOR_DEFAULT );
@@ -930,17 +944,26 @@ static void* TantrumGetProcAddressInternal( void* handle, const char* funcName )
 	TANTRUM_ASSERT_INTERNAL( handle );
 	TANTRUM_ASSERT_INTERNAL( funcName );
 
+	void* proc = NULL;
+
 #ifdef _WIN32
-	void* proc = (void*) GetProcAddress( (HMODULE) handle, funcName );
-	TANTRUM_ASSERT_INTERNAL( proc );
-	return proc;
+	proc = (void*) GetProcAddress( (HMODULE) handle, funcName );
 #elif defined( __APPLE__ ) || defined( __linux__ )	// defined( _WIN32 )
-	void* proc = dlsym( handle, funcName );
-	TANTRUM_ASSERT_INTERNAL( proc );
-	return proc;
+	proc = dlsym( handle, funcName );
 #else	// defined( _WIN32 )
 #error Uncrecognised platform.  It appears Tantrum does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
 #endif	// defined( _WIN32 )
+
+	if ( !proc ) {
+		const char* platformErrorMsg = "";
+#if defined( __APPLE__ ) || defined( __linux__ )
+		platformErrorMsg = "\nOn MacOS/Linux you need to explicitly allow dynamic symbol exporting (E.G.: on Clang use: \"-Wl,--export-dynamic\").\n";
+#endif
+
+		TANTRUM_LOG_ERROR( "Failed to find function \"%s\".%s\n", funcName, platformErrorMsg );
+	}
+
+	return proc;
 }
 
 //----------------------------------------------------------
@@ -1037,6 +1060,74 @@ static bool TantrumGetFullEXEPathInternal( void ) {
 	return true;
 }
 
+//----------------------------------------------------------
+
+// its ok to write directly to the global because only one test thread runs at a time
+// if multiple test threads were running asynchronously then probably want to atomic increment at the very end of the test thread
+static unsigned long TantrumThreadProcInternal( void* data ) {
+	TANTRUM_ASSERT_INTERNAL( data );
+
+	suiteTestInfo_t* information = (suiteTestInfo_t*) data;
+	TANTRUM_ASSERT_INTERNAL( information );
+
+	unsigned long exitCode = 0;
+
+	TantrumOnBeforeTest_UserModdable( information );
+
+	// MY : I'm not checking the flag first as it'd still be helpful for search queries to see if the test even appears
+	if ( information->testingFlag == TANTRUM_TEST_FLAG_SHOULD_RUN ) {
+		g_tantrumTestContext.totalErrorsInCurrentTests = 0;
+
+		double start = TantrumGetTimestampInternal();
+		information->callback();
+		double end = TantrumGetTimestampInternal();
+
+		information->testTimeTaken = end - start;
+
+		g_tantrumTestContext.totalTestsExecuted += 1;
+
+		if ( g_tantrumTestContext.totalErrorsInCurrentTests > 0 && !information->isExpectedToFail ) {
+			g_tantrumTestContext.testsFailed += 1;
+			exitCode = 1;
+		} else {
+			g_tantrumTestContext.testsPassed += 1;
+		}
+	} else {
+		g_tantrumTestContext.testsSkipped += 1;
+	}
+
+	TantrumOnAfterTest_UserModdable( information );
+
+	return exitCode;
+}
+
+//----------------------------------------------------------
+
+static void TantrumRunTestThreadInternal( suiteTestInfo_t* information ) {
+	TANTRUM_ASSERT_INTERNAL( information );
+
+#if defined( _WIN32 )
+	HANDLE testThread = CreateThread( NULL, 0, TantrumThreadProcInternal, information, 0, NULL );
+	TANTRUM_ASSERT_INTERNAL( testThread );
+
+	DWORD result = WaitForMultipleObjects( 1, &testThread, TRUE, UINT32_MAX );
+	TANTRUM_ASSERT_INTERNAL( result == WAIT_OBJECT_0 );
+
+	DWORD exitCode = (DWORD) -1;
+	BOOL gotExitCode = GetExitCodeThread( testThread, &exitCode );
+	TANTRUM_ASSERT_INTERNAL( gotExitCode );
+
+	CloseHandle( testThread );
+	testThread = NULL;
+#elif defined( __APPLE__ ) || ( __linux__ )	// defined( _WIN32 )
+#error todo
+#else	// defined( _WIN32 )
+#error Uncrecognised platform.  It appears Tantrum does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
+#endif	// defined( _WIN32 )
+}
+
+//----------------------------------------------------------
+
 static int TantrumExecuteAllTestsInternal() {
 	if ( !TantrumGetFullEXEPathInternal() ) {
 		return TANTRUM_EXIT_FAILURE;
@@ -1049,7 +1140,10 @@ static int TantrumExecuteAllTestsInternal() {
 	// so this shouldn't be a problem
 	// I wonder if it's possible we could perhaps make this string length constant an overridable #define ?
 	char testFuncName[1024];
-	testInfoFetcherFunc_t testInfoGrabberFunc = NULL;
+
+	// if partial suite/test filtering is enabled then we want to check if the queried filter is in a part of the name they specified
+	// otherwise partial filtering is off so we want to check for an exact string match
+	tantrumStringCompareFunc_t stringCompareFunc = g_tantrumTestContext.partialFilter ? TANTRUM_STRING_CONTAINS : TANTRUM_STRING_EQUALS;
 
 	for ( uint32_t i = 0; i < g_tantrumTestContext.totalTestsDeclared; i++ ) {
 		TANTRUM_SNPRINTF( testFuncName, 1024, "tantrum_test_info_fetcher_%d", i );
@@ -1057,23 +1151,13 @@ static int TantrumExecuteAllTestsInternal() {
 		//TANTRUM_LOG( "Loading test func: %s\n", testFuncName );
 
 		// get the test grabber functions out of the binary
-		testInfoGrabberFunc = (testInfoFetcherFunc_t) TantrumGetProcAddressInternal( handle, testFuncName );
+		testInfoFetcherFunc_t funcInfoGrabber = (testInfoFetcherFunc_t) TantrumGetProcAddressInternal( handle, testFuncName );
 
-		if ( !testInfoGrabberFunc ) {
-			const char* platformErrorMsg = "";
-#if defined( __APPLE__ ) || defined( __linux__ )
-			platformErrorMsg = "\nOn MacOS/Linux you need to explicitly allow dynamic symbol exporting (E.G.: on Clang use: \"-Wl,--export-dynamic\").\n";
-#endif
-
-			TANTRUM_LOG_ERROR( "Failed to find function %s.%s\n", testFuncName, platformErrorMsg );
+		if ( !funcInfoGrabber ) {
 			return TANTRUM_EXIT_FAILURE;
 		}
 
-		suiteTestInfo_t information = testInfoGrabberFunc();
-
-		// if partial suite/test filtering is enabled then we want to check if the queried filter is in a part of the name they specified
-		// otherwise partial filtering is off so we want to check for an exact string match
-		tantrumStringCompareFunc_t stringCompareFunc = g_tantrumTestContext.partialFilter ? TANTRUM_STRING_CONTAINS : TANTRUM_STRING_EQUALS;
+		suiteTestInfo_t information = funcInfoGrabber();
 
 		bool isFilteredSuite = g_tantrumTestContext.suiteFilter && information.suiteNameStr && stringCompareFunc( information.suiteNameStr, g_tantrumTestContext.suiteFilter );
 
@@ -1083,30 +1167,7 @@ static int TantrumExecuteAllTestsInternal() {
 			if ( isFilteredTest || !g_tantrumTestContext.testFilter ) {
 				g_tantrumTestContext.totalTestsFoundWithFilters += 1;
 
-				TantrumOnBeforeTest_UserModdable( information );
-
-				// MY : I'm not checking the flag first as it'd still be helpful for search queries to see if the test even appears
-				if ( information.testingFlag == TANTRUM_TEST_FLAG_SHOULD_RUN ) {
-					g_tantrumTestContext.totalErrorsInCurrentTests = 0;
-
-					double start = TantrumGetTimestampInternal();
-					information.callback();
-					double end = TantrumGetTimestampInternal();
-
-					information.testTimeTaken = end - start;
-
-					g_tantrumTestContext.totalTestsExecuted += 1;
-
-					if ( g_tantrumTestContext.totalErrorsInCurrentTests > 0 && !information.isExpectedToFail ) {
-						g_tantrumTestContext.testsFailed += 1;
-					} else {
-						g_tantrumTestContext.testsPassed += 1;
-					}
-				} else {
-					g_tantrumTestContext.testsSkipped += 1;
-				}
-
-				TantrumOnAfterTest_UserModdable( information );
+				TantrumRunTestThreadInternal( &information );
 			}
 		}
 	}
