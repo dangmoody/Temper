@@ -869,6 +869,29 @@ static void TantrumOnAfterTest_UserModdable( const suiteTestInfo_t* information 
 // You as the user probably don't want to be directly touching these.
 //==========================================================
 
+static void TantrumShowUsageInternal( void ) {
+	TANTRUM_LOG(
+		"Arguments:\n"
+		"    -h\n"
+		"    --help\n"
+		"        Shows this help and then exits.\n"
+		"\n"
+		"    -t <test>\n"
+		"        Only run the test with the given name.\n"
+		"\n"
+		"    -s <suite>\n"
+		"        Only run tests in the suite with the given name.\n"
+		"\n"
+		"    -p\n"
+		"        Enable partial filtering, which will only run tests and suites that contain the characters specified in the filters.\n"
+		"\n"
+		"    --time-unit [seconds|ms|us|ns|clocks]\n"
+		"        Set the units to measure test times in.\n"
+		"        The default is microseconds.\n"
+		"\n"
+	);
+}
+
 static bool TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 	// parse command line args
 	for ( int argIndex = 0; argIndex < argc; argIndex++ ) {
@@ -876,7 +899,11 @@ static bool TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 
 		if ( TANTRUM_STRING_EQUALS( arg, "-s" ) ) {
 			const char* nextArg = TantrumGetNextArgInternal( argIndex, argc, argv );
-			// TODO(DM): if nextArg == NULL then error that the suite filter wasnt set and show usage to help user
+			if ( !nextArg ) {
+				TANTRUM_LOG_ERROR( "Value for argument \"%s\" was not set.\n" );
+				TantrumShowUsageInternal();
+				return false;
+			}
 
 			g_tantrumTestContext.suiteFilter = nextArg;
 
@@ -885,7 +912,11 @@ static bool TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 
 		if ( TANTRUM_STRING_EQUALS( arg, "-t" ) ) {
 			const char* nextArg = TantrumGetNextArgInternal( argIndex, argc, argv );
-			// TODO(DM): if nextArg == NULL then error that the test filter wasnt set and show usage to help user
+			if ( !nextArg ) {
+				TANTRUM_LOG_ERROR( "Value for argument \"%s\" was not set.\n" );
+				TantrumShowUsageInternal();
+				return false;
+			}
 
 			g_tantrumTestContext.testFilter = nextArg;
 
@@ -899,7 +930,11 @@ static bool TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 
 		if ( TANTRUM_STRING_EQUALS( arg, "--time-unit" ) ) {
 			const char* nextArg = TantrumGetNextArgInternal( argIndex, argc, argv );
-			// TODO(DM): if nextArg == NULL then error that the time unit wasnt set and show usage to help user
+			if ( !nextArg ) {
+				TANTRUM_LOG_ERROR( "Value for argument \"%s\" was not set.\n" );
+				TantrumShowUsageInternal();
+				return false;
+			}
 
 			if ( TANTRUM_STRING_EQUALS( nextArg, "seconds" ) ) {
 				g_tantrumTestContext.timeUnit = TANTRUM_TIME_UNIT_SECONDS;
@@ -922,7 +957,9 @@ static bool TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 					"\n",
 					nextArg
 				);
-				// TODO(DM): TantrumShowUsageInternal() again...
+
+				TantrumShowUsageInternal();
+
 				return false;
 			}
 
@@ -934,7 +971,9 @@ static bool TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 	if ( g_tantrumTestContext.partialFilter ) {
 		if ( !g_tantrumTestContext.suiteFilter && !g_tantrumTestContext.testFilter ) {
 			TANTRUM_LOG_ERROR( "Partial filtering (-p) was enabled but suite or test filtering (-s, -t) was not.\n\n" );
-			// TODO(DM): TantrumShowUsageInternal() again...
+
+			TantrumShowUsageInternal();
+
 			return false;
 		}
 	}
