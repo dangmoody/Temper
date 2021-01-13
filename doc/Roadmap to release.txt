@@ -1,4 +1,4 @@
-17th Jan - Deadline to remove all paid for software OR start new repo
+* 17th Jan - Deadline to remove all paid for software OR start new repo
 21st Jan - Tantrum to Temper2 (or some other name) mass rename
 31st Jan - Get CI platform established - testing build scripts on all platforms (maybe/maybe not mac?)
 7th Feb - Self test all conditions
