@@ -70,6 +70,8 @@ extern "C" {
 #include <errno.h>
 #include <sys/stat.h>
 #include <linux/limits.h>
+#include <time.h>
+#include <pthread.h>
 #endif
 
 #include <stdio.h>
@@ -109,20 +111,11 @@ extern "C" {
 // Public API
 //==========================================================
 
-// MY: I'd like to eventually add more security around this,
-// such as ensuring it's only ever called/used once and thowing
-// an error if it isn't. Maybe also (SOMEHOW) ensuring no test
-// ever has a higher count.
 #define TANTRUM_SETUP() \
 do { \
-	g_tantrumTestContext.totalTestsDeclared = __COUNTER__; \
+	g_tantrumTestContext.totalTestsDeclared = __COUNTER__; /* MUST NOT be in a function otherwise value is not correct */ \
 \
-	g_tantrumTestContext.timeUnit = TANTRUM_TIME_UNIT_MS; \
-\
-	QueryPerformanceFrequency( &g_tantrumTestContext.timestampFrequency ); \
-\
-	g_tantrumTestContext.suiteFilter = NULL; \
-	g_tantrumTestContext.testFilter = NULL; \
+	TantrumSetupInternal(); \
 } while ( 0 )
 
 //----------------------------------------------------------
@@ -141,17 +134,17 @@ do { \
 //----------------------------------------------------------
 
 #define TANTRUM_TEST_TRUE_M( condition, message ) \
-	TantrumTestTrueInternal( condition, "TANTRUM_TEST_TRUE_M(" #condition ")", false, message, __FILE__, __LINE__ )
+	TantrumTestTrueInternal( condition, "TANTRUM_TEST_TRUE_M(" #condition ", ...)", false, message, __FILE__, __LINE__ )
 
 //----------------------------------------------------------
 
 #define TANTRUM_TEST_TRUE_OR_ABORT( condition ) \
-	TantrumTestTrueInternal( condition, "TANTRUM_TEST_TRUE_OR_ABORT( " #condition " )", true, NULL, __FILE__, __LINE__ )
+	TantrumTestTrueInternal( condition, "TANTRUM_TEST_TRUE_OR_ABORT(" #condition ")", true, NULL, __FILE__, __LINE__ )
 
 //----------------------------------------------------------
 
 #define TANTRUM_TEST_TRUE_OR_ABORT_M( condition, message ) \
-	TantrumTestTrueInternal( condition, "TANTRUM_TEST_TRUE_OR_ABORT_M( " #condition " )", true, message, __FILE__, __LINE__ )
+	TantrumTestTrueInternal( condition, "TANTRUM_TEST_TRUE_OR_ABORT_M(" #condition ", ...)", true, message, __FILE__, __LINE__ )
 
 //----------------------------------------------------------
 
@@ -161,7 +154,7 @@ do { \
 //----------------------------------------------------------
 
 #define TANTRUM_TEST_FALSE_M( condition, message ) \
-	TantrumTestTrueInternal( !(condition), "TANTRUM_TEST_FALSE_M(" #condition ")", false, message, __FILE__, __LINE__ )
+	TantrumTestTrueInternal( !(condition), "TANTRUM_TEST_FALSE_M(" #condition ", ...)", false, message, __FILE__, __LINE__ )
 
 //----------------------------------------------------------
 
@@ -171,7 +164,7 @@ do { \
 //----------------------------------------------------------
 
 #define TANTRUM_TEST_FALSE_OR_ABORT_M( condition, message ) \
-	TantrumTestTrueInternal( !(condition), "TANTRUM_TEST_FALSE_OR_ABORT_M(" #condition ")", true, message, __FILE__, __LINE__ )
+	TantrumTestTrueInternal( !(condition), "TANTRUM_TEST_FALSE_OR_ABORT_M(" #condition ", ...)", true, message, __FILE__, __LINE__ )
 
 //----------------------------------------------------------
 
@@ -181,7 +174,7 @@ do { \
 //----------------------------------------------------------
 
 #define TANTRUM_TEST_EQUAL_M( conditionA, conditionB, message ) \
-	TantrumTestTrueInternal( conditionA == conditionB, "TANTRUM_TEST_EQUAL_M(" #conditionA ", " #conditionB ")", false, message, __FILE__, __LINE__ )
+	TantrumTestTrueInternal( conditionA == conditionB, "TANTRUM_TEST_EQUAL_M(" #conditionA ", " #conditionB ", ...)", false, message, __FILE__, __LINE__ )
 
 //----------------------------------------------------------
 
@@ -191,7 +184,7 @@ do { \
 //----------------------------------------------------------
 
 #define TANTRUM_TEST_EQUAL_OR_ABORT_M( conditionA, conditionB, message ) \
-	TantrumTestTrueInternal( conditionA == conditionB, "TANTRUM_TEST_EQUAL_OR_ABORT_M(" #conditionA ", " #conditionB ")", true, message, __FILE__, __LINE__ )
+	TantrumTestTrueInternal( conditionA == conditionB, "TANTRUM_TEST_EQUAL_OR_ABORT_M(" #conditionA ", " #conditionB ", ...)", true, message, __FILE__, __LINE__ )
 
 //----------------------------------------------------------
 
@@ -201,7 +194,7 @@ do { \
 //----------------------------------------------------------
 
 #define TANTRUM_TEST_NOT_EQUAL_M( conditionA, conditionB, message ) \
-	TantrumTestTrueInternal( conditionA != conditionB, "TANTRUM_TEST_NOT_EQUAL_M(" #conditionA ", " #conditionB ")", false, message, __FILE__, __LINE__ )
+	TantrumTestTrueInternal( conditionA != conditionB, "TANTRUM_TEST_NOT_EQUAL_M(" #conditionA ", " #conditionB ", ...)", false, message, __FILE__, __LINE__ )
 
 //----------------------------------------------------------
 
@@ -211,7 +204,7 @@ do { \
 //----------------------------------------------------------
 
 #define TANTRUM_TEST_NOT_EQUAL_OR_ABORT_M( conditionA, conditionB, message ) \
-	TantrumTestTrueInternal( conditionA != conditionB, "TANTRUM_TEST_NOT_EQUAL_OR_ABORT_M(" #conditionA ", " #conditionB ")", true, message, __FILE__, __LINE__ )
+	TantrumTestTrueInternal( conditionA != conditionB, "TANTRUM_TEST_NOT_EQUAL_OR_ABORT_M(" #conditionA ", " #conditionB ", ...)", true, message, __FILE__, __LINE__ )
 
 //----------------------------------------------------------
 
@@ -221,7 +214,7 @@ do { \
 //----------------------------------------------------------
 
 #define TANTRUM_TEST_FLOAT_EQUAL_M( conditionA, conditionB, message ) \
-	TantrumTestTrueInternal( TANTRUM_FLOAT_EQUALS_INTERNAL( conditionA, conditionB, TANTRUM_DEFAULT_EPSILON ), "TANTRUM_TEST_FLOAT_EQUAL_M(" #conditionA ", " #conditionB ")", false, message, __FILE__, __LINE__ )
+	TantrumTestTrueInternal( TANTRUM_FLOAT_EQUALS_INTERNAL( conditionA, conditionB, TANTRUM_DEFAULT_EPSILON ), "TANTRUM_TEST_FLOAT_EQUAL_M(" #conditionA ", " #conditionB ", ...)", false, message, __FILE__, __LINE__ )
 
 //----------------------------------------------------------
 
@@ -231,7 +224,7 @@ do { \
 //----------------------------------------------------------
 
 #define TANTRUM_TEST_FLOAT_EQUAL_OR_ABORT_M( conditionA, conditionB, message ) \
-	TantrumTestTrueInternal( TANTRUM_FLOAT_EQUALS_INTERNAL( conditionA, conditionB, TANTRUM_DEFAULT_EPSILON ), "TANTRUM_TEST_FLOAT_EQUAL_OR_ABORT_M(" #conditionA ", " #conditionB ")", true, message, __FILE__, __LINE__ )
+	TantrumTestTrueInternal( TANTRUM_FLOAT_EQUALS_INTERNAL( conditionA, conditionB, TANTRUM_DEFAULT_EPSILON ), "TANTRUM_TEST_FLOAT_EQUAL_OR_ABORT_M(" #conditionA ", " #conditionB ", ...)", true, message, __FILE__, __LINE__ )
 
 //----------------------------------------------------------
 
@@ -241,7 +234,7 @@ do { \
 //----------------------------------------------------------
 
 #define TANTRUM_TEST_ALMOST_EQUAL_M( conditionA, conditionB, tolerance, message ) \
-	TantrumTestTrueInternal( TANTRUM_FLOAT_EQUALS_INTERNAL( conditionA, conditionB, tolerance ), "TANTRUM_TEST_ALMOST_EQUAL_M(" #conditionA ", " #conditionB ", " #tolerance ")", false, message, __FILE__, __LINE__ )
+	TantrumTestTrueInternal( TANTRUM_FLOAT_EQUALS_INTERNAL( conditionA, conditionB, tolerance ), "TANTRUM_TEST_ALMOST_EQUAL_M(" #conditionA ", " #conditionB ", " #tolerance ", ...)", false, message, __FILE__, __LINE__ )
 
 //----------------------------------------------------------
 
@@ -251,7 +244,7 @@ do { \
 //----------------------------------------------------------
 
 #define TANTRUM_TEST_ALMOST_EQUAL_OR_ABORT_M( conditionA, conditionB, tolerance, message ) \
-	TantrumTestTrueInternal( TANTRUM_FLOAT_EQUALS_INTERNAL( conditionA, conditionB, tolerance ), "TANTRUM_TEST_ALMOST_EQUAL_OR_ABORT_M(" #conditionA ", " #conditionB ", " #tolerance ")", true, message, __FILE__, __LINE__ )
+	TantrumTestTrueInternal( TANTRUM_FLOAT_EQUALS_INTERNAL( conditionA, conditionB, tolerance ), "TANTRUM_TEST_ALMOST_EQUAL_OR_ABORT_M(" #conditionA ", " #conditionB ", " #tolerance ", ...)", true, message, __FILE__, __LINE__ )
 
 //----------------------------------------------------------
 
@@ -261,7 +254,7 @@ do { \
 //----------------------------------------------------------
 
 #define TANTRUM_TEST_NOT_ALMOST_EQUAL_M( conditionA, conditionB, tolerance, message ) \
-	TantrumTestTrueInternal( !TANTRUM_FLOAT_EQUALS_INTERNAL( conditionA, conditionB, tolerance ), "TANTRUM_TEST_NOT_ALMOST_EQUAL_M(" #conditionA ", " #conditionB ", " #tolerance ")", false, message, __FILE__, __LINE__ )
+	TantrumTestTrueInternal( !TANTRUM_FLOAT_EQUALS_INTERNAL( conditionA, conditionB, tolerance ), "TANTRUM_TEST_NOT_ALMOST_EQUAL_M(" #conditionA ", " #conditionB ", " #tolerance ", ...)", false, message, __FILE__, __LINE__ )
 
 //----------------------------------------------------------
 
@@ -271,7 +264,7 @@ do { \
 //----------------------------------------------------------
 
 #define TANTRUM_TEST_NOT_ALMOST_EQUAL_OR_ABORT_M( conditionA, conditionB, tolerance, message ) \
-	TantrumTestTrueInternal( !TANTRUM_FLOAT_EQUALS_INTERNAL( conditionA, conditionB, tolerance ), "TANTRUM_TEST_NOT_ALMOST_EQUAL_OR_ABORT_M(" #conditionA ", " #conditionB ", " #tolerance ")", true, message, __FILE__, __LINE__ )
+	TantrumTestTrueInternal( !TANTRUM_FLOAT_EQUALS_INTERNAL( conditionA, conditionB, tolerance ), "TANTRUM_TEST_NOT_ALMOST_EQUAL_OR_ABORT_M(" #conditionA ", " #conditionB ", " #tolerance ", ...)", true, message, __FILE__, __LINE__ )
 
 //----------------------------------------------------------
 
@@ -281,7 +274,7 @@ do { \
 //----------------------------------------------------------
 
 #define TANTRUM_TEST_GREATER_THAN_M( conditionA, conditionB, message ) \
-	TantrumTestTrueInternal( conditionA > conditionB, "TANTRUM_TEST_GREATER_THAN_M(" #conditionA " > " #conditionB ")", false, message, __FILE__, __LINE__ )
+	TantrumTestTrueInternal( conditionA > conditionB, "TANTRUM_TEST_GREATER_THAN_M(" #conditionA " > " #conditionB ", ...)", false, message, __FILE__, __LINE__ )
 
 //----------------------------------------------------------
 
@@ -291,7 +284,7 @@ do { \
 //----------------------------------------------------------
 
 #define TANTRUM_TEST_GREATER_THAN_OR_ABORT_M( conditionA, conditionB, message ) \
-	TantrumTestTrueInternal( conditionA > conditionB, "TANTRUM_TEST_GREATER_THAN_OR_ABORT_M(" #conditionA " > " #conditionB ")", true, message, __FILE__, __LINE__ )
+	TantrumTestTrueInternal( conditionA > conditionB, "TANTRUM_TEST_GREATER_THAN_OR_ABORT_M(" #conditionA " > " #conditionB ", ...)", true, message, __FILE__, __LINE__ )
 
 //----------------------------------------------------------
 
@@ -301,7 +294,7 @@ do { \
 //----------------------------------------------------------
 
 #define TANTRUM_TEST_GREATER_OR_EQUAL_THAN_M( conditionA, conditionB, message ) \
-	TantrumTestTrueInternal( conditionA >= conditionB, "TANTRUM_TEST_GREATER_OR_EQUAL_THAN_M(" #conditionA " >= " #conditionB ")", false, message, __FILE__, __LINE__ )
+	TantrumTestTrueInternal( conditionA >= conditionB, "TANTRUM_TEST_GREATER_OR_EQUAL_THAN_M(" #conditionA " >= " #conditionB ", ...)", false, message, __FILE__, __LINE__ )
 
 //----------------------------------------------------------
 
@@ -311,7 +304,7 @@ do { \
 //----------------------------------------------------------
 
 #define TANTRUM_TEST_GREATER_OR_EQUAL_THAN_OR_ABORT_M( conditionA, conditionB, message ) \
-	TantrumTestTrueInternal( conditionA >= conditionB, "TANTRUM_TEST_GREATER_OR_EQUAL_THAN_OR_ABORT_M(" #conditionA " >= " #conditionB ")", true, message, __FILE__, __LINE__ )
+	TantrumTestTrueInternal( conditionA >= conditionB, "TANTRUM_TEST_GREATER_OR_EQUAL_THAN_OR_ABORT_M(" #conditionA " >= " #conditionB ", ...)", true, message, __FILE__, __LINE__ )
 
 //----------------------------------------------------------
 
@@ -321,7 +314,7 @@ do { \
 //----------------------------------------------------------
 
 #define TANTRUM_TEST_LESS_THAN_M( conditionA, conditionB, message ) \
-	TantrumTestTrueInternal( conditionA < conditionB, "TANTRUM_TEST_LESS_THAN_M(" #conditionA " < " #conditionB ")", false, message, __FILE__, __LINE__ )
+	TantrumTestTrueInternal( conditionA < conditionB, "TANTRUM_TEST_LESS_THAN_M(" #conditionA " < " #conditionB ", ...)", false, message, __FILE__, __LINE__ )
 
 //----------------------------------------------------------
 
@@ -331,7 +324,7 @@ do { \
 //----------------------------------------------------------
 
 #define TANTRUM_TEST_LESS_THAN_OR_ABORT_M( conditionA, conditionB, message ) \
-	TantrumTestTrueInternal( conditionA < conditionB, "TANTRUM_TEST_LESS_THAN_OR_ABORT_M(" #conditionA " < " #conditionB ")", true, message, __FILE__, __LINE__ )
+	TantrumTestTrueInternal( conditionA < conditionB, "TANTRUM_TEST_LESS_THAN_OR_ABORT_M(" #conditionA " < " #conditionB ", ...)", true, message, __FILE__, __LINE__ )
 
 //----------------------------------------------------------
 
@@ -341,7 +334,7 @@ do { \
 //----------------------------------------------------------
 
 #define TANTRUM_TEST_LESS_OR_EQUAL_THAN_M( conditionA, conditionB, message ) \
-	TantrumTestTrueInternal( conditionA <= conditionB, "TANTRUM_TEST_LESS_OR_EQUAL_THAN_M(" #conditionA " <= " #conditionB ")", false, message, __FILE__, __LINE__ )
+	TantrumTestTrueInternal( conditionA <= conditionB, "TANTRUM_TEST_LESS_OR_EQUAL_THAN_M(" #conditionA " <= " #conditionB ", ...)", false, message, __FILE__, __LINE__ )
 
 //----------------------------------------------------------
 
@@ -351,7 +344,7 @@ do { \
 //----------------------------------------------------------
 
 #define TANTRUM_TEST_LESS_OR_EQUAL_THAN_OR_ABORT_M( conditionA, conditionB, message ) \
-	TantrumTestTrueInternal( conditionA <= conditionB, "TANTRUM_TEST_LESS_OR_EQUAL_THAN_OR_ABORT_M(" #conditionA " <= " #conditionB ")", true, message, __FILE__, __LINE__ )
+	TantrumTestTrueInternal( conditionA <= conditionB, "TANTRUM_TEST_LESS_OR_EQUAL_THAN_OR_ABORT_M(" #conditionA " <= " #conditionB ", ...)", true, message, __FILE__, __LINE__ )
 
 //==========================================================
 // User-Overridable Preprocessor defines
@@ -445,6 +438,8 @@ typedef struct tantrumTestContext_t {
 #ifdef _WIN32
 	LARGE_INTEGER		timestampFrequency;
 #endif
+	double				currentTestStartTime;
+	double				currentTestEndTime;
 	uint32_t			testsPassed;
 	uint32_t			testsFailed;
 	uint32_t			testsAborted;
@@ -452,9 +447,11 @@ typedef struct tantrumTestContext_t {
 	uint32_t			totalTestsDeclared; // Gets set in the main function with a preprocessor
 	uint32_t			totalTestsFoundWithFilters;
 	uint32_t			totalTestsExecuted;
-	uint32_t			totalErrorsInCurrentTests;
+	uint32_t			currentTestErrorCount;
+	tantrumBool32		currentTestWasAborted;
 	tantrumBool32		partialFilter;
 	tantrumTimeUnit_t	timeUnit;
+	uint32_t			pad0;
 	char				programName[TANTRUM_MAX_PATH];
 	const char*			suiteFilterPrevious;
 	const char*			suiteFilter;
@@ -596,9 +593,9 @@ static tantrumBool32 TantrumStringContainsInternal( const char* str, const char*
 //==========================================================
 
 #if defined( _WIN32 )
-#define TANTRUM_EXIT_TEST_THREAD_INTERNAL()		ExitThread( 1 )
+#define TANTRUM_EXIT_TEST_THREAD_INTERNAL()		ExitThread( TANTRUM_EXIT_FAILURE )
 #else
-#error add me
+#define TANTRUM_EXIT_TEST_THREAD_INTERNAL()		pthread_exit( NULL )
 #endif
 
 //----------------------------------------------------------
@@ -810,9 +807,9 @@ static void TantrumPrintTestExecutionInformation_UserModdable() {
 static const char* TantrumGetTimeUnitStringInternal( void ) {
 	switch ( g_tantrumTestContext.timeUnit ) {
 		case TANTRUM_TIME_UNIT_CLOCKS:	return "clocks";
-		case TANTRUM_TIME_UNIT_NS:		return "ns";
-		case TANTRUM_TIME_UNIT_US:		return "us";
-		case TANTRUM_TIME_UNIT_MS:		return "ms";
+		case TANTRUM_TIME_UNIT_NS:		return "nanoseconds";
+		case TANTRUM_TIME_UNIT_US:		return "microseconds";
+		case TANTRUM_TIME_UNIT_MS:		return "milliseconds";
 		case TANTRUM_TIME_UNIT_SECONDS:	return "seconds";
 
 		default:
@@ -825,6 +822,9 @@ static const char* TantrumGetTimeUnitStringInternal( void ) {
 
 static void TantrumOnBeforeTest_UserModdable( const suiteTestInfo_t* information ) {
 	TANTRUM_ASSERT_INTERNAL( information );
+
+	// reset "global" test vars for next test to overwrite them
+	g_tantrumTestContext.currentTestWasAborted = false;
 
 	if ( !TANTRUM_STRING_EQUALS( g_tantrumTestContext.suiteFilterPrevious, information->suiteNameStr ) ) {
 		TantrumPrintDivider_UserModdable();
@@ -846,13 +846,17 @@ static void TantrumOnAfterTest_UserModdable( const suiteTestInfo_t* information 
 	if ( information->testingFlag == TANTRUM_TEST_FLAG_SHOULD_RUN ) {
 		const char* timeUnitStr = TantrumGetTimeUnitStringInternal();
 
-		if ( g_tantrumTestContext.totalErrorsInCurrentTests > 0 ) {
+		if ( g_tantrumTestContext.currentTestWasAborted ) {
 			TantrumSetTextColorInternal( TANTRUM_COLOR_RED );
-			TANTRUM_LOG( "TEST FAILED (%f %s)\n\n", information->testTimeTaken, timeUnitStr );
+			TANTRUM_LOG( "=== TEST ABORTED (%.3f %s) ===\n\n", g_tantrumTestContext.currentTestEndTime - g_tantrumTestContext.currentTestStartTime, timeUnitStr );
+			TantrumSetTextColorInternal( TANTRUM_COLOR_DEFAULT );
+		} else if ( g_tantrumTestContext.currentTestErrorCount > 0 ) {
+			TantrumSetTextColorInternal( TANTRUM_COLOR_RED );
+			TANTRUM_LOG( "TEST FAILED (%.3f %s)\n\n", g_tantrumTestContext.currentTestEndTime - g_tantrumTestContext.currentTestStartTime, timeUnitStr );
 			TantrumSetTextColorInternal( TANTRUM_COLOR_DEFAULT );
 		} else {
 			TantrumSetTextColorInternal( TANTRUM_COLOR_GREEN );
-			TANTRUM_LOG( "TEST SUCCEEDED (%f %s)\n\n", information->testTimeTaken, timeUnitStr );
+			TANTRUM_LOG( "TEST SUCCEEDED (%.3f %s)\n\n", g_tantrumTestContext.currentTestEndTime - g_tantrumTestContext.currentTestStartTime, timeUnitStr );
 			TantrumSetTextColorInternal( TANTRUM_COLOR_DEFAULT );
 		}
 	} else {
@@ -869,6 +873,21 @@ static void TantrumOnAfterTest_UserModdable( const suiteTestInfo_t* information 
 // You as the user probably don't want to be directly touching these.
 //==========================================================
 
+// MY: I'd like to eventually add more security around this,
+// such as ensuring it's only ever called/used once and thowing
+// an error if it isn't. Maybe also (SOMEHOW) ensuring no test
+// ever has a higher count.
+static void TantrumSetupInternal( void ) {
+	g_tantrumTestContext.timeUnit = TANTRUM_TIME_UNIT_US;
+
+#ifdef _WIN32
+	QueryPerformanceFrequency( &g_tantrumTestContext.timestampFrequency );
+#endif
+
+	g_tantrumTestContext.suiteFilter = NULL;
+	g_tantrumTestContext.testFilter = NULL;
+}
+
 static void TantrumShowUsageInternal( void ) {
 	TANTRUM_LOG(
 		"Arguments:\n"
@@ -883,7 +902,7 @@ static void TantrumShowUsageInternal( void ) {
 		"        Only run tests in the suite with the given name.\n"
 		"\n"
 		"    -p\n"
-		"        Enable partial filtering, which will only run tests and suites that contain the characters specified in the filters.\n"
+		"        Enable partial filtering, which will only run tests and suites that contain the text specified in the filters.\n"
 		"\n"
 		"    --time-unit [seconds|ms|us|ns|clocks]\n"
 		"        Set the units to measure test times in.\n"
@@ -900,7 +919,7 @@ static bool TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 		if ( TANTRUM_STRING_EQUALS( arg, "-s" ) ) {
 			const char* nextArg = TantrumGetNextArgInternal( argIndex, argc, argv );
 			if ( !nextArg ) {
-				TANTRUM_LOG_ERROR( "Value for argument \"%s\" was not set.\n" );
+				TANTRUM_LOG_ERROR( "Value for argument \"%s\" was not set.\n", arg );
 				TantrumShowUsageInternal();
 				return false;
 			}
@@ -913,7 +932,7 @@ static bool TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 		if ( TANTRUM_STRING_EQUALS( arg, "-t" ) ) {
 			const char* nextArg = TantrumGetNextArgInternal( argIndex, argc, argv );
 			if ( !nextArg ) {
-				TANTRUM_LOG_ERROR( "Value for argument \"%s\" was not set.\n" );
+				TANTRUM_LOG_ERROR( "Value for argument \"%s\" was not set.\n", arg );
 				TantrumShowUsageInternal();
 				return false;
 			}
@@ -931,7 +950,7 @@ static bool TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 		if ( TANTRUM_STRING_EQUALS( arg, "--time-unit" ) ) {
 			const char* nextArg = TantrumGetNextArgInternal( argIndex, argc, argv );
 			if ( !nextArg ) {
-				TANTRUM_LOG_ERROR( "Value for argument \"%s\" was not set.\n" );
+				TANTRUM_LOG_ERROR( "Value for argument \"%s\" was not set.\n", arg );
 				TantrumShowUsageInternal();
 				return false;
 			}
@@ -1054,10 +1073,10 @@ static double TantrumGetTimestampInternal( void ) {
 
 	switch ( g_tantrumTestContext.timeUnit ) {
 		case TANTRUM_TIME_UNIT_CLOCKS:	return (double) ( now.QuadPart );
-		case TANTRUM_TIME_UNIT_NS:		return (double) ( ( now.QuadPart * 1000000000 ) / g_tantrumTestContext.timestampFrequency.QuadPart );
-		case TANTRUM_TIME_UNIT_US:		return (double) ( ( now.QuadPart * 1000000 ) / g_tantrumTestContext.timestampFrequency.QuadPart );
-		case TANTRUM_TIME_UNIT_MS:		return (double) ( ( now.QuadPart * 1000 ) / g_tantrumTestContext.timestampFrequency.QuadPart );
-		case TANTRUM_TIME_UNIT_SECONDS:	return (double) ( ( now.QuadPart ) / g_tantrumTestContext.timestampFrequency.QuadPart );
+		case TANTRUM_TIME_UNIT_NS:		return (double) ( ( (double)now.QuadPart * 1000000000.f ) / (double) g_tantrumTestContext.timestampFrequency.QuadPart );
+		case TANTRUM_TIME_UNIT_US:		return (double) ( ( (double)now.QuadPart * 1000000.f ) / (double) g_tantrumTestContext.timestampFrequency.QuadPart );
+		case TANTRUM_TIME_UNIT_MS:		return (double) ( ( (double)now.QuadPart * 1000.f ) / (double) g_tantrumTestContext.timestampFrequency.QuadPart );
+		case TANTRUM_TIME_UNIT_SECONDS:	return (double) ( ( (double)now.QuadPart ) / (double) g_tantrumTestContext.timestampFrequency.QuadPart );
 	}
 #elif defined( __APPLE__ ) || defined( __linux__ )	// defined( _WIN32 )
 	struct timespec now;
@@ -1121,43 +1140,27 @@ static bool TantrumGetFullEXEPathInternal( void ) {
 
 //----------------------------------------------------------
 
+#if defined( _WIN32 )
+typedef unsigned long	tantrumThreadHandle_t;
+#elif defined( __APPLE__ ) || defined( __linux__ )	// defined( _WIN32 )
+typedef void*			tantrumThreadHandle_t;
+#else	// defined( _WIN32 )
+#error Uncrecognised platform.  It appears Tantrum does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
+#endif	// defined( _WIN32 )
+
 // its ok to write directly to the global because only one test thread runs at a time
 // if multiple test threads were running asynchronously then probably want to atomic increment at the very end of the test thread
-static unsigned long TantrumThreadProcInternal( void* data ) {
+static tantrumThreadHandle_t TantrumThreadProcInternal( void* data ) {
 	TANTRUM_ASSERT_INTERNAL( data );
 
 	suiteTestInfo_t* information = (suiteTestInfo_t*) data;
 	TANTRUM_ASSERT_INTERNAL( information );
 
-	unsigned long exitCode = 0;
+	g_tantrumTestContext.currentTestStartTime = TantrumGetTimestampInternal();
+	information->callback();
+	g_tantrumTestContext.currentTestEndTime = TantrumGetTimestampInternal();
 
-	TantrumOnBeforeTest_UserModdable( information );
-
-	// MY : I'm not checking the flag first as it'd still be helpful for search queries to see if the test even appears
-	if ( information->testingFlag == TANTRUM_TEST_FLAG_SHOULD_RUN ) {
-		g_tantrumTestContext.totalErrorsInCurrentTests = 0;
-
-		double start = TantrumGetTimestampInternal();
-		information->callback();
-		double end = TantrumGetTimestampInternal();
-
-		information->testTimeTaken = end - start;
-
-		g_tantrumTestContext.totalTestsExecuted += 1;
-
-		if ( g_tantrumTestContext.totalErrorsInCurrentTests > 0 && !information->isExpectedToFail ) {
-			g_tantrumTestContext.testsFailed += 1;
-			exitCode = 1;
-		} else {
-			g_tantrumTestContext.testsPassed += 1;
-		}
-	} else {
-		g_tantrumTestContext.testsSkipped += 1;
-	}
-
-	TantrumOnAfterTest_UserModdable( information );
-
-	return exitCode;
+	return 0;
 }
 
 //----------------------------------------------------------
@@ -1179,7 +1182,23 @@ static void TantrumRunTestThreadInternal( suiteTestInfo_t* information ) {
 	CloseHandle( testThread );
 	testThread = NULL;
 #elif defined( __APPLE__ ) || ( __linux__ )	// defined( _WIN32 )
-#error todo
+	int err = 0;
+
+	pthread_t thread;
+	pthread_attr_t threadAttribs;
+	pthread_attr_init( &threadAttribs );
+	if ( pthread_create( &thread, &threadAttribs, TantrumThreadProcInternal, information ) != 0 ) {
+		err = errno;
+		TANTRUM_LOG_ERROR( "Failed to create test thread: %s.\n", strerror( err ) );
+		return;
+	}
+
+	void* exitCode;
+	if ( pthread_join( thread, &exitCode ) != 0 ) {
+		err = errno;
+		TANTRUM_LOG_ERROR( "Failed to wait for test thread to finish: %s.\n", strerror( err ) );
+		return;
+	}
 #else	// defined( _WIN32 )
 #error Uncrecognised platform.  It appears Tantrum does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
 #endif	// defined( _WIN32 )
@@ -1187,13 +1206,11 @@ static void TantrumRunTestThreadInternal( suiteTestInfo_t* information ) {
 
 //----------------------------------------------------------
 
-// DM: this only gets called inside TantrumTestTrueInternal()
-// so could this function get removed?
 static void TantrumAbortTestOnFailInternal( const bool abortOnFail ) {
 	if ( abortOnFail ) {
-		TANTRUM_LOG( "=== THIS TEST IS BEING ABORTED ===\n" );
-
+		g_tantrumTestContext.currentTestEndTime = TantrumGetTimestampInternal();
 		g_tantrumTestContext.testsAborted += 1;
+		g_tantrumTestContext.currentTestWasAborted = true;
 
 		TANTRUM_EXIT_TEST_THREAD_INTERNAL();
 	}
@@ -1203,7 +1220,7 @@ static void TantrumAbortTestOnFailInternal( const bool abortOnFail ) {
 
 static void TantrumTestTrueInternal( const bool condition, const char* conditionStr, const bool abortOnFail, const char* message, const char* file, const uint32_t line ) {
 	if ( !( condition ) ) {
-		g_tantrumTestContext.totalErrorsInCurrentTests += 1;
+		g_tantrumTestContext.currentTestErrorCount += 1;
 
 		// DM: could probably make this user-overridable
 		{
@@ -1270,7 +1287,28 @@ static int TantrumExecuteAllTestsInternal() {
 			if ( isFilteredTest || !g_tantrumTestContext.testFilter ) {
 				g_tantrumTestContext.totalTestsFoundWithFilters += 1;
 
-				TantrumRunTestThreadInternal( &information );
+				TantrumOnBeforeTest_UserModdable( &information );
+
+				// MY : I'm not checking the flag first as it'd still be helpful for search queries to see if the test even appears
+				if ( information.testingFlag == TANTRUM_TEST_FLAG_SHOULD_RUN ) {
+					g_tantrumTestContext.currentTestErrorCount = 0;
+
+					TantrumRunTestThreadInternal( &information );
+
+					information.testTimeTaken = g_tantrumTestContext.currentTestEndTime - g_tantrumTestContext.currentTestStartTime;
+
+					g_tantrumTestContext.totalTestsExecuted += 1;
+
+					if ( g_tantrumTestContext.currentTestErrorCount > 0 && !information.isExpectedToFail ) {
+						g_tantrumTestContext.testsFailed += 1;
+					} else {
+						g_tantrumTestContext.testsPassed += 1;
+					}
+				} else {
+					g_tantrumTestContext.testsSkipped += 1;
+				}
+
+				TantrumOnAfterTest_UserModdable( &information );
 			}
 		}
 	}

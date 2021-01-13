@@ -6,6 +6,7 @@ static void CheckIntDoesNotEqual( const uint32_t a, const uint32_t b ) {
 
 TANTRUM_TEST( DanTest0, TANTRUM_TEST_FLAG_SHOULD_RUN ) {
 	for ( uint32_t i = 0; i < 10; i++ ) {
+		//printf( "%d\n", i );
 		CheckIntDoesNotEqual( i, 5 );
 	}
 }
