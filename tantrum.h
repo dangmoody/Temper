@@ -71,6 +71,7 @@ extern "C" {
 #include <sys/stat.h>
 #include <linux/limits.h>
 #include <time.h>
+#include <pthread.h>
 #endif
 
 #include <stdio.h>
@@ -110,20 +111,11 @@ extern "C" {
 // Public API
 //==========================================================
 
-// MY: I'd like to eventually add more security around this,
-// such as ensuring it's only ever called/used once and thowing
-// an error if it isn't. Maybe also (SOMEHOW) ensuring no test
-// ever has a higher count.
 #define TANTRUM_SETUP() \
 do { \
-	g_tantrumTestContext.totalTestsDeclared = __COUNTER__; \
+	g_tantrumTestContext.totalTestsDeclared = __COUNTER__; /* MUST NOT be in a function otherwise value is not correct */ \
 \
-	g_tantrumTestContext.timeUnit = TANTRUM_TIME_UNIT_US; \
-\
-	QueryPerformanceFrequency( &g_tantrumTestContext.timestampFrequency ); \
-\
-	g_tantrumTestContext.suiteFilter = NULL; \
-	g_tantrumTestContext.testFilter = NULL; \
+	TantrumSetupInternal(); \
 } while ( 0 )
 
 //----------------------------------------------------------
@@ -446,6 +438,8 @@ typedef struct tantrumTestContext_t {
 #ifdef _WIN32
 	LARGE_INTEGER		timestampFrequency;
 #endif
+	double				currentTestStartTime;
+	double				currentTestEndTime;
 	uint32_t			testsPassed;
 	uint32_t			testsFailed;
 	uint32_t			testsAborted;
@@ -455,10 +449,9 @@ typedef struct tantrumTestContext_t {
 	uint32_t			totalTestsExecuted;
 	uint32_t			currentTestErrorCount;
 	tantrumBool32		currentTestWasAborted;
-	double				currentTestStartTime;
-	double				currentTestEndTime;
 	tantrumBool32		partialFilter;
 	tantrumTimeUnit_t	timeUnit;
+	uint32_t			pad0;
 	char				programName[TANTRUM_MAX_PATH];
 	const char*			suiteFilterPrevious;
 	const char*			suiteFilter;
@@ -602,7 +595,7 @@ static tantrumBool32 TantrumStringContainsInternal( const char* str, const char*
 #if defined( _WIN32 )
 #define TANTRUM_EXIT_TEST_THREAD_INTERNAL()		ExitThread( TANTRUM_EXIT_FAILURE )
 #else
-#error add me
+#define TANTRUM_EXIT_TEST_THREAD_INTERNAL()		pthread_exit( NULL )
 #endif
 
 //----------------------------------------------------------
@@ -830,6 +823,9 @@ static const char* TantrumGetTimeUnitStringInternal( void ) {
 static void TantrumOnBeforeTest_UserModdable( const suiteTestInfo_t* information ) {
 	TANTRUM_ASSERT_INTERNAL( information );
 
+	// reset "global" test vars for next test to overwrite them
+	g_tantrumTestContext.currentTestWasAborted = false;
+
 	if ( !TANTRUM_STRING_EQUALS( g_tantrumTestContext.suiteFilterPrevious, information->suiteNameStr ) ) {
 		TantrumPrintDivider_UserModdable();
 		g_tantrumTestContext.suiteFilterPrevious = information->suiteNameStr;
@@ -876,6 +872,21 @@ static void TantrumOnAfterTest_UserModdable( const suiteTestInfo_t* information 
 //
 // You as the user probably don't want to be directly touching these.
 //==========================================================
+
+// MY: I'd like to eventually add more security around this,
+// such as ensuring it's only ever called/used once and thowing
+// an error if it isn't. Maybe also (SOMEHOW) ensuring no test
+// ever has a higher count.
+static void TantrumSetupInternal( void ) {
+	g_tantrumTestContext.timeUnit = TANTRUM_TIME_UNIT_US;
+
+#ifdef _WIN32
+	QueryPerformanceFrequency( &g_tantrumTestContext.timestampFrequency );
+#endif
+
+	g_tantrumTestContext.suiteFilter = NULL;
+	g_tantrumTestContext.testFilter = NULL;
+}
 
 static bool TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 	// parse command line args
@@ -1090,9 +1101,17 @@ static bool TantrumGetFullEXEPathInternal( void ) {
 
 //----------------------------------------------------------
 
+#if defined( _WIN32 )
+typedef unsigned long	tantrumThreadHandle_t;
+#elif defined( __APPLE__ ) || defined( __linux__ )	// defined( _WIN32 )
+typedef void*			tantrumThreadHandle_t;
+#else	// defined( _WIN32 )
+#error Uncrecognised platform.  It appears Tantrum does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
+#endif	// defined( _WIN32 )
+
 // its ok to write directly to the global because only one test thread runs at a time
 // if multiple test threads were running asynchronously then probably want to atomic increment at the very end of the test thread
-static unsigned long TantrumThreadProcInternal( void* data ) {
+static tantrumThreadHandle_t TantrumThreadProcInternal( void* data ) {
 	TANTRUM_ASSERT_INTERNAL( data );
 
 	suiteTestInfo_t* information = (suiteTestInfo_t*) data;
@@ -1124,7 +1143,23 @@ static void TantrumRunTestThreadInternal( suiteTestInfo_t* information ) {
 	CloseHandle( testThread );
 	testThread = NULL;
 #elif defined( __APPLE__ ) || ( __linux__ )	// defined( _WIN32 )
-#error todo
+	int err = 0;
+
+	pthread_t thread;
+	pthread_attr_t threadAttribs;
+	pthread_attr_init( &threadAttribs );
+	if ( pthread_create( &thread, &threadAttribs, TantrumThreadProcInternal, information ) != 0 ) {
+		err = errno;
+		TANTRUM_LOG_ERROR( "Failed to create test thread: %s.\n", strerror( err ) );
+		return;
+	}
+
+	void* exitCode;
+	if ( pthread_join( thread, &exitCode ) != 0 ) {
+		err = errno;
+		TANTRUM_LOG_ERROR( "Failed to wait for test thread to finish: %s.\n", strerror( err ) );
+		return;
+	}
 #else	// defined( _WIN32 )
 #error Uncrecognised platform.  It appears Tantrum does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Tantrum/issues
 #endif	// defined( _WIN32 )
@@ -1132,8 +1167,6 @@ static void TantrumRunTestThreadInternal( suiteTestInfo_t* information ) {
 
 //----------------------------------------------------------
 
-// DM: this only gets called inside TantrumTestTrueInternal()
-// so could this function get removed?
 static void TantrumAbortTestOnFailInternal( const bool abortOnFail ) {
 	if ( abortOnFail ) {
 		g_tantrumTestContext.currentTestEndTime = TantrumGetTimestampInternal();
