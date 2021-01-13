@@ -27,8 +27,8 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: Build
-        run: ./scripts/build_clang_gcc.bat --output filtering.exe --compiler clang --config debug --source demos/filtering/filtering.c
+        run: .\scripts\build_clang_gcc.bat --output filtering.exe --compiler clang --config debug --source demos\filtering\filtering.c
 
       # Runs a set of commands using the runners shell
       - name: Run
-        run: ./bin/win64/clang/debug/demos/filtering.exe
+        run: .\bin\win64\clang\debug\demos\filtering.exe
