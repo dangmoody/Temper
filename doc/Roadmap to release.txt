@@ -1,5 +1,5 @@
 * 17th Jan - Deadline to remove all paid for software OR start new repo
-21st Jan - mass rename
+* 21st Jan - mass rename
 31st Jan - Get CI platform established - testing build scripts on all platforms (maybe/maybe not mac?)
 7th Feb - Self test all conditions
 14th Feb - Documentation
