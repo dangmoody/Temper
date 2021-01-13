@@ -916,6 +916,11 @@ static bool TantrumHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 	for ( int argIndex = 0; argIndex < argc; argIndex++ ) {
 		const char* arg = argv[argIndex];
 
+		if ( TANTRUM_STRING_EQUALS( arg, "-h" ) || TANTRUM_STRING_EQUALS( arg, "--help" ) ) {
+			TantrumShowUsageInternal();
+			return false;
+		}
+
 		if ( TANTRUM_STRING_EQUALS( arg, "-s" ) ) {
 			const char* nextArg = TantrumGetNextArgInternal( argIndex, argc, argv );
 			if ( !nextArg ) {
