@@ -1,6 +1,6 @@
 Original notes:
 {
-    Tantrum (TemperV2)
+    Temper V2
 
     TODO:
     0 - AIMING for the final shipable version of this to be a SINGLE header only. Bear this in mind with each feature we build.
@@ -18,15 +18,15 @@ Original notes:
 
 
 TODO:
-TESTS WILL NO LONGER RETURN WEATHER THEY PASS OR FAIL - THE GLOBAL CONTEXT FOR TANTRUM WILL KEEP AN ERROR COUNT FOR THE IMMEDIATE TEST AND FAIL IT IF THE TEST COMPLETES WITH AN ERROR COUNT GREATER THAN 0
+TESTS WILL NO LONGER RETURN WEATHER THEY PASS OR FAIL - THE GLOBAL CONTEXT FOR TEMPER WILL KEEP AN ERROR COUNT FOR THE IMMEDIATE TEST AND FAIL IT IF THE TEST COMPLETES WITH AN ERROR COUNT GREATER THAN 0
 
 
 Priority next steps:
-- Mike - Big bad master test file to test everything about the Tantrum framework. All conditions, parametrics, logging, etc in C99.
-- Mike - Big bad master test file to test everything about the Tantrum framework. All conditions, parametrics, logging, etc in C++ testing.
+- Mike - Big bad master test file to test everything about the Temper framework. All conditions, parametrics, logging, etc in C99.
+- Mike - Big bad master test file to test everything about the Temper framework. All conditions, parametrics, logging, etc in C++ testing.
 - Dan - OS support for Windows & Linux - maybe Mac if we can get a VM.
 - Unclaimed - Logging erros in the user's codebase to fail tests.
-- Unclaimed - Making Tantrum into a self testing framework for automation, so we don't have to test Tantrum with Temper or some other framework.
+- Unclaimed - Making Temper into a self testing framework for automation, so we don't have to test Temper with Temper or some other framework.
 
 Non manditory next steps:
 - Dan - HLML test porting.

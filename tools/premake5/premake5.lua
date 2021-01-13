@@ -17,7 +17,7 @@ function array_length( array )
 end
 
 
-workspace( "Tantrum" )
+workspace( "Temper" )
 	location( g_generated_project_files_root )
 
 	platforms { "win64-clang", "win64-clang++", "win64-gcc", "win64-g++", "win64-msvc" }

@@ -29,7 +29,7 @@ REM now make release
 pushd %~dp0
 pushd ..
 
-tools\\7zip\\7za.exe a -tzip releases\\tantrum_!version!.zip tantrum.h
+tools\\7zip\\7za.exe a -tzip releases\\temper_!version!.zip temper.h
 
 popd
 popd
