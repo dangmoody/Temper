@@ -828,9 +828,6 @@ static const char* TemperGetTimeUnitStringInternal( void ) {
 static void TemperOnBeforeTest_UserModdable( const temperSuiteTestInfo_t* information ) {
 	TEMPER_ASSERT( information );
 
-	// reset "global" test vars for next test to overwrite them
-	g_temperTestContext.currentTestWasAborted = false;
-
 	if ( !TEMPER_STRING_EQUALS( g_temperTestContext.suiteFilterPrevious, information->suiteNameStr ) ) {
 		TemperPrintDivider_UserModdable();
 		g_temperTestContext.suiteFilterPrevious = information->suiteNameStr;
@@ -1301,6 +1298,7 @@ static int TemperExecuteAllTestsInternal() {
 				// MY : I'm not checking the flag first as it'd still be helpful for search queries to see if the test even appears
 				if ( information.testingFlag == TEMPER_TEST_FLAG_SHOULD_RUN ) {
 					g_temperTestContext.currentTestErrorCount = 0;
+					g_temperTestContext.currentTestWasAborted = false;
 
 					TemperRunTestThreadInternal( &information );
 
