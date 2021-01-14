@@ -19,7 +19,7 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        compiler: [clang, clang++, gcc, g++]
+        compiler: [clang, gcc]
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -51,7 +51,7 @@ jobs:
       - name: Install LLVM and Clang
         run: |
           sudo apt update
-          sudo apt install ${{ matrix.compiler }}
+          sudo apt install clang gcc
 
       - name: Build
         run: ./scripts/build_clang_gcc.sh --output filtering.exe --compiler ${{ matrix.compiler }} --config debug --source demos/filtering/filtering.c
