@@ -22,13 +22,13 @@ jobs:
         compiler: [clang, clang++, gcc, g++]
         include:
           - compiler: clang
-            file-ext: c
+            language: "c"
           - compiler: gcc
-            file-ext: c
+            language: "c"
           - compiler: clang++
-            file-ext: cpp
+            language: "cpp"
           - compiler: g++
-            file-ext: cpp
+            language: "cpp"
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -43,8 +43,8 @@ jobs:
 
       - name: Build
         env:
-          EXT: ${{ matrix.file-ext }}
-        run: .\scripts\build_clang_gcc.bat --output scale_test_c.exe --compiler ${{ matrix.compiler }} --config debug --source demos\scale_test_c\scale_test_c.%EXT%
+          LANGUAGE: ${{ matrix.language }}
+        run: .\scripts\build_clang_gcc.bat --output scale_test_c.exe --compiler ${{ matrix.compiler }} --config debug --source demos\scale_test_c\scale_test_c.%LANGUAGE%
 
       - name: Run
         run: .\bin\win64\${{ matrix.compiler }}\debug\demos\scale_test_c.exe
@@ -54,6 +54,15 @@ jobs:
     strategy:
       matrix:
         compiler: [clang, clang++, gcc, g++]
+        include:
+          - compiler: clang
+            language: "c"
+          - compiler: gcc
+            language: "c"
+          - compiler: clang++
+            language: "cpp"
+          - compiler: g++
+            language: "cpp"
 
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -64,8 +73,8 @@ jobs:
 
       - name: Build
         env:
-          EXT: ${{ matrix.file-ext }}
-        run: ./scripts/build_clang_gcc.sh --output scale_test_c.exe --compiler ${{ matrix.compiler }} --config debug --source demos/scale_test_c/scale_test_c.$EXT
+          LANGUAGE: ${{ matrix.language }}
+        run: ./scripts/build_clang_gcc.sh --output scale_test_c.exe --compiler ${{ matrix.compiler }} --config debug --source demos/scale_test_c/scale_test_c.$LANGUAGE
 
       - name: Run
         run: ./bin/linux/${{ matrix.compiler }}/debug/demos/scale_test_c.exe
