@@ -16,27 +16,25 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   build:
+    runs-on: windows-latest
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
       - name: Install LLVM and Clang
-        runs-on: windows-latest
         uses: KyleMayes/install-llvm-action@v1
         with:
           version: "10.0"
           directory: ${{ runner.temp }}/llvm
 
       - name: Build
-        runs-on: windows-latest
         strategy:
           matrix:
           compiler: [clang, gcc]
         run: .\scripts\build_clang_gcc.bat --output filtering.exe --compiler ${{ matrix.compiler }} --config debug --source demos\filtering\filtering.c
 
       - name: Run
-        runs-on: windows-latest
         strategy:
           matrix:
           compiler: [clang, gcc]
