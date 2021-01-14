@@ -1123,7 +1123,7 @@ static bool TemperGetFullEXEPathInternal( void ) {
 	int err = 0;
 
 	const char* exeFilenameVirtual = "/proc/self/exe";
-	struct stat exeFileInfo = { 0 };
+	struct stat exeFileInfo;
 	if ( lstat( exeFilenameVirtual, &exeFileInfo ) == -1 ) {
 		err = errno;
 		TEMPER_LOG_ERROR( "lstat() failed: %s", strerror( err ) );
