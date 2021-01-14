@@ -74,7 +74,7 @@ jobs:
       - name: Build
         env:
           LANGUAGE: ${{ matrix.language }}
-        run: ./scripts/build_clang_gcc.sh --output scale_test.exe --compiler ${{ matrix.compiler }} --config debug --source demos/scale_test_c/scale_test_%LANGUAGE%.$LANGUAGE
+        run: ./scripts/build_clang_gcc.sh --output scale_test.exe --compiler ${{ matrix.compiler }} --config debug --source demos/scale_test_c/scale_test_$LANGUAGE.$LANGUAGE
 
       - name: Run
         run: ./bin/linux/${{ matrix.compiler }}/debug/demos/scale_test.exe
