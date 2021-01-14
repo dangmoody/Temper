@@ -15,24 +15,25 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build-win64-clang"
-  build-win64-clang:
-    # The type of runner that the job will run on
-    runs-on: windows-latest
+  # The type of runner that the job will run on
+  runs-on: windows-latest
+  strategy:
+    matrix:
+      compiler: [clang, gcc]
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
-    steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+  # Steps represent a sequence of tasks that will be executed as part of the job
+  steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
 
-      - name: Install LLVM and Clang
-        uses: KyleMayes/install-llvm-action@v1
-        with:
-          version: "10.0"
-          directory: ${{ runner.temp }}/llvm
+    - name: Install LLVM and Clang
+      uses: KyleMayes/install-llvm-action@v1
+      with:
+        version: "10.0"
+        directory: ${{ runner.temp }}/llvm
 
-      - name: Build
-        run: .\scripts\build_clang_gcc.bat --output filtering.exe --compiler clang --config debug --source demos\filtering\filtering.c
+    - name: Build
+      run: .\scripts\build_clang_gcc.bat --output filtering.exe --compiler ${{ matrix.compiler }} --config debug --source demos\filtering\filtering.c
 
-      - name: Run
-        run: .\bin\win64\clang\debug\demos\filtering.exe
+    - name: Run
+      run: .\bin\win64\${{ matrix.compiler }}\debug\demos\filtering.exe
