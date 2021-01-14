@@ -19,7 +19,7 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        compiler: [clang, gcc]
+        compiler: [clang, clang++, gcc, g++]
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -42,7 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        compiler: [clang, gcc]
+        compiler: [clang, clang++, gcc, g++]
 
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
