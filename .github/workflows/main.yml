@@ -17,6 +17,9 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+    strategy:
+      matrix:
+      compiler: [clang, gcc]
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -29,13 +32,7 @@ jobs:
           directory: ${{ runner.temp }}/llvm
 
       - name: Build
-        strategy:
-          matrix:
-          compiler: [clang, gcc]
         run: .\scripts\build_clang_gcc.bat --output filtering.exe --compiler ${{ matrix.compiler }} --config debug --source demos\filtering\filtering.c
 
       - name: Run
-        strategy:
-          matrix:
-          compiler: [clang, gcc]
         run: .\bin\win64\${{ matrix.compiler }}\debug\demos\filtering.exe
