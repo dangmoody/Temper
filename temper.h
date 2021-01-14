@@ -681,7 +681,7 @@ static temperBool32 TemperStringContainsInternal( const char* str, const char* s
 	typedef struct TEMPER_CONCAT_INTERNAL( testName, _ParametricTestInfo ) { \
 		TEMPER_CONCAT_INTERNAL( testName, _FuncType ) Callback; \
 		temperTestFlag_t	testingFlag; \
-		bool				isExpectedToFail; \
+		temperBool32		isExpectedToFail; \
 		const char*			testNameStr; \
 		const char*			suiteNameStr; \
 	} TEMPER_CONCAT_INTERNAL( testName, _ParametricTestInfo ); \
