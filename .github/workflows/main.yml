@@ -28,8 +28,8 @@ jobs:
       - name: Install LLVM and Clang
         uses: KyleMayes/install-llvm-action@v1
         with:
-        version: "10.0"
-        directory: ${{ runner.temp }}/llvm
+          version: "10.0"
+          directory: ${{ runner.temp }}/llvm
 
       - name: Build
         run: .\scripts\build_clang_gcc.bat --output filtering.exe --compiler clang --config debug --source demos\filtering\filtering.c
