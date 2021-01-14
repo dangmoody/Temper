@@ -21,9 +21,13 @@ jobs:
       matrix:
         compiler: [clang, clang++, gcc, g++]
         include:
-          - compiler: [clang, gcc]
+          - compiler: clang
             file-ext: c
-          - compiler: [clang++, g++]
+          - compiler: gcc
+            file-ext: c
+          - compiler: clang++
+            file-ext: cpp
+          - compiler: g++
             file-ext: cpp
 
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -38,7 +42,9 @@ jobs:
           directory: ${{ runner.temp }}/llvm
 
       - name: Build
-        run: .\scripts\build_clang_gcc.bat --output scale_test_c.exe --compiler ${{ matrix.compiler }} --config debug --source demos\scale_test_c\scale_test_c.${{ matrix.file-ext }}
+        env:
+          EXT: ${{ matrix.file-ext }}
+        run: .\scripts\build_clang_gcc.bat --output scale_test_c.exe --compiler ${{ matrix.compiler }} --config debug --source demos\scale_test_c\scale_test_c.%EXT%
 
       - name: Run
         run: .\bin\win64\${{ matrix.compiler }}\debug\demos\scale_test_c.exe
@@ -57,7 +63,9 @@ jobs:
         run: sudo apt install clang gcc
 
       - name: Build
-        run: ./scripts/build_clang_gcc.sh --output scale_test_c.exe --compiler ${{ matrix.compiler }} --config debug --source demos/scale_test_c/scale_test_c.${{ matrix.file-ext }}
+        env:
+          EXT: ${{ matrix.file-ext }}
+        run: ./scripts/build_clang_gcc.sh --output scale_test_c.exe --compiler ${{ matrix.compiler }} --config debug --source demos/scale_test_c/scale_test_c.$EXT
 
       - name: Run
         run: ./bin/linux/${{ matrix.compiler }}/debug/demos/scale_test_c.exe
