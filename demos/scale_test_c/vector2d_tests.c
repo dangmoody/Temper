@@ -10,7 +10,7 @@ TEMPER_SUITE_TEST( VectorOperators, GivenTwoVectors_WhenAddedTogether_ThenAddedC
 	TEMPER_TEST_FLOAT_EQUAL_M( Result.y, 10.f, "Vector2D_Add function is broken" );
 }
 
-TEMPER_SUITE_TEST( VectorOperators, GivenTwoVectors_WhenSubtractedTogether_ThenSubtractCorrectly, TEMPER_TEST_FLAG_SHOULD_SKIP ){
+TEMPER_SUITE_TEST( VectorOperators, GivenTwoVectors_WhenSubtractedTogether_ThenSubtractCorrectly, TEMPER_TEST_FLAG_SHOULD_RUN ){
 	vector2d A = { 2.f,4.f };
 	vector2d B = { 4.f,6.f };
 	vector2d Result = Vector2D_Sub( A, B );
@@ -26,7 +26,7 @@ TEMPER_SUITE_TEST( VectorOperators, GivenTwoVectors_WhenMultipliedTogether_ThenM
 	TEMPER_TEST_FLOAT_EQUAL_M( Result.y, 99.f, "Vector2D_Mul function is broken" ); // expecting this to fail - to test temper's internal system
 }
 
-TEMPER_SUITE_TEST( VectorOperators, GivenTwoVectors_WhenDividedTogether_ThenDivideCorrectly, TEMPER_TEST_FLAG_SHOULD_RUN ){
+TEMPER_SUITE_TEST( VectorOperators, GivenTwoVectors_WhenDividedTogether_ThenDivideCorrectly, TEMPER_TEST_FLAG_SHOULD_SKIP ) {
 	vector2d A = { 2.f,4.f };
 	vector2d B = { 4.f,6.f };
 	vector2d Result = Vector2D_Div( A, B );
@@ -48,7 +48,7 @@ TEMPER_DECLARE_PARAMETRIC_SUITE_TEST( AdditionSuite, AdditionPowerSet, TEMPER_TE
 
 TEMPER_INVOKE_PARAMETRIC_TEST( AdditionPowerSet, AddTest0, 5, 15.f, 20.f );
 TEMPER_INVOKE_PARAMETRIC_TEST( AdditionPowerSet, AddTest1, 7, 3.f, 10.f );
-TEMPER_INVOKE_PARAMETRIC_TEST( AdditionPowerSet, AddTest2, -9.1f, 14.6f, 7.5f ); // expecting this to fail
+//TEMPER_INVOKE_PARAMETRIC_TEST( AdditionPowerSet, AddTest2, -9.1f, 14.6f, 7.5f ); // expecting this to fail
 TEMPER_INVOKE_PARAMETRIC_TEST( AdditionPowerSet, AddTest3, -63.f, 2.f, -61.f );
 
 TEMPER_DECLARE_PARAMETRIC_TEST( SubtractionPowerSet, TEMPER_TEST_FLAG_DEPRECATED, float left, float right, float expected )
@@ -61,7 +61,7 @@ TEMPER_INVOKE_PARAMETRIC_TEST( SubtractionPowerSet, SubTest0, 4, 4.f, 0.f );
 TEMPER_INVOKE_PARAMETRIC_TEST( SubtractionPowerSet, SubTest1, 4, 2.f, 2.f );
 TEMPER_INVOKE_PARAMETRIC_TEST( SubtractionPowerSet, SubTest2, -9.1f, 14.6f, -23.7f );
 
-static void TestAbortTestCase( float a, float b, char* message )
+static void TestAbortTestCase( float a, float b, const char* message )
 {
 	TEMPER_TEST_FLOAT_EQUAL_OR_ABORT_M( a, b, message );
 }
@@ -72,7 +72,7 @@ TEMPER_SUITE_TEST( AbortTesting, TestEqualOrAbortUsed_ValuesAreEqual_ThreadNotAb
 	TEMPER_TEST_TRUE_M( true, "We expect this to execute" );
 }
 
-TEMPER_SUITE_TEST( AbortTesting, TestEqualOrAbortUsed_ValuesAreNotEqual_ThreadAbortedBeforeTestConcludes, TEMPER_TEST_FLAG_SHOULD_RUN )
+TEMPER_SUITE_TEST( AbortTesting, TestEqualOrAbortUsed_ValuesAreNotEqual_ThreadAbortedBeforeTestConcludes, TEMPER_TEST_FLAG_SHOULD_SKIP )
 {
 	TestAbortTestCase( 5.f, 7.f, "Expected these two values to be equal" );
 	TEMPER_TEST_TRUE_M( false, "The test should have been aborted and this test never executed" );
