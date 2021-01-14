@@ -18,7 +18,7 @@ TEMPER_SUITE_TEST( VectorOperators, GivenTwoVectors_WhenSubtractedTogether_ThenS
 	TEMPER_TEST_FLOAT_EQUAL_M( Result.y, -2.f,  "Vector2D_Sub function is broken" );
 }
 
-TEMPER_SUITE_TEST( VectorOperators, GivenTwoVectors_WhenMultipliedTogether_ThenMultiplyCorrectly, TEMPER_TEST_FLAG_SHOULD_RUN ){
+TEMPER_SUITE_TEST( VectorOperators, GivenTwoVectors_WhenMultipliedTogether_ThenMultiplyCorrectly, TEMPER_TEST_FLAG_SHOULD_SKIP ){
 	vector2d A = { 2.f,4.f };
 	vector2d B = { 4.f,6.f };
 	vector2d Result = Vector2D_Mul( A, B );
