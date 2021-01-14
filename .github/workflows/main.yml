@@ -48,6 +48,11 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
+      - name: Install LLVM and Clang
+        run: |
+          sudo apt update
+          sudo apt install ${{ matrix.compiler }}
+
       - name: Build
         run: ./scripts/build_clang_gcc.sh --output filtering.exe --compiler ${{ matrix.compiler }} --config debug --source demos/filtering/filtering.c
 
