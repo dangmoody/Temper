@@ -15,11 +15,12 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  build:
+  build-windows:
     runs-on: windows-latest
     strategy:
       matrix:
         compiler: [clang, gcc]
+
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -36,3 +37,19 @@ jobs:
 
       - name: Run
         run: .\bin\win64\${{ matrix.compiler }}\debug\demos\filtering.exe
+
+  build-linux:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        compiler: [clang, gcc]
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Build
+        run: ./scripts/build_clang_gcc.sh --output filtering.exe --compiler ${{ matrix.compiler }} --config debug --source demos/filtering/filtering.c
+
+      - name: Run
+        run: ./bin/linux/${{ matrix.compiler }}/debug/demos/filtering.exe
