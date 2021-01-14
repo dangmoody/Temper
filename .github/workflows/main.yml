@@ -38,7 +38,7 @@ jobs:
           directory: ${{ runner.temp }}/llvm
 
       - name: Build
-        run: .\scripts\build_clang_gcc.bat --output scale_test_c.exe --compiler ${{ matrix.compiler }} --config debug --source demos\scale_test_c\scale_test_c.${{ file-ext }}
+        run: .\scripts\build_clang_gcc.bat --output scale_test_c.exe --compiler ${{ matrix.compiler }} --config debug --source demos\scale_test_c\scale_test_c.${{ matrix.file-ext }}
 
       - name: Run
         run: .\bin\win64\${{ matrix.compiler }}\debug\demos\scale_test_c.exe
@@ -57,7 +57,7 @@ jobs:
         run: sudo apt install clang gcc
 
       - name: Build
-        run: ./scripts/build_clang_gcc.sh --output scale_test_c.exe --compiler ${{ matrix.compiler }} --config debug --source demos/scale_test_c/scale_test_c.${{ file-ext }}
+        run: ./scripts/build_clang_gcc.sh --output scale_test_c.exe --compiler ${{ matrix.compiler }} --config debug --source demos/scale_test_c/scale_test_c.${{ matrix.file-ext }}
 
       - name: Run
         run: ./bin/linux/${{ matrix.compiler }}/debug/demos/scale_test_c.exe
