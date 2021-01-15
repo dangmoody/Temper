@@ -122,7 +122,7 @@ fi
 ignore_warnings="-Wno-newline-eof"
 
 # add warnings specifically for mac
-if [[ "g_os_name" == "macos" ]]; then
+if [[ "${g_os_name}" == "macos" ]]; then
 	ignore_warnings="${ignore_warnings} -Wno-poison-system-directories"
 fi
 
