@@ -82,6 +82,7 @@ extern "C" {
 #include <linux/limits.h>
 #elif defined( __APPLE__ )
 #include <sys/syslimits.h>
+#include <mach-o/dyld.h>
 #endif
 #include <time.h>
 #include <pthread.h>
@@ -1132,28 +1133,41 @@ static bool TemperGetFullEXEPathInternal( void ) {
 	}
 
 	g_temperTestContext.programName[fullExePathLength] = 0;
-#elif defined( __APPLE__ ) || defined( __linux__ )	// _WIN32
+#elif defined( __linux__ )	// defined( _WIN32 )
 	int err = 0;
 
 	const char* exeFilenameVirtual = "/proc/self/exe";
+
 	struct stat exeFileInfo;
 	if ( lstat( exeFilenameVirtual, &exeFileInfo ) == -1 ) {
 		err = errno;
-		TEMPER_LOG_ERROR( "lstat() failed: %s", strerror( err ) );
+		TEMPER_LOG_ERROR( "lstat() failed: %s.\n", strerror( err ) );
 		return false;
 	}
 
 	ssize_t fullExePathLength = readlink( exeFilenameVirtual, g_temperTestContext.programName, (size_t) exeFileInfo.st_size + 1 );
 	err = errno;
 	if ( fullExePathLength == -1 ) {
-		TEMPER_LOG_ERROR( "readlink() failed: %s", strerror( err ) );
+		TEMPER_LOG_ERROR( "readlink() failed: %s.\n", strerror( err ) );
 		return false;
 	}
 
 	g_temperTestContext.programName[exeFileInfo.st_size] = 0;
-#else	// _WIN32
+#elif defined( __APPLE__ )	// defined( _WIN32 )
+	int err = 0;
+
+	int bufsize = 0;
+
+	if ( _NSGetExecutablePath( g_temperTestContext.programName, &bufsize ) != 0 ) {
+		err = errno;
+		TEMPER_LOG_ERROR( "_NSGetExecutablePath() failed: %s.\n", strerror( err ) );
+		return false;
+	}
+
+	g_temperTestContext.programName[bufsize] = 0;
+#else	// defined( _WIN32 )
 #error Uncrecognised platform.  It appears Temper does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Temper/issues
-#endif	// _WIN32
+#endif	// defined( _WIN32 )
 
 	return true;
 }
