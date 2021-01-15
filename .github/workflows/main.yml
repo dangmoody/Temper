@@ -50,9 +50,10 @@ jobs:
         run: .\bin\win64\${{ matrix.compiler }}\debug\demos\scale_test.exe
 
   build-macos-and-linux:
-    runs-on: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: [ubuntu-latest, macos-latest]
         compiler: [clang, clang++, gcc, g++]
         include:
           - compiler: clang
