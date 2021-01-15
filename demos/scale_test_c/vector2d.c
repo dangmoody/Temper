@@ -1,9 +1,12 @@
 #include "vector2d.h"
 #include <math.h>
 
-#ifdef __clang__
+#if defined( __clang__ )
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wc++98-compat"
+#elif defined( __GNUC__ )
+#pragma gcc diagnostic push
+#pragma gcc diagnostic ignored "-Wc++11-extensions"
 #endif
 
 #ifdef __cplusplus
@@ -51,6 +54,8 @@ float Vector2D_GetLength( vector2d vector ){
 
 //==========================================================
 
-#ifdef __clang__
+#if defined( __clang__ )
 #pragma clang diagnostic pop
+#elif defined( __GNUC__ )
+#pragma gcc diagnostic pop
 #endif
