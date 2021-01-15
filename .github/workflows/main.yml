@@ -15,11 +15,17 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
+  #
+  # win64 msvc
+  #
   build-windows-msvc:
     runs-on: windows-latest
 
     steps:
       - uses: actions/checkout@v2
+
+      - name: Download MSVC
+        uses: ilammy/msvc-dev-cmd@v1
 
       - name: Build
         run: |
@@ -31,6 +37,9 @@ jobs:
           .\bin\win64\msvc\debug\demos\scale_test_c.exe
           .\bin\win64\msvc\debug\demos\scale_test_cpp.exe
 
+  #
+  # win64 clang/gcc
+  #
   build-windows-clang-gcc:
     runs-on: windows-latest
 
@@ -47,7 +56,6 @@ jobs:
           - compiler: g++
             language: "cpp"
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
@@ -66,6 +74,9 @@ jobs:
       - name: Run
         run: .\bin\win64\${{ matrix.compiler }}\debug\demos\scale_test.exe
 
+  #
+  # linux
+  #
   build-linux:
     runs-on: ubuntu-latest
 
@@ -97,6 +108,9 @@ jobs:
       - name: Run
         run: ./bin/linux/${{ matrix.compiler }}/debug/demos/scale_test.exe
 
+  #
+  # mac os
+  #
   build-macos:
     runs-on: macos-latest
 
