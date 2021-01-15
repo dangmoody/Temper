@@ -50,10 +50,16 @@ extern "C" {
 #pragma clang diagnostic ignored "-Wold-style-cast"
 #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
 #pragma clang diagnostic ignored "-Wc++98-compat-pedantic"
+#if defined( __APPLE__ )
+// DM: only disabling this one to avoid a warning that gets generated when trying to convert function pointers to void*
+// if anyone knows of a better way to get around that without disabling all pedantic warnings I'd love to hear about it
+// submit an issue telling me how: https://github.com/dangmoody/Temper/issues
+#pragma clang diagnostic ignored "-Wpedantic"
+#endif
 #elif defined( __GNUC__ )	// defined( __clang__ )
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
-// DM: only disabling this one on gcc to avoid a warning that gets generated when trying to convert function pointers to void*
+// DM: only disabling this one to avoid a warning that gets generated when trying to convert function pointers to void*
 // if anyone knows of a better way to get around that without disabling all pedantic warnings I'd love to hear about it
 // submit an issue telling me how: https://github.com/dangmoody/Temper/issues
 #pragma GCC diagnostic ignored "-Wpedantic"
