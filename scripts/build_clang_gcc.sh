@@ -119,7 +119,7 @@ else
 	warning_level="-Wall -Wextra -Werror"
 fi
 
-ignore_warnings=-Wno-newline-eof -Wno-poison-system-directories
+ignore_warnings="-Wno-newline-eof -Wno-poison-system-directories"
 
 if [[ "${g_config}" == debug ]]
 then
