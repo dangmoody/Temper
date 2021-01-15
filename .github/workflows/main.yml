@@ -15,8 +15,25 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  build-windows:
+  build-windows-msvc:
     runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build
+        run: |
+          .\scripts\build_msvc.bat --output scale_test_c.exe --config debug --source demos\scale_test_c\scale_test_c.c
+          .\scripts\build_msvc.bat --output scale_test_cpp.exe --config debug --source demos\scale_test_c\scale_test_cpp.cpp
+
+      - name: Run
+        run: |
+          .\bin\win64\msvc\debug\demos\scale_test_c.exe
+          .\bin\win64\msvc\debug\demos\scale_test_cpp.exe
+
+  build-windows-clang-gcc:
+    runs-on: windows-latest
+
     strategy:
       matrix:
         compiler: [clang, clang++, gcc, g++]
@@ -51,6 +68,7 @@ jobs:
 
   build-linux:
     runs-on: ubuntu-latest
+
     strategy:
       matrix:
         compiler: [clang, clang++, gcc, g++]
@@ -81,6 +99,7 @@ jobs:
 
   build-macos:
     runs-on: macos-latest
+
     strategy:
       matrix:
         compiler: [clang, clang++, gcc, g++]
