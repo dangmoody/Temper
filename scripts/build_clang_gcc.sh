@@ -154,7 +154,7 @@ fi
 
 defines=-D_CRT_SECURE_NO_WARNINGS
 
-linker_options_passthrough=
+linker_options_passthrough=""
 
 if [[ "${g_os_name}" != "macos" ]]; then
 	linker_options_passthrough="-Wl,--export-dynamic"
