@@ -75,7 +75,7 @@ extern "C" {
 #if defined( __linux__ )
 #include <linux/limits.h>
 #elif defined( __APPLE__ )
-#include <sys/limits.h>
+#include <sys/syslimits.h>
 #endif
 #include <time.h>
 #include <pthread.h>
