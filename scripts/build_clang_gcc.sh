@@ -23,7 +23,7 @@ echo OS IS: ${OSTYPE}
 g_os_name=""
 if [[ ${OSTYPE} == "linux-gnu" ]]; then
 	g_os_name="linux"
-elif [[ ${OSTYPE} == "darwin" ]]; then
+elif [[ ${OSTYPE} == darwin* ]]; then
 	g_os_name="macos"
 elif [[ ${OSTYPE} == "win32" ]]; then
 	g_os_name="win64"
