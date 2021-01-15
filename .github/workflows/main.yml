@@ -49,8 +49,8 @@ jobs:
       - name: Run
         run: .\bin\win64\${{ matrix.compiler }}\debug\demos\scale_test.exe
 
-  build-linux:
-    runs-on: ubuntu-latest
+  build-macos-and-linux:
+    runs-on: [ubuntu-latest, macos-latest]
     strategy:
       matrix:
         compiler: [clang, clang++, gcc, g++]
@@ -63,6 +63,10 @@ jobs:
             language: "cpp"
           - compiler: g++
             language: "cpp"
+          - os: ubuntu-latest
+            os-name: "linux"
+          - os: macos-latest
+            os-name: "macos"
 
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -74,7 +78,8 @@ jobs:
       - name: Build
         env:
           LANGUAGE: ${{ matrix.language }}
+          OS_NAME: ${{ matrix.os-name }}
         run: ./scripts/build_clang_gcc.sh --output scale_test.exe --compiler ${{ matrix.compiler }} --config debug --source demos/scale_test_c/scale_test_$LANGUAGE.$LANGUAGE
 
       - name: Run
-        run: ./bin/linux/${{ matrix.compiler }}/debug/demos/scale_test.exe
+        run: ./bin/${{ $OS_NAME }}/${{ matrix.compiler }}/debug/demos/scale_test.exe
