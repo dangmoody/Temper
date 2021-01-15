@@ -119,7 +119,12 @@ else
 	warning_level="-Wall -Wextra -Werror"
 fi
 
-ignore_warnings="-Wno-newline-eof -Wno-poison-system-directories"
+ignore_warnings="-Wno-newline-eof"
+
+# add warnings specifically for mac
+if [[ "g_os_name" == "macos" ]]; then
+	ignore_warnings="${ignore_warnings} -Wno-poison-system-directories"
+fi
 
 if [[ "${g_config}" == debug ]]
 then
