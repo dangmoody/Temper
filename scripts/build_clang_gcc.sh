@@ -19,7 +19,7 @@ g_config=""
 g_source_files=""
 
 # get os name
-echo OS IS: ${OSTYPE}
+#echo OS IS: ${OSTYPE}
 g_os_name=""
 if [[ ${OSTYPE} == "linux-gnu" ]]; then
 	g_os_name="linux"
@@ -155,11 +155,7 @@ fi
 
 defines=-D_CRT_SECURE_NO_WARNINGS
 
-linker_options_passthrough=""
-
-if [[ "${g_os_name}" != "macos" ]] && [[ "${g_compiler}" != gcc ]] && [[ "${g_compiler}" != g++ ]]; then
-	linker_options_passthrough="-Wl,--export-dynamic"
-fi
+linker_options_passthrough="-Wl,--export-dynamic"
 
 echo ${g_compiler} ${std} -o ${g_bin_dir}/${g_output} ${symbols} ${optimisations} ${defines} ${g_source_files} ${warning_level} ${ignore_warnings} -lm -ldl -lpthread ${linker_options_passthrough}
 ${g_compiler} ${std} -o ${g_bin_dir}/${g_output} ${symbols} ${optimisations} ${defines} ${g_source_files} ${warning_level} ${ignore_warnings} -lm -ldl -lpthread ${linker_options_passthrough}
