@@ -89,6 +89,8 @@ REM echo.
 set std=
 if /I [!compiler:~-2!] NEQ [++] (
 	set std=-std=c99
+) else (
+	set std=-std=c++11
 )
 
 set symbols=

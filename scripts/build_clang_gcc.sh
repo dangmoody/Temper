@@ -119,7 +119,12 @@ else
 	warning_level="-Wall -Wextra -Werror"
 fi
 
-ignore_warnings="-Wno-newline-eof"
+ignore_warnings=""
+
+# add warnings specifically for clang
+if [[ "${g_compiler}" == clang* ]]; then
+	ignore_warnings="${ignore_warnings} -Wno-newline-eof"
+fi
 
 # add warnings specifically for mac
 if [[ "${g_os_name}" == "macos" ]]; then
@@ -142,7 +147,7 @@ fi
 
 if [[ "${g_compiler}" == *++* ]]
 then
-	std=""
+	std=-std=c++11
 else
 	std=-std=c99
 fi
