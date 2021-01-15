@@ -1156,7 +1156,7 @@ static bool TemperGetFullEXEPathInternal( void ) {
 #elif defined( __APPLE__ )	// defined( _WIN32 )
 	int err = 0;
 
-	int bufsize = 0;
+	uint32_t bufsize = 0;
 
 	if ( _NSGetExecutablePath( g_temperTestContext.programName, &bufsize ) != 0 ) {
 		err = errno;
