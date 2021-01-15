@@ -72,7 +72,11 @@ extern "C" {
 #include <dlfcn.h>
 #include <errno.h>
 #include <sys/stat.h>
+#if defined( __linux__ )
 #include <linux/limits.h>
+#elif defined( __APPLE__ )
+#include <sys/limits.h>
+#endif
 #include <time.h>
 #include <pthread.h>
 #endif
