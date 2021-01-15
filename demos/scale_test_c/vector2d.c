@@ -7,7 +7,7 @@
 #endif
 
 #ifdef __cplusplus
-#define CONSTRUCT( type )	type
+#define CONSTRUCT( type )
 #else
 #define CONSTRUCT( type )	( type )
 #endif
