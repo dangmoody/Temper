@@ -29,21 +29,21 @@ jobs:
 
       - name: Build
         run: |
-          echo Building for C.
+          echo "Building for C."
           .\scripts\build_msvc.bat --output scale_test_c.exe --config debug --source demos\scale_test_c\scale_test_c.c
           echo `n
 
-          echo Building for C++.
+          echo "Building for C++."
           .\scripts\build_msvc.bat --output scale_test_cpp.exe --config debug --source demos\scale_test_c\scale_test_cpp.cpp
           echo `n
 
       - name: Run
         run: |
-          echo Running C.
+          echo "Running C."
           .\bin\win64\msvc\debug\demos\scale_test_c.exe
           echo `n
 
-          echo Running C++.
+          echo "Running C++."
           .\bin\win64\msvc\debug\demos\scale_test_cpp.exe
           echo `n
 
