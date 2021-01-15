@@ -6,7 +6,9 @@
 #pragma clang diagnostic ignored "-Wc++98-compat"
 #elif defined( __GNUC__ )
 #pragma gcc diagnostic push
+#if defined( __APPLE__ )
 #pragma gcc diagnostic ignored "-Wc++11-extensions"
+#endif
 #endif
 
 #ifdef __cplusplus
