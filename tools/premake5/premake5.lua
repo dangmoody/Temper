@@ -139,8 +139,8 @@ end
 
 
 g_demos_names = {
-	"basic_c",
-	"basic_suites_c",
+	"automation_c",
+	"automation_cpp",
 	"filtering",
 	"scale_test_c",
 	"threads"

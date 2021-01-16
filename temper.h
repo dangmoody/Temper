@@ -284,86 +284,6 @@ do { \
 #define TEMPER_TEST_NOT_ALMOST_EQUAL_OR_ABORT_M( conditionA, conditionB, tolerance, message ) \
 	TemperTestTrueInternal( !TEMPER_FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_TEST_NOT_ALMOST_EQUAL_OR_ABORT_M(" #conditionA ", " #conditionB ", " #tolerance ", ...)", true, message, __FILE__, __LINE__ )
 
-//----------------------------------------------------------
-
-#define TEMPER_TEST_GREATER_THAN( conditionA, conditionB ) \
-	TemperTestTrueInternal( conditionA > conditionB, "TEMPER_TEST_GREATER_THAN(" #conditionA " > " #conditionB ")", false, NULL, __FILE__, __LINE__ )
-
-//----------------------------------------------------------
-
-#define TEMPER_TEST_GREATER_THAN_M( conditionA, conditionB, message ) \
-	TemperTestTrueInternal( conditionA > conditionB, "TEMPER_TEST_GREATER_THAN_M(" #conditionA " > " #conditionB ", ...)", false, message, __FILE__, __LINE__ )
-
-//----------------------------------------------------------
-
-#define TEMPER_TEST_GREATER_THAN_OR_ABORT( conditionA, conditionB ) \
-	TemperTestTrueInternal( conditionA > conditionB, "TEMPER_TEST_GREATER_THAN_OR_ABORT(" #conditionA " > " #conditionB ")", true, NULL, __FILE__, __LINE__ )
-
-//----------------------------------------------------------
-
-#define TEMPER_TEST_GREATER_THAN_OR_ABORT_M( conditionA, conditionB, message ) \
-	TemperTestTrueInternal( conditionA > conditionB, "TEMPER_TEST_GREATER_THAN_OR_ABORT_M(" #conditionA " > " #conditionB ", ...)", true, message, __FILE__, __LINE__ )
-
-//----------------------------------------------------------
-
-#define TEMPER_TEST_GREATER_OR_EQUAL_THAN( conditionA, conditionB ) \
-	TemperTestTrueInternal( conditionA >= conditionB, "TEMPER_TEST_GREATER_OR_EQUAL_THAN(" #conditionA " >= " #conditionB ")", false, NULL, __FILE__, __LINE__ )
-
-//----------------------------------------------------------
-
-#define TEMPER_TEST_GREATER_OR_EQUAL_THAN_M( conditionA, conditionB, message ) \
-	TemperTestTrueInternal( conditionA >= conditionB, "TEMPER_TEST_GREATER_OR_EQUAL_THAN_M(" #conditionA " >= " #conditionB ", ...)", false, message, __FILE__, __LINE__ )
-
-//----------------------------------------------------------
-
-#define TEMPER_TEST_GREATER_OR_EQUAL_THAN_OR_ABORT( conditionA, conditionB ) \
-	TemperTestTrueInternal( conditionA >= conditionB, "TEMPER_TEST_GREATER_OR_EQUAL_THAN_OR_ABORT(" #conditionA " >= " #conditionB ")", true, NULL, __FILE__, __LINE__ )
-
-//----------------------------------------------------------
-
-#define TEMPER_TEST_GREATER_OR_EQUAL_THAN_OR_ABORT_M( conditionA, conditionB, message ) \
-	TemperTestTrueInternal( conditionA >= conditionB, "TEMPER_TEST_GREATER_OR_EQUAL_THAN_OR_ABORT_M(" #conditionA " >= " #conditionB ", ...)", true, message, __FILE__, __LINE__ )
-
-//----------------------------------------------------------
-
-#define TEMPER_TEST_LESS_THAN( conditionA, conditionB ) \
-	TemperTestTrueInternal( conditionA < conditionB, "TEMPER_TEST_LESS_THAN(" #conditionA " < " #conditionB ")", false, NULL, __FILE__, __LINE__ )
-
-//----------------------------------------------------------
-
-#define TEMPER_TEST_LESS_THAN_M( conditionA, conditionB, message ) \
-	TemperTestTrueInternal( conditionA < conditionB, "TEMPER_TEST_LESS_THAN_M(" #conditionA " < " #conditionB ", ...)", false, message, __FILE__, __LINE__ )
-
-//----------------------------------------------------------
-
-#define TEMPER_TEST_LESS_THAN_OR_ABORT( conditionA, conditionB ) \
-	TemperTestTrueInternal( conditionA < conditionB, "TEMPER_TEST_LESS_THAN_OR_ABORT(" #conditionA " < " #conditionB ")", true, NULL, __FILE__, __LINE__ )
-
-//----------------------------------------------------------
-
-#define TEMPER_TEST_LESS_THAN_OR_ABORT_M( conditionA, conditionB, message ) \
-	TemperTestTrueInternal( conditionA < conditionB, "TEMPER_TEST_LESS_THAN_OR_ABORT_M(" #conditionA " < " #conditionB ", ...)", true, message, __FILE__, __LINE__ )
-
-//----------------------------------------------------------
-
-#define TEMPER_TEST_LESS_OR_EQUAL_THAN( conditionA, conditionB ) \
-	TemperTestTrueInternal( conditionA <= conditionB, "TEMPER_TEST_LESS_OR_EQUAL_THAN(" #conditionA " <= " #conditionB ")", false, NULL, __FILE__, __LINE__ )
-
-//----------------------------------------------------------
-
-#define TEMPER_TEST_LESS_OR_EQUAL_THAN_M( conditionA, conditionB, message ) \
-	TemperTestTrueInternal( conditionA <= conditionB, "TEMPER_TEST_LESS_OR_EQUAL_THAN_M(" #conditionA " <= " #conditionB ", ...)", false, message, __FILE__, __LINE__ )
-
-//----------------------------------------------------------
-
-#define TEMPER_TEST_LESS_OR_EQUAL_THAN_OR_ABORT( conditionA, conditionB ) \
-	TemperTestTrueInternal( conditionA <= conditionB, "TEMPER_TEST_LESS_OR_EQUAL_THAN_OR_ABORT(" #conditionA " <= " #conditionB ")", true, NULL, __FILE__, __LINE__ )
-
-//----------------------------------------------------------
-
-#define TEMPER_TEST_LESS_OR_EQUAL_THAN_OR_ABORT_M( conditionA, conditionB, message ) \
-	TemperTestTrueInternal( conditionA <= conditionB, "TEMPER_TEST_LESS_OR_EQUAL_THAN_OR_ABORT_M(" #conditionA " <= " #conditionB ", ...)", true, message, __FILE__, __LINE__ )
-
 //==========================================================
 // User-Overridable Preprocessor defines
 //
@@ -445,12 +365,13 @@ typedef void( *temperTestCallback_t )( void );
 typedef temperBool32 ( *temperStringCompareFunc_t )( const char* lhs, const char* rhs );
 
 typedef struct temperSuiteTestInfo_t {
-	temperTestCallback_t		callback;
-	double						testTimeTaken;
-	temperTestFlag_t			testingFlag;
-	temperBool32				isExpectedToFail;
-	const char*					testNameStr;
-	const char*					suiteNameStr;
+	temperTestCallback_t	callback;
+	double					testTimeTaken;
+	temperTestFlag_t		testingFlag;
+	temperBool32			isExpectedToFail;
+	temperBool32			isExpectedToAbort;
+	const char*				testNameStr;
+	const char*				suiteNameStr;
 } temperSuiteTestInfo_t;
 
 typedef temperSuiteTestInfo_t( *temperTestInfoFetcherFunc_t )( void );
@@ -635,7 +556,7 @@ static temperBool32 TemperStringContainsInternal( const char* str, const char* s
 
 //----------------------------------------------------------
 
-#define TEMPER_DEFINE_TEST_INTERNAL( counter, suiteNameString, testName, testExpectedToFail, runFlag ) \
+#define TEMPER_DEFINE_TEST_INTERNAL( counter, suiteNameString, testName, testExpectedToFail, testExpectedToAbort, runFlag ) \
 \
 	/*1. Create a function with a name matching the test.*/ \
 	void ( testName )( void ); \
@@ -656,6 +577,7 @@ static temperBool32 TemperStringContainsInternal( const char* str, const char* s
 		TEMPER_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.callback = testName; \
 		TEMPER_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.suiteNameStr = suiteNameString; \
 		TEMPER_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.isExpectedToFail = testExpectedToFail; \
+		TEMPER_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.isExpectedToAbort = testExpectedToAbort; \
 		TEMPER_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.testNameStr = #testName; \
 		TEMPER_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.testingFlag = runFlag; \
 		return TEMPER_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation; \
@@ -667,26 +589,26 @@ static temperBool32 TemperStringContainsInternal( const char* str, const char* s
 //----------------------------------------------------------
 
 #ifdef TEMPER_SELF_TEST_ENABLED
-#define TEMPER_TEST( testName, testExpectedToFail, runFlag ) \
-	TEMPER_DEFINE_TEST_INTERNAL( __COUNTER__, NULL, testName, testExpectedToFail, runFlag )
+#define TEMPER_TEST( testName, testExpectedToFail, testExpectedToAbort, runFlag ) \
+	TEMPER_DEFINE_TEST_INTERNAL( __COUNTER__, NULL, testName, testExpectedToFail, testExpectedToAbort, runFlag )
 #else
 #define TEMPER_TEST( testName, runFlag ) \
-	TEMPER_DEFINE_TEST_INTERNAL( __COUNTER__, NULL, testName, false, runFlag )
+	TEMPER_DEFINE_TEST_INTERNAL( __COUNTER__, NULL, testName, false, false, runFlag )
 #endif //TEMPER_SELF_TEST_ENABLED
 
 //----------------------------------------------------------
 
 #ifdef TEMPER_SELF_TEST_ENABLED
-#define TEMPER_SUITE_TEST( suiteName, testName, testExpectedToFail, runFlag ) \
-	TEMPER_DEFINE_TEST_INTERNAL( __COUNTER__, #suiteName, testName, testExpectedToFail, runFlag )
+#define TEMPER_SUITE_TEST( suiteName, testName, testExpectedToFail, testExpectedToAbort, runFlag ) \
+	TEMPER_DEFINE_TEST_INTERNAL( __COUNTER__, #suiteName, testName, testExpectedToFail, testExpectedToAbort, runFlag )
 #else
 #define TEMPER_SUITE_TEST( suiteName, testName, runFlag ) \
-	TEMPER_DEFINE_TEST_INTERNAL( __COUNTER__, #suiteName, testName, false, runFlag )
+	TEMPER_DEFINE_TEST_INTERNAL( __COUNTER__, #suiteName, testName, false, false, runFlag )
 #endif //TEMPER_SELF_TEST_ENABLED
 
 //----------------------------------------------------------
 
-#define TEMPER_DECLARE_PARAMETRIC_SUITE_TEST_INTERNAL( suiteName, testName, testExpectedToFail, runFlag, ... )\
+#define TEMPER_DECLARE_PARAMETRIC_SUITE_TEST_INTERNAL( suiteName, testName, testExpectedToFail, testExpectedToAbort, runFlag, ... )\
 \
 	/*1. Create a function with a name matching the test with the provided parameters.*/\
 	void ( testName )( __VA_ARGS__ ); \
@@ -699,6 +621,7 @@ static temperBool32 TemperStringContainsInternal( const char* str, const char* s
 		TEMPER_CONCAT_INTERNAL( testName, _FuncType ) Callback; \
 		temperTestFlag_t	testingFlag; \
 		temperBool32		isExpectedToFail; \
+		temperBool32		isExpectedToAbort; \
 		const char*			testNameStr; \
 		const char*			suiteNameStr; \
 	} TEMPER_CONCAT_INTERNAL( testName, _ParametricTestInfo ); \
@@ -714,6 +637,7 @@ static temperBool32 TemperStringContainsInternal( const char* str, const char* s
 		TEMPER_CONCAT_INTERNAL( testName, _GlobalParametricInfo ).Callback = testName; \
 		TEMPER_CONCAT_INTERNAL( testName, _GlobalParametricInfo ).testingFlag = runFlag; \
 		TEMPER_CONCAT_INTERNAL( testName, _GlobalParametricInfo ).isExpectedToFail = testExpectedToFail; \
+		TEMPER_CONCAT_INTERNAL( testName, _GlobalParametricInfo ).isExpectedToAbort = testExpectedToAbort; \
 		TEMPER_CONCAT_INTERNAL( testName, _GlobalParametricInfo ).testNameStr = #testName; \
 		TEMPER_CONCAT_INTERNAL( testName, _GlobalParametricInfo ).suiteNameStr = suiteName; \
 	}\
@@ -724,26 +648,26 @@ static temperBool32 TemperStringContainsInternal( const char* str, const char* s
 //----------------------------------------------------------
 
 #ifdef TEMPER_SELF_TEST_ENABLED
-#define TEMPER_DECLARE_PARAMETRIC_TEST( testName, testExpectedToFail, runFlag, ... )\
-	TEMPER_DECLARE_PARAMETRIC_SUITE_TEST_INTERNAL( NULL, testName, testExpectedToFail, runFlag, __VA_ARGS__ )
+#define TEMPER_DECLARE_PARAMETRIC_TEST( testName, testExpectedToFail, testExpectedToAbort, runFlag, ... )\
+	TEMPER_DECLARE_PARAMETRIC_SUITE_TEST_INTERNAL( NULL, testName, testExpectedToFail, testExpectedToAbort, runFlag, __VA_ARGS__ )
 #else
 #define TEMPER_DECLARE_PARAMETRIC_TEST( testName, runFlag, ... )\
-	TEMPER_DECLARE_PARAMETRIC_SUITE_TEST_INTERNAL( NULL, testName, false, runFlag, __VA_ARGS__ )
+	TEMPER_DECLARE_PARAMETRIC_SUITE_TEST_INTERNAL( NULL, testName, false, false, runFlag, __VA_ARGS__ )
 #endif //TEMPER_SELF_TEST_ENABLED
 
 //----------------------------------------------------------
 
 #ifdef TEMPER_SELF_TEST_ENABLED
-#define TEMPER_DECLARE_PARAMETRIC_SUITE_TEST( suiteName, testName, testExpectedToFail, runFlag, ... )\
-	TEMPER_DECLARE_PARAMETRIC_SUITE_TEST_INTERNAL( #suiteName, testName, testExpectedToFail, runFlag, __VA_ARGS__ )
+#define TEMPER_DECLARE_PARAMETRIC_SUITE_TEST( suiteName, testName, testExpectedToFail, testExpectedToAbort, runFlag, ... )\
+	TEMPER_DECLARE_PARAMETRIC_SUITE_TEST_INTERNAL( #suiteName, testName, testExpectedToFail, testExpectedToAbort, runFlag, __VA_ARGS__ )
 #else
 #define TEMPER_DECLARE_PARAMETRIC_SUITE_TEST( suiteName, testName, runFlag, ... )\
-	TEMPER_DECLARE_PARAMETRIC_SUITE_TEST_INTERNAL( #suiteName, testName, false, runFlag, __VA_ARGS__ )
+	TEMPER_DECLARE_PARAMETRIC_SUITE_TEST_INTERNAL( #suiteName, testName, false, false, runFlag, __VA_ARGS__ )
 #endif //TEMPER_SELF_TEST_ENABLED
 
 //----------------------------------------------------------
 
-#define TEMPER_INVOKE_PARAMETRIC_TEST_INTERNAL( counter, nameOfTestToCall, parametricInvokationName, testExpectedToFail, ... ) \
+#define TEMPER_INVOKE_PARAMETRIC_TEST_INTERNAL( counter, nameOfTestToCall, parametricInvokationName, testExpectedToFail, testExpectedToAbort, ... ) \
 \
 	/*1. Create a function with a name matching the test.*/ \
 	void ( parametricInvokationName )( void ); \
@@ -770,6 +694,7 @@ static temperBool32 TemperStringContainsInternal( const char* str, const char* s
 		TEMPER_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation.callback = parametricInvokationName; \
 		TEMPER_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation.suiteNameStr = TEMPER_CONCAT_INTERNAL( nameOfTestToCall, _GlobalParametricInfo ).suiteNameStr; \
 		TEMPER_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation.isExpectedToFail = testExpectedToFail; \
+		TEMPER_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation.isExpectedToAbort = testExpectedToAbort; \
 		TEMPER_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation.testNameStr = #parametricInvokationName; \
 		TEMPER_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation.testingFlag = TEMPER_CONCAT_INTERNAL( nameOfTestToCall, _GlobalParametricInfo ).testingFlag; \
 		return TEMPER_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation; \
@@ -781,11 +706,11 @@ static temperBool32 TemperStringContainsInternal( const char* str, const char* s
 //----------------------------------------------------------
 
 #ifdef TEMPER_SELF_TEST_ENABLED
-#define TEMPER_INVOKE_PARAMETRIC_TEST( nameOfTestToCall, parametricInvokationName, testExpectedToFail, ... ) \
-	TEMPER_INVOKE_PARAMETRIC_TEST_INTERNAL( __COUNTER__, nameOfTestToCall, parametricInvokationName, testExpectedToFail, __VA_ARGS__ )
+#define TEMPER_INVOKE_PARAMETRIC_TEST( nameOfTestToCall, parametricInvokationName, testExpectedToFail, testExpectedToAbort, ... ) \
+	TEMPER_INVOKE_PARAMETRIC_TEST_INTERNAL( __COUNTER__, nameOfTestToCall, parametricInvokationName, testExpectedToFail, testExpectedToAbort, __VA_ARGS__ )
 #else
 #define TEMPER_INVOKE_PARAMETRIC_TEST( nameOfTestToCall, parametricInvokationName, ... ) \
-	TEMPER_INVOKE_PARAMETRIC_TEST_INTERNAL( __COUNTER__, nameOfTestToCall, parametricInvokationName, false, __VA_ARGS__ )
+	TEMPER_INVOKE_PARAMETRIC_TEST_INTERNAL( __COUNTER__, nameOfTestToCall, parametricInvokationName, false, false, __VA_ARGS__ )
 #endif // TEMPER_SELF_TEST_ENABLED
 
 //==========================================================
@@ -1340,11 +1265,33 @@ static int TemperExecuteAllTestsInternal() {
 
 					g_temperTestContext.totalTestsExecuted += 1;
 
-					if ( g_temperTestContext.currentTestErrorCount > 0 && !information.isExpectedToFail ) {
+// MY: not sure how much I like this. Should we be interupting normal code flow for tests?
+// I'm considering a TemperDeclareExpectedTestResults(int32_t expectedPassedCount, expectedFailCount, etc)
+// function to invoke in the automation main(). Yes we'd need to update it with every new test but I see
+// this as a positive for assurance everything works.
+#ifndef TEMPER_SELF_TEST_ENABLED
+					if ( g_temperTestContext.currentTestErrorCount > 0 ) {
 						g_temperTestContext.testsFailed += 1;
 					} else {
 						g_temperTestContext.testsPassed += 1;
 					}
+#else
+					if ( ( information.isExpectedToAbort && g_temperTestContext.currentTestWasAborted ) ||
+						 ( information.isExpectedToFail && g_temperTestContext.currentTestErrorCount > 0 ) ) {
+						g_temperTestContext.testsPassed += 1;
+
+						// we only care about un-exected aborts / failures
+						g_temperTestContext.testsAborted -= information.isExpectedToAbort && g_temperTestContext.currentTestWasAborted ? 1 : 0;
+						g_temperTestContext.currentTestErrorCount = 0;
+						g_temperTestContext.currentTestWasAborted = false;
+					}
+					else if ( g_temperTestContext.currentTestErrorCount == 0 ) {
+						g_temperTestContext.testsPassed += 1;
+					}
+					else {
+						g_temperTestContext.testsFailed += 1;
+					}
+#endif //TEMPER_SELF_TEST_ENABLED
 				} else {
 					g_temperTestContext.testsSkipped += 1;
 				}
