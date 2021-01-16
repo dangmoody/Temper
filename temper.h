@@ -63,6 +63,9 @@ extern "C" {
 // if anyone knows of a better way to get around that without disabling all pedantic warnings I'd love to hear about it
 // submit an issue telling me how: https://github.com/dangmoody/Temper/issues
 #pragma GCC diagnostic ignored "-Wpedantic"
+#elif defined( _MSC_VER )
+#pragma warning( push, 4 )
+#pragma warning( disable : 4505 )	// unused function
 #endif	// defined( __clang__ )
 
 #if defined( __linux__ ) || defined( __APPLE__ )
@@ -1379,6 +1382,8 @@ static int TemperExecuteAllTestsWithArgumentsInternal( int argc, char** argv ) {
 #pragma clang diagnostic pop
 #elif defined( __GNUC__ )
 #pragma GCC diagnostic pop
+#elif defined( _MSC_VER )
+#pragma warning( pop )
 #endif // defined( __GNUC__ ) || defined( __clang__ )
 
 #ifdef __cplusplus
