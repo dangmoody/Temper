@@ -378,7 +378,7 @@ do { \
 #endif
 
 #ifndef TEMPER_ASSERT
-#define TEMPER_ASSERT				assert
+#define TEMPER_ASSERT			assert
 #endif
 
 #ifndef TEMPER_SNPRINTF
@@ -386,15 +386,15 @@ do { \
 #endif
 
 #ifndef TEMPER_LOG
-#define TEMPER_LOG					TemperLogInternal
+#define TEMPER_LOG				TemperLogInternal
 #endif
 
 #ifndef TEMPER_LOG_WARNING
-#define TEMPER_LOG_WARNING			TemperLogWarningInternal
+#define TEMPER_LOG_WARNING		TemperLogWarningInternal
 #endif
 
 #ifndef TEMPER_LOG_ERROR
-#define TEMPER_LOG_ERROR			TemperLogErrorInternal
+#define TEMPER_LOG_ERROR		TemperLogErrorInternal
 #endif
 
 #ifndef TEMPER_FLOAT_EQUALS
@@ -402,15 +402,15 @@ do { \
 #endif
 
 #ifndef TEMPER_STRING_EQUALS
-#define TEMPER_STRING_EQUALS		TemperStringEqualsInternal
+#define TEMPER_STRING_EQUALS	TemperStringEqualsInternal
 #endif
 
 #ifndef TEMPER_STRING_CONTAINS
-#define TEMPER_STRING_CONTAINS		TemperStringContainsInternal
+#define TEMPER_STRING_CONTAINS	TemperStringContainsInternal
 #endif
 
 #ifndef TEMPER_GET_TIMESTAMP
-#define TEMPER_GET_TIMESTAMP		TemperGetTimestampInternal
+#define TEMPER_GET_TIMESTAMP	TemperGetTimestampInternal
 #endif
 
 //==========================================================
@@ -442,12 +442,12 @@ typedef void( *temperTestCallback_t )( void );
 typedef temperBool32 ( *temperStringCompareFunc_t )( const char* lhs, const char* rhs );
 
 typedef struct temperSuiteTestInfo_t {
-	temperTestCallback_t	callback;
-	double					testTimeTaken;
-	temperTestFlag_t		testingFlag;
-	temperBool32			isExpectedToFail;
-	const char*				testNameStr;
-	const char*				suiteNameStr;
+	temperTestCallback_t		callback;
+	double						testTimeTaken;
+	temperTestFlag_t			testingFlag;
+	temperBool32				isExpectedToFail;
+	const char*					testNameStr;
+	const char*					suiteNameStr;
 } temperSuiteTestInfo_t;
 
 typedef temperSuiteTestInfo_t( *temperTestInfoFetcherFunc_t )( void );
@@ -456,26 +456,26 @@ typedef temperSuiteTestInfo_t( *temperTestInfoFetcherFunc_t )( void );
 
 typedef struct temperTestContext_t {
 #ifdef _WIN32
-	LARGE_INTEGER		timestampFrequency;
+	LARGE_INTEGER				timestampFrequency;
 #endif
-	double				currentTestStartTime;
-	double				currentTestEndTime;
-	uint32_t			testsPassed;
-	uint32_t			testsFailed;
-	uint32_t			testsAborted;
-	uint32_t			testsSkipped;
-	uint32_t			totalTestsDeclared; // Gets set in the main function with a preprocessor
-	uint32_t			totalTestsFoundWithFilters;
-	uint32_t			totalTestsExecuted;
-	uint32_t			currentTestErrorCount;
-	temperBool32		currentTestWasAborted;
-	temperBool32		partialFilter;
-	temperTimeUnit_t	timeUnit;
-	uint32_t			pad0;
-	char				programName[TEMPER_MAX_PATH];
-	const char*			suiteFilterPrevious;
-	const char*			suiteFilter;
-	const char*			testFilter;
+	double						currentTestStartTime;
+	double						currentTestEndTime;
+	uint32_t					testsPassed;
+	uint32_t					testsFailed;
+	uint32_t					testsAborted;
+	uint32_t					testsSkipped;
+	uint32_t					totalTestsDeclared; // Gets set in the main function with a preprocessor
+	uint32_t					totalTestsFoundWithFilters;
+	uint32_t					totalTestsExecuted;
+	uint32_t					currentTestErrorCount;
+	temperBool32				currentTestWasAborted;
+	temperBool32				partialFilter;
+	temperTimeUnit_t			timeUnit;
+	uint32_t					pad0;
+	char						programName[TEMPER_MAX_PATH];
+	const char*					suiteFilterPrevious;
+	const char*					suiteFilter;
+	const char*					testFilter;
 } temperTestContext_t;
 
 //----------------------------------------------------------
@@ -500,7 +500,7 @@ typedef const char*				temperTextColor_t;
 // GLOBALS
 //==========================================================
 
-static temperTestContext_t			g_temperTestContext;
+static temperTestContext_t		g_temperTestContext;
 
 //==========================================================
 // FUNCTIONS - BASE HELPER/UTILITY FUNCTIONS
@@ -1056,7 +1056,10 @@ static void* TemperGetProcAddressInternal( void* handle, const char* funcName ) 
 	if ( !proc ) {
 		const char* platformErrorMsg = "";
 #if defined( __APPLE__ ) || defined( __linux__ )
-		platformErrorMsg = "\nOn MacOS/Linux you need to explicitly allow dynamic symbol exporting (E.G.: on Clang use: \"-Wl,--export-dynamic\").\n";
+		platformErrorMsg =
+			"\n"
+			"On MacOS and Linux you need to explicitly allow dynamic symbol exporting via your compiler options.\n"
+			"E.G.: Using \"--export-dynamic\" or some other variant.\n";
 #endif
 
 		TEMPER_LOG_ERROR( "Failed to find function \"%s\".%s\n", funcName, platformErrorMsg );
