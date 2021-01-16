@@ -141,9 +141,7 @@ end
 g_demos_names = {
 	"automation_c",
 	"automation_cpp",
-	"filtering",
-	"scale_test_c",
-	"threads"
+	"scale_test_c"
 }
 
 group( "demos" )
