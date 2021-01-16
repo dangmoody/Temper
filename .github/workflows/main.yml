@@ -30,21 +30,21 @@ jobs:
       - name: Build
         run: |
           echo "Building for C."
-          .\scripts\build_msvc.bat --output scale_test_c.exe --config debug --source demos\scale_test_c\scale_test_c.c
+          .\scripts\build_msvc.bat --output automation_c.exe --config debug --source demos\automation_c\automation_c.c
           echo `n
 
           echo "Building for C++."
-          .\scripts\build_msvc.bat --output scale_test_cpp.exe --config debug --source demos\scale_test_c\scale_test_cpp.cpp
+          .\scripts\build_msvc.bat --output automation_cpp.exe --config debug --source demos\automation_cpp\automation_cpp.cpp
           echo `n
 
       - name: Run
         run: |
           echo "Running C."
-          .\bin\win64\msvc\debug\demos\scale_test_c.exe
+          .\bin\win64\msvc\debug\demos\automation_c.exe
           echo `n
 
           echo "Running C++."
-          .\bin\win64\msvc\debug\demos\scale_test_cpp.exe
+          .\bin\win64\msvc\debug\demos\automation_cpp.exe
           echo `n
 
   #
@@ -79,10 +79,10 @@ jobs:
       - name: Build
         env:
           LANGUAGE: ${{ matrix.language }}
-        run: .\scripts\build_clang_gcc.bat --output scale_test.exe --compiler ${{ matrix.compiler }} --config debug --source demos\scale_test_c\scale_test_%LANGUAGE%.%LANGUAGE%
+        run: .\scripts\build_clang_gcc.bat --output automation.exe --compiler ${{ matrix.compiler }} --config debug --source demos\automation_%LANGUAGE%\automation_%LANGUAGE%.%LANGUAGE%
 
       - name: Run
-        run: .\bin\win64\${{ matrix.compiler }}\debug\demos\scale_test.exe
+        run: .\bin\win64\${{ matrix.compiler }}\debug\demos\automation.exe
 
   #
   # linux
@@ -113,10 +113,10 @@ jobs:
       - name: Build
         env:
           LANGUAGE: ${{ matrix.language }}
-        run: ./scripts/build_clang_gcc.sh --output scale_test.exe --compiler ${{ matrix.compiler }} --config debug --source demos/scale_test_c/scale_test_$LANGUAGE.$LANGUAGE
+        run: ./scripts/build_clang_gcc.sh --output automation.exe --compiler ${{ matrix.compiler }} --config debug --source demos/automation_$LANGUAGE/automation_$LANGUAGE.$LANGUAGE
 
       - name: Run
-        run: ./bin/linux/${{ matrix.compiler }}/debug/demos/scale_test.exe
+        run: ./bin/linux/${{ matrix.compiler }}/debug/demos/automation.exe
 
   #
   # mac os
@@ -144,7 +144,7 @@ jobs:
       - name: Build
         env:
           LANGUAGE: ${{ matrix.language }}
-        run: ./scripts/build_clang_gcc.sh --output scale_test.exe --compiler ${{ matrix.compiler }} --config debug --source demos/scale_test_c/scale_test_$LANGUAGE.$LANGUAGE
+        run: ./scripts/build_clang_gcc.sh --output automation.exe --compiler ${{ matrix.compiler }} --config debug --source demos/automation_$LANGUAGE/automation_$LANGUAGE.$LANGUAGE
 
       - name: Run
-        run: ./bin/macos/${{ matrix.compiler }}/debug/demos/scale_test.exe
+        run: ./bin/macos/${{ matrix.compiler }}/debug/demos/automation.exe
