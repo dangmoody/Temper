@@ -362,7 +362,6 @@ typedef void( *temperTestCallback_t )( void );
 typedef temperBool32 ( *temperStringCompareFunc_t )( const char* lhs, const char* rhs );
 
 typedef struct temperSuiteTestInfo_t {
-<<<<<<< HEAD
 	temperTestCallback_t	callback;
 	double					testTimeTaken;
 	temperTestFlag_t		testingFlag;
@@ -370,14 +369,6 @@ typedef struct temperSuiteTestInfo_t {
 	temperBool32			isExpectedToAbort;
 	const char*				testNameStr;
 	const char*				suiteNameStr;
-=======
-	temperTestCallback_t		callback;
-	double						testTimeTaken;
-	temperTestFlag_t			testingFlag;
-	temperBool32				isExpectedToFail;
-	const char*					testNameStr;
-	const char*					suiteNameStr;
->>>>>>> a4d0287870b30a85e95b209cd766135d0abfef4c
 } temperSuiteTestInfo_t;
 
 typedef temperSuiteTestInfo_t( *temperTestInfoFetcherFunc_t )( void );
