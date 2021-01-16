@@ -125,6 +125,8 @@ extern "C" {
 #error Uncrecognised platform.  It appears Temper does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Temper/issues
 #endif	// _WIN32
 
+#define TEMPER_BIT( x )	( 1 << ( x ) )
+
 //==========================================================
 // Public API
 //==========================================================
@@ -360,18 +362,24 @@ typedef enum temperTimeUnit_t {
 
 //----------------------------------------------------------
 
+typedef enum temperTestExpectationFlagBits_t {
+	TEMPER_TEST_EXPECTATION_NONE		= 0,
+	TEMPER_TEST_EXPECTATION_FLAG_FAIL	= TEMPER_BIT( 0 ),
+	TEMPER_TEST_EXPECTATION_FLAG_ABORT	= TEMPER_BIT( 1 )
+} temperTestExpectationFlagBits_t;
+typedef uint32_t temperTestExpectationFlags_t;
+
+//----------------------------------------------------------
+
 typedef void( *temperTestCallback_t )( void );
 
-typedef temperBool32 ( *temperStringCompareFunc_t )( const char* lhs, const char* rhs );
-
 typedef struct temperSuiteTestInfo_t {
-	temperTestCallback_t	callback;
-	double					testTimeTaken;
-	temperTestFlag_t		testingFlag;
-	temperBool32			isExpectedToFail;
-	temperBool32			isExpectedToAbort;
-	const char*				testNameStr;
-	const char*				suiteNameStr;
+	temperTestCallback_t			callback;
+	double							testTimeTaken;
+	temperTestFlag_t				testingFlag;
+	temperTestExpectationFlags_t	expectationFlags;
+	const char*						testNameStr;
+	const char*						suiteNameStr;
 } temperSuiteTestInfo_t;
 
 typedef temperSuiteTestInfo_t( *temperTestInfoFetcherFunc_t )( void );
@@ -556,7 +564,7 @@ static temperBool32 TemperStringContainsInternal( const char* str, const char* s
 
 //----------------------------------------------------------
 
-#define TEMPER_DEFINE_TEST_INTERNAL( counter, suiteNameString, testName, testExpectedToFail, testExpectedToAbort, runFlag ) \
+#define TEMPER_DEFINE_TEST_INTERNAL( counter, suiteNameString, testName, testExpectationFlags, runFlag ) \
 \
 	/*1. Create a function with a name matching the test.*/ \
 	void ( testName )( void ); \
@@ -576,8 +584,7 @@ static temperBool32 TemperStringContainsInternal( const char* str, const char* s
 	temperSuiteTestInfo_t TEMPER_CONCAT_INTERNAL( temper_test_info_fetcher_, counter )( void ) { \
 		TEMPER_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.callback = testName; \
 		TEMPER_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.suiteNameStr = suiteNameString; \
-		TEMPER_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.isExpectedToFail = testExpectedToFail; \
-		TEMPER_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.isExpectedToAbort = testExpectedToAbort; \
+		TEMPER_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.expectationFlags = testExpectationFlags; \
 		TEMPER_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.testNameStr = #testName; \
 		TEMPER_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.testingFlag = runFlag; \
 		return TEMPER_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation; \
@@ -589,26 +596,26 @@ static temperBool32 TemperStringContainsInternal( const char* str, const char* s
 //----------------------------------------------------------
 
 #ifdef TEMPER_SELF_TEST_ENABLED
-#define TEMPER_TEST( testName, testExpectedToFail, testExpectedToAbort, runFlag ) \
-	TEMPER_DEFINE_TEST_INTERNAL( __COUNTER__, NULL, testName, testExpectedToFail, testExpectedToAbort, runFlag )
+#define TEMPER_TEST( testName, expectationFlags, runFlag ) \
+	TEMPER_DEFINE_TEST_INTERNAL( __COUNTER__, NULL, testName, expectationFlags, runFlag )
 #else
 #define TEMPER_TEST( testName, runFlag ) \
-	TEMPER_DEFINE_TEST_INTERNAL( __COUNTER__, NULL, testName, false, false, runFlag )
+	TEMPER_DEFINE_TEST_INTERNAL( __COUNTER__, NULL, testName, TEMPER_TEST_EXPECTATION_NONE, runFlag )
 #endif //TEMPER_SELF_TEST_ENABLED
 
 //----------------------------------------------------------
 
 #ifdef TEMPER_SELF_TEST_ENABLED
-#define TEMPER_SUITE_TEST( suiteName, testName, testExpectedToFail, testExpectedToAbort, runFlag ) \
-	TEMPER_DEFINE_TEST_INTERNAL( __COUNTER__, #suiteName, testName, testExpectedToFail, testExpectedToAbort, runFlag )
+#define TEMPER_SUITE_TEST( suiteName, testName, testExpectationFlags, runFlag ) \
+	TEMPER_DEFINE_TEST_INTERNAL( __COUNTER__, #suiteName, testName, testExpectationFlags, runFlag )
 #else
 #define TEMPER_SUITE_TEST( suiteName, testName, runFlag ) \
-	TEMPER_DEFINE_TEST_INTERNAL( __COUNTER__, #suiteName, testName, false, false, runFlag )
+	TEMPER_DEFINE_TEST_INTERNAL( __COUNTER__, #suiteName, testName, TEMPER_TEST_EXPECTATION_NONE, runFlag )
 #endif //TEMPER_SELF_TEST_ENABLED
 
 //----------------------------------------------------------
 
-#define TEMPER_DECLARE_PARAMETRIC_SUITE_TEST_INTERNAL( suiteName, testName, testExpectedToFail, testExpectedToAbort, runFlag, ... )\
+#define TEMPER_DECLARE_PARAMETRIC_SUITE_TEST_INTERNAL( suiteName, testName, testExpectationFlags, runFlag, ... )\
 \
 	/*1. Create a function with a name matching the test with the provided parameters.*/\
 	void ( testName )( __VA_ARGS__ ); \
@@ -619,11 +626,10 @@ static temperBool32 TemperStringContainsInternal( const char* str, const char* s
 	/*3. Stash this function and run info in a struct unique to this.*/ \
 	typedef struct TEMPER_CONCAT_INTERNAL( testName, _ParametricTestInfo ) { \
 		TEMPER_CONCAT_INTERNAL( testName, _FuncType ) Callback; \
-		temperTestFlag_t	testingFlag; \
-		temperBool32		isExpectedToFail; \
-		temperBool32		isExpectedToAbort; \
-		const char*			testNameStr; \
-		const char*			suiteNameStr; \
+		temperTestFlag_t				testingFlag; \
+		temperTestExpectationFlags_t	expectationFlags; \
+		const char*						testNameStr; \
+		const char*						suiteNameStr; \
 	} TEMPER_CONCAT_INTERNAL( testName, _ParametricTestInfo ); \
 \
 	/*4. Create a global instance of this new struct for us to access and write data about this test to.*/ \
@@ -636,8 +642,7 @@ static temperBool32 TemperStringContainsInternal( const char* str, const char* s
 	void TEMPER_CONCAT_INTERNAL( testName, _ParametricTestInfoBinder )( void ) { \
 		TEMPER_CONCAT_INTERNAL( testName, _GlobalParametricInfo ).Callback = testName; \
 		TEMPER_CONCAT_INTERNAL( testName, _GlobalParametricInfo ).testingFlag = runFlag; \
-		TEMPER_CONCAT_INTERNAL( testName, _GlobalParametricInfo ).isExpectedToFail = testExpectedToFail; \
-		TEMPER_CONCAT_INTERNAL( testName, _GlobalParametricInfo ).isExpectedToAbort = testExpectedToAbort; \
+		TEMPER_CONCAT_INTERNAL( testName, _GlobalParametricInfo ).expectationFlags = testExpectationFlags; \
 		TEMPER_CONCAT_INTERNAL( testName, _GlobalParametricInfo ).testNameStr = #testName; \
 		TEMPER_CONCAT_INTERNAL( testName, _GlobalParametricInfo ).suiteNameStr = suiteName; \
 	}\
@@ -648,26 +653,26 @@ static temperBool32 TemperStringContainsInternal( const char* str, const char* s
 //----------------------------------------------------------
 
 #ifdef TEMPER_SELF_TEST_ENABLED
-#define TEMPER_DECLARE_PARAMETRIC_TEST( testName, testExpectedToFail, testExpectedToAbort, runFlag, ... )\
-	TEMPER_DECLARE_PARAMETRIC_SUITE_TEST_INTERNAL( NULL, testName, testExpectedToFail, testExpectedToAbort, runFlag, __VA_ARGS__ )
+#define TEMPER_DECLARE_PARAMETRIC_TEST( testName, testExpectationFlags, runFlag, ... )\
+	TEMPER_DECLARE_PARAMETRIC_SUITE_TEST_INTERNAL( NULL, testName, testExpectationFlags, runFlag, __VA_ARGS__ )
 #else
 #define TEMPER_DECLARE_PARAMETRIC_TEST( testName, runFlag, ... )\
-	TEMPER_DECLARE_PARAMETRIC_SUITE_TEST_INTERNAL( NULL, testName, false, false, runFlag, __VA_ARGS__ )
+	TEMPER_DECLARE_PARAMETRIC_SUITE_TEST_INTERNAL( NULL, testName, TEMPER_TEST_EXPECTATION_NONE, runFlag, __VA_ARGS__ )
 #endif //TEMPER_SELF_TEST_ENABLED
 
 //----------------------------------------------------------
 
 #ifdef TEMPER_SELF_TEST_ENABLED
-#define TEMPER_DECLARE_PARAMETRIC_SUITE_TEST( suiteName, testName, testExpectedToFail, testExpectedToAbort, runFlag, ... )\
-	TEMPER_DECLARE_PARAMETRIC_SUITE_TEST_INTERNAL( #suiteName, testName, testExpectedToFail, testExpectedToAbort, runFlag, __VA_ARGS__ )
+#define TEMPER_DECLARE_PARAMETRIC_SUITE_TEST( suiteName, testName, testExpectationFlags, runFlag, ... )\
+	TEMPER_DECLARE_PARAMETRIC_SUITE_TEST_INTERNAL( #suiteName, testName, testExpectationFlags, runFlag, __VA_ARGS__ )
 #else
 #define TEMPER_DECLARE_PARAMETRIC_SUITE_TEST( suiteName, testName, runFlag, ... )\
-	TEMPER_DECLARE_PARAMETRIC_SUITE_TEST_INTERNAL( #suiteName, testName, false, false, runFlag, __VA_ARGS__ )
+	TEMPER_DECLARE_PARAMETRIC_SUITE_TEST_INTERNAL( #suiteName, testName, TEMPER_TEST_EXPECTATION_NONE, runFlag, __VA_ARGS__ )
 #endif //TEMPER_SELF_TEST_ENABLED
 
 //----------------------------------------------------------
 
-#define TEMPER_INVOKE_PARAMETRIC_TEST_INTERNAL( counter, nameOfTestToCall, parametricInvokationName, testExpectedToFail, testExpectedToAbort, ... ) \
+#define TEMPER_INVOKE_PARAMETRIC_TEST_INTERNAL( counter, nameOfTestToCall, parametricInvokationName, testExpectationFlags, ... ) \
 \
 	/*1. Create a function with a name matching the test.*/ \
 	void ( parametricInvokationName )( void ); \
@@ -693,8 +698,7 @@ static temperBool32 TemperStringContainsInternal( const char* str, const char* s
 		TEMPER_CONCAT_INTERNAL( nameOfTestToCall, _ParametricTestInfoBinder )();/*Make it so we can grab the needed information out of the test function's global info*/\
 		TEMPER_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation.callback = parametricInvokationName; \
 		TEMPER_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation.suiteNameStr = TEMPER_CONCAT_INTERNAL( nameOfTestToCall, _GlobalParametricInfo ).suiteNameStr; \
-		TEMPER_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation.isExpectedToFail = testExpectedToFail; \
-		TEMPER_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation.isExpectedToAbort = testExpectedToAbort; \
+		TEMPER_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation.expectationFlags = testExpectationFlags; \
 		TEMPER_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation.testNameStr = #parametricInvokationName; \
 		TEMPER_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation.testingFlag = TEMPER_CONCAT_INTERNAL( nameOfTestToCall, _GlobalParametricInfo ).testingFlag; \
 		return TEMPER_CONCAT_INTERNAL( parametricInvokationName, _GlobalInfo ).testInformation; \
@@ -706,11 +710,11 @@ static temperBool32 TemperStringContainsInternal( const char* str, const char* s
 //----------------------------------------------------------
 
 #ifdef TEMPER_SELF_TEST_ENABLED
-#define TEMPER_INVOKE_PARAMETRIC_TEST( nameOfTestToCall, parametricInvokationName, testExpectedToFail, testExpectedToAbort, ... ) \
-	TEMPER_INVOKE_PARAMETRIC_TEST_INTERNAL( __COUNTER__, nameOfTestToCall, parametricInvokationName, testExpectedToFail, testExpectedToAbort, __VA_ARGS__ )
+#define TEMPER_INVOKE_PARAMETRIC_TEST( nameOfTestToCall, testExpectationFlags, ... ) \
+	TEMPER_INVOKE_PARAMETRIC_TEST_INTERNAL( __COUNTER__, nameOfTestToCall, testExpectationFlags, __VA_ARGS__ )
 #else
 #define TEMPER_INVOKE_PARAMETRIC_TEST( nameOfTestToCall, parametricInvokationName, ... ) \
-	TEMPER_INVOKE_PARAMETRIC_TEST_INTERNAL( __COUNTER__, nameOfTestToCall, parametricInvokationName, false, false, __VA_ARGS__ )
+	TEMPER_INVOKE_PARAMETRIC_TEST_INTERNAL( __COUNTER__, nameOfTestToCall, parametricInvokationName, TEMPER_TEST_EXPECTATION_NONE, __VA_ARGS__ )
 #endif // TEMPER_SELF_TEST_ENABLED
 
 //==========================================================
@@ -817,6 +821,8 @@ static void TemperOnAfterTest_UserModdable( const temperSuiteTestInfo_t* informa
 //
 // You as the user probably don't want to be directly touching these.
 //==========================================================
+
+typedef temperBool32 ( *temperStringCompareFunc_t )( const char* lhs, const char* rhs );
 
 // MY: I'd like to eventually add more security around this,
 // such as ensuring it's only ever called/used once and thowing
@@ -1265,10 +1271,6 @@ static int TemperExecuteAllTestsInternal() {
 
 					g_temperTestContext.totalTestsExecuted += 1;
 
-// MY: not sure how much I like this. Should we be interupting normal code flow for tests?
-// I'm considering a TemperDeclareExpectedTestResults(int32_t expectedPassedCount, expectedFailCount, etc)
-// function to invoke in the automation main(). Yes we'd need to update it with every new test but I see
-// this as a positive for assurance everything works.
 #ifndef TEMPER_SELF_TEST_ENABLED
 					if ( g_temperTestContext.currentTestErrorCount > 0 ) {
 						g_temperTestContext.testsFailed += 1;
@@ -1276,12 +1278,14 @@ static int TemperExecuteAllTestsInternal() {
 						g_temperTestContext.testsPassed += 1;
 					}
 #else
-					if ( ( information.isExpectedToAbort && g_temperTestContext.currentTestWasAborted ) ||
-						 ( information.isExpectedToFail && g_temperTestContext.currentTestErrorCount > 0 ) ) {
+					temperBool32 expectedToAbort = ( information.expectationFlags & TEMPER_TEST_EXPECTATION_FLAG_ABORT );
+
+					if ( ( expectedToAbort && g_temperTestContext.currentTestWasAborted ) ||
+						 ( ( information.expectationFlags & TEMPER_TEST_EXPECTATION_FLAG_FAIL ) && g_temperTestContext.currentTestErrorCount > 0 ) ) {
 						g_temperTestContext.testsPassed += 1;
 
 						// we only care about un-exected aborts / failures
-						g_temperTestContext.testsAborted -= information.isExpectedToAbort && g_temperTestContext.currentTestWasAborted ? 1 : 0;
+						g_temperTestContext.testsAborted -= expectedToAbort && g_temperTestContext.currentTestWasAborted ? 1 : 0;
 						g_temperTestContext.currentTestErrorCount = 0;
 						g_temperTestContext.currentTestWasAborted = false;
 					}
