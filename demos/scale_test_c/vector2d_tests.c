@@ -46,10 +46,10 @@ TEMPER_DECLARE_PARAMETRIC_SUITE_TEST( AdditionSuite, AdditionPowerSet, TEMPER_TE
 	TEMPER_TEST_FLOAT_EQUAL_M( result, expected, "Addition function is broken" );
 }
 
-TEMPER_INVOKE_PARAMETRIC_TEST( AdditionPowerSet, AddTest0, 5, 15.f, 20.f );
-TEMPER_INVOKE_PARAMETRIC_TEST( AdditionPowerSet, AddTest1, 7, 3.f, 10.f );
-//TEMPER_INVOKE_PARAMETRIC_TEST( AdditionPowerSet, AddTest2, -9.1f, 14.6f, 7.5f ); // expecting this to fail
-TEMPER_INVOKE_PARAMETRIC_TEST( AdditionPowerSet, AddTest3, -63.f, 2.f, -61.f );
+TEMPER_INVOKE_PARAMETRIC_TEST( AdditionPowerSet, 5, 15.f, 20.f );
+TEMPER_INVOKE_PARAMETRIC_TEST( AdditionPowerSet, 7, 3.f, 10.f );
+//TEMPER_INVOKE_PARAMETRIC_TEST( AdditionPowerSet, -9.1f, 14.6f, 7.5f ); // expecting this to fail
+TEMPER_INVOKE_PARAMETRIC_TEST( AdditionPowerSet, -63.f, 2.f, -61.f );
 
 TEMPER_DECLARE_PARAMETRIC_TEST( SubtractionPowerSet, TEMPER_TEST_FLAG_DEPRECATED, float left, float right, float expected )
 {
@@ -57,9 +57,9 @@ TEMPER_DECLARE_PARAMETRIC_TEST( SubtractionPowerSet, TEMPER_TEST_FLAG_DEPRECATED
 	TEMPER_TEST_FLOAT_EQUAL_M( result, expected, "Subtraction function is broken" );
 }
 
-TEMPER_INVOKE_PARAMETRIC_TEST( SubtractionPowerSet, SubTest0, 4, 4.f, 0.f );
-TEMPER_INVOKE_PARAMETRIC_TEST( SubtractionPowerSet, SubTest1, 4, 2.f, 2.f );
-TEMPER_INVOKE_PARAMETRIC_TEST( SubtractionPowerSet, SubTest2, -9.1f, 14.6f, -23.7f );
+TEMPER_INVOKE_PARAMETRIC_TEST( SubtractionPowerSet, 4, 4.f, 0.f );
+TEMPER_INVOKE_PARAMETRIC_TEST( SubtractionPowerSet, 4, 2.f, 2.f );
+TEMPER_INVOKE_PARAMETRIC_TEST( SubtractionPowerSet, -9.1f, 14.6f, -23.7f );
 
 static void TestAbortTestCase( float a, float b, const char* message )
 {
