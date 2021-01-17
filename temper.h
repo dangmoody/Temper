@@ -31,6 +31,36 @@ SOFTWARE.
 
 TODO: documentation here
 
+
+Changelog:
+v2.0.0:
+	* Tests are now self-registering.  All you need to do now is write the test code and it will get called automatically for you.
+	* Added parametric testing.
+	* Added partial filtering for tests and suites.
+		* When enabled, will search for suites/tests that CONTAIN the filter given instead of searching for an exact match.
+		* Use `-p` command line argument to enable.
+	* Made various parts of the internal API extendable/overridable to help hook Temper into your codebase.
+	* Removed the `-a` command line argument since this is now configured per-test.
+	* The default console output is no longer on one line to be more accomodating of test suites that have console output.
+		* Therefore the command line argument `-c` has been removed.
+	* Tests that fail will no longer exit on the first failure, they will report all failures before exiting.
+		* If you want a test to exit if it fails use the `_OR_ABORT` suffix on your test function.
+	* Colored text console output is now always on.
+	* Fixed a bug where tests could call functions that failed, but not exit the test itself.
+	* Much nicer internal API.  Nearly everything has been completely re-written from scratch.
+
+v1.1.1:
+	* Fix bug when parsing the --time-unit command line argument.
+
+v1.1.0:
+	* Tests now display how long they took to run (defaulting to milliseconds).
+		* You can configure this yourself via the --time-unit command line argument.
+		* The unit you set must be either "seconds", "ms", "us", "ns", or "clocks".
+
+v1.0.1:
+	* Support for macOS.
+	* Fixed some other weird issues appearing on some other flavours of Clang and GCC on Linux.
+
 ===========================================================================
 */
 #pragma once

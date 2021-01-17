@@ -40,9 +40,9 @@ TEMPER_TEST( GivenIsolatedTest_WhenDeclaredWithSkipFlag_IsNotExecuted, TEMPER_TE
 
 //----------------------------------------------------------
 
-TEMPER_TEST( GivenIsolatedTest_WhenDeclaredWithDepricatedFlag_IsNotExecuted, TEMPER_TEST_EXPECTATION_NONE, TEMPER_TEST_FLAG_DEPRECATED )
+TEMPER_TEST( GivenIsolatedTest_WhenDeclaredWithDeprecatedFlag_IsNotExecuted, TEMPER_TEST_EXPECTATION_NONE, TEMPER_TEST_FLAG_DEPRECATED )
 {
-	TEMPER_TEST_TRUE_M( false, "The 'depricated' flag is broken. This should NOT have run!" );
+	TEMPER_TEST_TRUE_M( false, "The 'deprecated' flag is broken. This should NOT have run!" );
 }
 
 //----------------------------------------------------------
