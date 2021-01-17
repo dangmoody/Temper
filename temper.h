@@ -8,7 +8,7 @@ Distributed under MIT License:
 Copyright (c) 2021:
 
 	Dan Moody (daniel.guy.moody@gmail.com)
-	TODO(MY): YOUR NAME HERE (email optional)
+	Mike Young (IllThinkAboutIt@DoesntExist.com)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -342,10 +342,6 @@ do { \
 // TYPES
 //==========================================================
 
-typedef uint32_t temperBool32;
-
-//----------------------------------------------------------
-
 typedef enum temperTestFlag_t {
 	TEMPER_TEST_FLAG_SHOULD_RUN	= 0,
 	TEMPER_TEST_FLAG_SHOULD_SKIP,
@@ -371,7 +367,18 @@ typedef uint32_t temperTestExpectationFlags_t;
 
 //----------------------------------------------------------
 
+typedef uint32_t temperBool32;
+
+//----------------------------------------------------------
+
+typedef temperBool32( *temperStringCompareFunc_t )( const char* lhs, const char* rhs );
+
+//----------------------------------------------------------
+
 typedef void( *temperTestCallback_t )( void );
+
+//----------------------------------------------------------
+
 
 typedef struct temperSuiteTestInfo_t {
 	temperTestCallback_t			callback;
@@ -822,12 +829,6 @@ static void TemperOnAfterTest_UserModdable( const temperSuiteTestInfo_t* informa
 // You as the user probably don't want to be directly touching these.
 //==========================================================
 
-typedef temperBool32 ( *temperStringCompareFunc_t )( const char* lhs, const char* rhs );
-
-// MY: I'd like to eventually add more security around this,
-// such as ensuring it's only ever called/used once and thowing
-// an error if it isn't. Maybe also (SOMEHOW) ensuring no test
-// ever has a higher count.
 static void TemperSetupInternal( void ) {
 	g_temperTestContext.timeUnit = TEMPER_TIME_UNIT_US;
 
@@ -1238,8 +1239,6 @@ static int TemperExecuteAllTestsInternal() {
 
 	for ( uint32_t i = 0; i < g_temperTestContext.totalTestsDeclared; i++ ) {
 		TEMPER_SNPRINTF( testFuncName, 1024, "temper_test_info_fetcher_%d", i );
-
-		//TEMPER_LOG( "Loading test func: %s\n", testFuncName );
 
 		// get the test grabber function out of the binary
 		temperTestInfoFetcherFunc_t funcInfoGrabber = (temperTestInfoFetcherFunc_t) TemperGetProcAddressInternal( handle, testFuncName );
