@@ -33,22 +33,14 @@ TEMPER_TEST( GivenIsolatedTest_WhenDeclaredWithErrorAndAbort_IsExecutedFailsAndA
 
 //----------------------------------------------------------
 
-<<<<<<< HEAD
-TEMPER_TEST( GivenIsolatedTest_WhenDeclaredWithSkipFlag_IsNotExecuted, TEMPER_TEST_EXPECTATION_FLAG_FAIL, TEMPER_TEST_FLAG_SHOULD_SKIP )
-=======
 TEMPER_TEST( GivenIsolatedTest_WhenDeclaredWithSkipFlag_IsNotExecuted, TEMPER_TEST_EXPECTATION_NONE, TEMPER_TEST_FLAG_SHOULD_SKIP )
->>>>>>> 2ee0fdffab4dc45ad4b9a1238cac25a5428b235d
 {
 	TEMPER_TEST_TRUE_M( false, "The 'skip' flag is broken. This should NOT have run!" );
 }
 
 //----------------------------------------------------------
 
-<<<<<<< HEAD
-TEMPER_TEST( GivenIsolatedTest_WhenDeclaredWithDepricatedFlag_IsNotExecuted, TEMPER_TEST_EXPECTATION_FLAG_FAIL, TEMPER_TEST_FLAG_DEPRECATED )
-=======
 TEMPER_TEST( GivenIsolatedTest_WhenDeclaredWithDepricatedFlag_IsNotExecuted, TEMPER_TEST_EXPECTATION_NONE, TEMPER_TEST_FLAG_DEPRECATED )
->>>>>>> 2ee0fdffab4dc45ad4b9a1238cac25a5428b235d
 {
 	TEMPER_TEST_TRUE_M( false, "The 'depricated' flag is broken. This should NOT have run!" );
 }
