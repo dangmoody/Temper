@@ -33,33 +33,42 @@ TODO: documentation here
 
 
 Changelog:
-v2.0.0:
-	* Tests are now self-registering.  All you need to do now is write the test code and it will get called automatically for you.
+v2.0.0, <RELEASE DATE HERE>:
+	* Tests are now self-registering.  All you need to do now is write the test code and the tests will get called automatically for you (unless the test is marked as skipped).
+		* Because of this, the functions `TEMPER_RUN_TEST` and `TEMPER_SKIP_TEST` have been removed.
+		* If you want to skip a test now you must now do so by setting the test flag.
+		* Due to how tests are now registered, `TEMPER_SUITE` has also been removed.
 	* Added parametric testing.
 	* Added partial filtering for tests and suites.
-		* When enabled, will search for suites/tests that CONTAIN the filter given instead of searching for an exact match.
-		* Use `-p` command line argument to enable.
+		* When enabled, will search for suites/tests that only contain the filter given instead of searching for an exact match.
+		* Disabled by default.  Use `-p` command line argument to enable.
+	* Added self-testing functionality (TO BE USED ONLY FOR TEMPER DEVELOPERS).
+	* Tests now run in their own thread.
+		* This allows tests to always exit even if a test is aborted when running code not directly inside the test function.
 	* Made various parts of the internal API extendable/overridable to help hook Temper into your codebase.
-	* Removed the `-a` command line argument since this is now configured per-test.
+		* Write into `g_temperTestContext.callbacks` directly to override Temper's default internal functionality.
+	* Removed the `-a` command line argument since this is now configured per check per test.
 	* The default console output is no longer on one line to be more accomodating of test suites that have console output.
-		* Therefore the command line argument `-c` has been removed.
 	* Tests that fail will no longer exit on the first failure, they will report all failures before exiting.
 		* If you want a test to exit if it fails use the `_OR_ABORT` suffix on your test function.
 	* Colored text console output is now always on.
-	* Fixed a bug where tests could call functions that failed, but not exit the test itself.
+		* Therefore the command line argument `-c` has been removed.
 	* Much nicer internal API.  Nearly everything has been completely re-written from scratch.
 
-v1.1.1:
+v1.1.1, 1st October 2019:
 	* Fix bug when parsing the --time-unit command line argument.
 
-v1.1.0:
+v1.1.0, 22nd September 2019:
 	* Tests now display how long they took to run (defaulting to milliseconds).
 		* You can configure this yourself via the --time-unit command line argument.
-		* The unit you set must be either "seconds", "ms", "us", "ns", or "clocks".
+		* The unit you set must be either: "seconds", "ms", "us", "ns", or "clocks" (without speech marks).
 
-v1.0.1:
+v1.0.1, 16th April 2019:
 	* Support for macOS.
 	* Fixed some other weird issues appearing on some other flavours of Clang and GCC on Linux.
+
+v1.0.0, 13th February 2019:
+	* Initial release.
 
 ===========================================================================
 */
@@ -163,7 +172,7 @@ extern "C" {
 
 #define TEMPER_SETUP() \
 do { \
-	g_temperTestContext.totalTestsDeclared = __COUNTER__; /* MUST NOT be in a function otherwise __COUNTER__ is not correct */ \
+	g_temperTestContext.totalTestsDeclared = __COUNTER__; /* MUST NOT be in a function otherwise value of __COUNTER__ is not correct */ \
 \
 	TemperSetupInternal(); \
 } while ( 0 )
@@ -340,34 +349,6 @@ do { \
 #define TEMPER_SNPRINTF			snprintf
 #endif
 
-#ifndef TEMPER_LOG
-#define TEMPER_LOG				TemperLogInternal
-#endif
-
-#ifndef TEMPER_LOG_WARNING
-#define TEMPER_LOG_WARNING		TemperLogWarningInternal
-#endif
-
-#ifndef TEMPER_LOG_ERROR
-#define TEMPER_LOG_ERROR		TemperLogErrorInternal
-#endif
-
-#ifndef TEMPER_FLOAT_EQUALS
-#define TEMPER_FLOAT_EQUALS		TemperFloatEqualsInternal
-#endif
-
-#ifndef TEMPER_STRING_EQUALS
-#define TEMPER_STRING_EQUALS	TemperStringEqualsInternal
-#endif
-
-#ifndef TEMPER_STRING_CONTAINS
-#define TEMPER_STRING_CONTAINS	TemperStringContainsInternal
-#endif
-
-#ifndef TEMPER_GET_TIMESTAMP
-#define TEMPER_GET_TIMESTAMP	TemperGetTimestampInternal
-#endif
-
 //==========================================================
 // TYPES
 //==========================================================
@@ -401,17 +382,12 @@ typedef uint32_t temperBool32;
 
 //----------------------------------------------------------
 
-typedef temperBool32( *temperStringCompareFunc_t )( const char* lhs, const char* rhs );
-
-//----------------------------------------------------------
-
 typedef void( *temperTestCallback_t )( void );
 
 //----------------------------------------------------------
 
-
 typedef struct temperSuiteTestInfo_t {
-	temperTestCallback_t			callback;
+	temperTestCallback_t			Callback;
 	double							testTimeTaken;
 	temperTestFlag_t				testingFlag;
 	temperTestExpectationFlags_t	expectationFlags;
@@ -423,159 +399,58 @@ typedef temperSuiteTestInfo_t( *temperTestInfoFetcherFunc_t )( void );
 
 //----------------------------------------------------------
 
-typedef struct temperTestContext_t {
-#ifdef _WIN32
-	LARGE_INTEGER				timestampFrequency;
-#endif
-	double						currentTestStartTime;
-	double						currentTestEndTime;
-	uint32_t					testsPassed;
-	uint32_t					testsFailed;
-	uint32_t					testsAborted;
-	uint32_t					testsSkipped;
-	uint32_t					totalTestsDeclared; // Gets set in the main function with a preprocessor
-	uint32_t					totalTestsFoundWithFilters;
-	uint32_t					totalTestsExecuted;
-	uint32_t					currentTestErrorCount;
-	temperBool32				currentTestWasAborted;
-	temperBool32				partialFilter;
-	temperTimeUnit_t			timeUnit;
-	uint32_t					pad0;
-	char						programName[TEMPER_MAX_PATH];
-	const char*					suiteFilterPrevious;
-	const char*					suiteFilter;
-	const char*					testFilter;
-} temperTestContext_t;
+typedef struct temperCallbacks_t {
+	void	( *Log )( const char* fmt, ... );
+	void	( *LogWarning )( const char* fmt, ... );
+	void	( *LogError )( const char* fmt, ... );
+	bool	( *StringEquals )( const char* a, const char* b );
+	bool	( *StringContains )( const char* a, const char* b );
+	void*	( *GetProcAddress )( void* handle, const char* funcName );
+	void	( *OnBeforeTest )( const temperSuiteTestInfo_t* testInfo );
+	void 	( *RunTestThread )( temperSuiteTestInfo_t* testInfo );
+	bool	( *FloatEquals )( const float a, const float b, const float epsilon );
+	double	( *GetTimestamp )( void );
+	void	( *OnAfterTest )( const temperSuiteTestInfo_t* testInfo );
+	// DM: cold in cache, these are called infrequently, once, or during shutdown
+	void*	( *LoadEXEHandle )( void );
+	void	( *UnloadEXEHandle )( void* handle );
+	void	( *OnAllTestsFinished )( void );
+} temperCallbacks_t;
 
 //----------------------------------------------------------
 
-#if defined( _WIN32 )
-#define TEMPER_COLOR_DEFAULT	0x07
-#define TEMPER_COLOR_RED		0x0C
-#define TEMPER_COLOR_GREEN		0x02
-#define TEMPER_COLOR_YELLOW		0x0E
+typedef struct temperTestContext_t {
+	// overridable callbacks - you can set them directly
+	temperCallbacks_t	callbacks;
 
-typedef uint32_t				temperTextColor_t;
-#elif defined( __linux__ ) || defined( __APPLE__ )
-#define TEMPER_COLOR_DEFAULT	"\033[0m"
-#define TEMPER_COLOR_RED		"\033[0;31m"
-#define TEMPER_COLOR_GREEN		"\033[0;32m"
-#define TEMPER_COLOR_YELLOW		"\033[1;33m"
-
-typedef const char*				temperTextColor_t;
-#endif // defined( _WIN32 )
+#ifdef _WIN32
+	LARGE_INTEGER		timestampFrequency;
+#endif
+	double				currentTestStartTime;
+	double				currentTestEndTime;
+	uint32_t			testsPassed;
+	uint32_t			testsFailed;
+	uint32_t			testsAborted;
+	uint32_t			testsSkipped;
+	uint32_t			totalTestsDeclared; // Gets set in the main function with a preprocessor
+	uint32_t			totalTestsFoundWithFilters;
+	uint32_t			totalTestsExecuted;
+	uint32_t			currentTestErrorCount;
+	temperBool32		currentTestWasAborted;
+	temperBool32		partialFilter;
+	temperTimeUnit_t	timeUnit;
+	uint32_t			pad0;
+	char				programName[TEMPER_MAX_PATH];
+	const char*			suiteFilterPrevious;
+	const char*			suiteFilter;
+	const char*			testFilter;
+} temperTestContext_t;
 
 //==========================================================
 // GLOBALS
 //==========================================================
 
 static temperTestContext_t		g_temperTestContext;
-
-//==========================================================
-// FUNCTIONS - BASE HELPER/UTILITY FUNCTIONS
-//==========================================================
-
-static void TemperSetTextColorInternal( const temperTextColor_t color ) {
-#if defined( _WIN32 )
-	SetConsoleTextAttribute( GetStdHandle( STD_OUTPUT_HANDLE ), (WORD) color );
-#elif defined( __APPLE__ ) || defined( __linux__ )
-	printf( "%s", color );
-#else
-#error Uncrecognised platform.  It appears Temper does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Temper/issues
-#endif
-}
-
-//----------------------------------------------------------
-
-static void TemperLogInternal( const char* fmt, ... ) {
-	TEMPER_ASSERT( fmt );
-
-	va_list args;
-	va_start( args, fmt );
-	vprintf( fmt, args );
-	va_end( args );
-}
-
-//----------------------------------------------------------
-
-static void TemperLogWarningInternal( const char* fmt, ... ) {
-	TEMPER_ASSERT( fmt );
-
-	va_list args;
-	va_start( args, fmt );
-
-	TemperSetTextColorInternal( TEMPER_COLOR_RED );
-
-	printf( "WARNING: " );
-
-	TemperSetTextColorInternal( TEMPER_COLOR_YELLOW );
-
-	vprintf( fmt, args );
-
-	TemperSetTextColorInternal( TEMPER_COLOR_DEFAULT );
-
-	va_end( args );
-}
-
-//----------------------------------------------------------
-
-static void TemperLogErrorInternal( const char* fmt, ... ) {
-	TEMPER_ASSERT( fmt );
-
-	va_list args;
-	va_start( args, fmt );
-
-	TemperSetTextColorInternal( TEMPER_COLOR_RED );
-
-	printf( "ERROR: " );
-
-	TemperSetTextColorInternal( TEMPER_COLOR_YELLOW );
-
-	vprintf( fmt, args );
-
-	TemperSetTextColorInternal( TEMPER_COLOR_DEFAULT );
-
-	va_end( args );
-}
-
-//----------------------------------------------------------
-
-static uint32_t TemperGetPercentInternal( uint32_t yourValue, uint32_t yourMax ) {
-	return (uint32_t) ( ( ( (float) yourValue ) / ( (float) yourMax ) ) * 100 );
-}
-
-//----------------------------------------------------------
-
-static bool TemperFloatEqualsInternal( const float a, const float b, const float epsilon ) {
-	return fabsf( a - b ) <= epsilon;
-}
-
-//----------------------------------------------------------
-
-static const char* TemperGetNextArgInternal( const int argIndex, const int argc, char** argv ) {
-	TEMPER_ASSERT( argc );
-	TEMPER_ASSERT( argv );
-
-	return ( argIndex + 1 < argc ) ? argv[argIndex + 1] : NULL;
-}
-
-//----------------------------------------------------------
-
-static temperBool32 TemperStringEqualsInternal( const char* a, const char* b ) {
-	if ( a && b ) {
-		return strcmp( a, b ) == 0;
-	} else if ( !a && !b ) {
-		return true;
-	}
-
-	return false;
-}
-
-//----------------------------------------------------------
-
-static temperBool32 TemperStringContainsInternal( const char* str, const char* substring ) {
-	return strstr( str, substring ) != NULL;
-}
 
 //==========================================================
 // PREPROCESSORS - TEMPER INTERNAL
@@ -619,7 +494,7 @@ static temperBool32 TemperStringContainsInternal( const char* str, const char* s
 	/* HACK(DM): I shouldn't have to add extern "C" before each declaration here to make this work for c++ compiled binaries.  I already did that at the top of the header! How is that NOT a compiler bug!? */ \
 	TEMPER_EXTERN_C temperSuiteTestInfo_t TEMPER_API TEMPER_CONCAT_INTERNAL( temper_test_info_fetcher_, counter )( void ); \
 	temperSuiteTestInfo_t TEMPER_CONCAT_INTERNAL( temper_test_info_fetcher_, counter )( void ) { \
-		TEMPER_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.callback = testName; \
+		TEMPER_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.Callback = testName; \
 		TEMPER_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.suiteNameStr = suiteNameString; \
 		TEMPER_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.expectationFlags = testExpectationFlags; \
 		TEMPER_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.testNameStr = #testName; \
@@ -733,7 +608,7 @@ static temperBool32 TemperStringContainsInternal( const char* str, const char* s
 	TEMPER_EXTERN_C temperSuiteTestInfo_t TEMPER_API TEMPER_CONCAT_INTERNAL( temper_test_info_fetcher_, counter )( void ); \
 	temperSuiteTestInfo_t TEMPER_CONCAT_INTERNAL( temper_test_info_fetcher_, counter )( void ) { \
 		TEMPER_CONCAT_INTERNAL( nameOfTestToCall, _ParametricTestInfoBinder )();/*Make it so we can grab the needed information out of the test function's global info*/\
-		TEMPER_CONCAT_INTERNAL( TEMPER_CONCAT_INTERNAL( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.callback = TEMPER_CONCAT_INTERNAL( temper_parametric_wrapper_, counter ); \
+		TEMPER_CONCAT_INTERNAL( TEMPER_CONCAT_INTERNAL( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.Callback = TEMPER_CONCAT_INTERNAL( temper_parametric_wrapper_, counter ); \
 		TEMPER_CONCAT_INTERNAL( TEMPER_CONCAT_INTERNAL( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.suiteNameStr = TEMPER_CONCAT_INTERNAL( nameOfTestToCall, _GlobalParametricInfo ).suiteNameStr; \
 		TEMPER_CONCAT_INTERNAL( TEMPER_CONCAT_INTERNAL( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.expectationFlags = testExpectationFlags; \
 		TEMPER_CONCAT_INTERNAL( TEMPER_CONCAT_INTERNAL( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.testNameStr = #nameOfTestToCall; \
@@ -755,123 +630,169 @@ static temperBool32 TemperStringContainsInternal( const char* str, const char* s
 #endif // TEMPER_SELF_TEST_ENABLED
 
 //==========================================================
-// FUNCTIONS - USER MODDING WELCOME
-//==========================================================
-
-static void TemperPrintDivider_UserModdable() {
-	TEMPER_LOG( "------------------------------------------------------------\n\n" );
-}
-
-//----------------------------------------------------------
-
-static void TemperPrintTestExecutionInformation_UserModdable() {
-	TemperPrintDivider_UserModdable();
-
-	TEMPER_LOG( "\n=== TEMPER TESTING REPORT ===\n" );
-	TEMPER_LOG( "Total tests defined: %d\n", g_temperTestContext.totalTestsDeclared );
-
-	if ( g_temperTestContext.suiteFilter || g_temperTestContext.testFilter ) {
-		TEMPER_LOG( "\t- Total tests matching filters: %d\n\t- Suite filter: %s\n\t- Test filter: %s\n\t- Partial results %s\n",
-				g_temperTestContext.totalTestsFoundWithFilters,
-				g_temperTestContext.suiteFilter,
-				g_temperTestContext.testFilter,
-				g_temperTestContext.partialFilter ? "PERMITTED" : "DISCARDED" );
-	}
-
-	uint32_t totalFound = g_temperTestContext.totalTestsFoundWithFilters;
-	TEMPER_LOG(
-		"Passed:   %d ( %d%% )\n"
-		"Failed:   %d ( %d%% )\n"
-		"Aborted:  %d ( %d%% )\n"
-		"Skipped:  %d ( %d%% )\n",
-		g_temperTestContext.testsPassed,  TemperGetPercentInternal( g_temperTestContext.testsPassed, totalFound  ),
-		g_temperTestContext.testsFailed,  TemperGetPercentInternal( g_temperTestContext.testsFailed, totalFound  ),
-		g_temperTestContext.testsAborted, TemperGetPercentInternal( g_temperTestContext.testsAborted, totalFound ),
-		g_temperTestContext.testsSkipped, TemperGetPercentInternal( g_temperTestContext.testsSkipped, totalFound )
-	);
-}
-
-//----------------------------------------------------------
-
-static const char* TemperGetTimeUnitStringInternal( void ) {
-	switch ( g_temperTestContext.timeUnit ) {
-		case TEMPER_TIME_UNIT_CLOCKS:	return "clocks";
-		case TEMPER_TIME_UNIT_NS:		return "nanoseconds";
-		case TEMPER_TIME_UNIT_US:		return "microseconds";
-		case TEMPER_TIME_UNIT_MS:		return "milliseconds";
-		case TEMPER_TIME_UNIT_SECONDS:	return "seconds";
-
-		default:
-			TEMPER_ASSERT( false && "Temper test context time unit was invalid somehow!?" );
-			return NULL;
-	}
-}
-
-//----------------------------------------------------------
-
-static void TemperOnBeforeTest_UserModdable( const temperSuiteTestInfo_t* information ) {
-	TEMPER_ASSERT( information );
-
-	if ( !TEMPER_STRING_EQUALS( g_temperTestContext.suiteFilterPrevious, information->suiteNameStr ) ) {
-		TemperPrintDivider_UserModdable();
-		g_temperTestContext.suiteFilterPrevious = information->suiteNameStr;
-	}
-
-	if ( information->suiteNameStr ) {
-		TEMPER_LOG( "TEST \t- \"%s\" : \"%s\"\n", information->suiteNameStr, information->testNameStr );
-	} else {
-		TEMPER_LOG( "TEST \t- \"%s\"\n", information->testNameStr );
-	}
-}
-
-//----------------------------------------------------------
-
-static void TemperOnAfterTest_UserModdable( const temperSuiteTestInfo_t* information ) {
-	TEMPER_ASSERT( information );
-
-	if ( information->testingFlag == TEMPER_TEST_FLAG_SHOULD_RUN ) {
-		const char* timeUnitStr = TemperGetTimeUnitStringInternal();
-
-		if ( g_temperTestContext.currentTestWasAborted ) {
-			TemperSetTextColorInternal( TEMPER_COLOR_RED );
-			TEMPER_LOG( "=== TEST ABORTED (%.3f %s) ===\n\n", g_temperTestContext.currentTestEndTime - g_temperTestContext.currentTestStartTime, timeUnitStr );
-			TemperSetTextColorInternal( TEMPER_COLOR_DEFAULT );
-		} else if ( g_temperTestContext.currentTestErrorCount > 0 ) {
-			TemperSetTextColorInternal( TEMPER_COLOR_RED );
-			TEMPER_LOG( "TEST FAILED (%.3f %s)\n\n", g_temperTestContext.currentTestEndTime - g_temperTestContext.currentTestStartTime, timeUnitStr );
-			TemperSetTextColorInternal( TEMPER_COLOR_DEFAULT );
-		} else {
-			TemperSetTextColorInternal( TEMPER_COLOR_GREEN );
-			TEMPER_LOG( "TEST SUCCEEDED (%.3f %s)\n\n", g_temperTestContext.currentTestEndTime - g_temperTestContext.currentTestStartTime, timeUnitStr );
-			TemperSetTextColorInternal( TEMPER_COLOR_DEFAULT );
-		}
-	} else {
-		const char* skipReason = information->testingFlag == TEMPER_TEST_FLAG_DEPRECATED ? "DEPRECATED" : "SHOULD_SKIP";
-		TemperSetTextColorInternal( TEMPER_COLOR_YELLOW );
-		TEMPER_LOG( "TEST FLAGGED \"%s\"\n\n", skipReason );
-		TemperSetTextColorInternal( TEMPER_COLOR_DEFAULT );
-	}
-}
-
-//==========================================================
 // Internal Functions
 //
 // You as the user probably don't want to be directly touching these.
 //==========================================================
 
-static void TemperSetupInternal( void ) {
-	g_temperTestContext.timeUnit = TEMPER_TIME_UNIT_US;
+#if defined( _WIN32 )
+#define TEMPER_COLOR_DEFAULT	0x07
+#define TEMPER_COLOR_RED		0x0C
+#define TEMPER_COLOR_GREEN		0x02
+#define TEMPER_COLOR_YELLOW		0x0E
 
-#ifdef _WIN32
-	QueryPerformanceFrequency( &g_temperTestContext.timestampFrequency );
+typedef uint32_t				temperTextColor_t;
+#elif defined( __linux__ ) || defined( __APPLE__ )
+#define TEMPER_COLOR_DEFAULT	"\033[0m"
+#define TEMPER_COLOR_RED		"\033[0;31m"
+#define TEMPER_COLOR_GREEN		"\033[0;32m"
+#define TEMPER_COLOR_YELLOW		"\033[1;33m"
+
+typedef const char*				temperTextColor_t;
+#endif // defined( _WIN32 )
+
+//----------------------------------------------------------
+
+static void TemperSetTextColorInternal( const temperTextColor_t color ) {
+#if defined( _WIN32 )
+	SetConsoleTextAttribute( GetStdHandle( STD_OUTPUT_HANDLE ), (WORD) color );
+#elif defined( __APPLE__ ) || defined( __linux__ )
+	printf( "%s", color );
+#else
+#error Uncrecognised platform.  It appears Temper does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Temper/issues
 #endif
-
-	g_temperTestContext.suiteFilter = NULL;
-	g_temperTestContext.testFilter = NULL;
 }
 
+//----------------------------------------------------------
+
+static void TemperLogInternal( const char* fmt, ... ) {
+	TEMPER_ASSERT( fmt );
+
+	va_list args;
+	va_start( args, fmt );
+	vprintf( fmt, args );
+	va_end( args );
+}
+
+//----------------------------------------------------------
+
+static void TemperLogWarningInternal( const char* fmt, ... ) {
+	TEMPER_ASSERT( fmt );
+
+	va_list args;
+	va_start( args, fmt );
+
+	TemperSetTextColorInternal( TEMPER_COLOR_RED );
+
+	printf( "WARNING: " );
+
+	TemperSetTextColorInternal( TEMPER_COLOR_YELLOW );
+
+	vprintf( fmt, args );
+
+	TemperSetTextColorInternal( TEMPER_COLOR_DEFAULT );
+
+	va_end( args );
+}
+
+//----------------------------------------------------------
+
+static void TemperLogErrorInternal( const char* fmt, ... ) {
+	TEMPER_ASSERT( fmt );
+
+	va_list args;
+	va_start( args, fmt );
+
+	TemperSetTextColorInternal( TEMPER_COLOR_RED );
+
+	printf( "ERROR: " );
+
+	TemperSetTextColorInternal( TEMPER_COLOR_YELLOW );
+
+	vprintf( fmt, args );
+
+	TemperSetTextColorInternal( TEMPER_COLOR_DEFAULT );
+
+	va_end( args );
+}
+
+//----------------------------------------------------------
+
+static uint32_t TemperGetPercentInternal( uint32_t yourValue, uint32_t yourMax ) {
+	return (uint32_t) ( ( ( (float) yourValue ) / ( (float) yourMax ) ) * 100 );
+}
+
+//----------------------------------------------------------
+
+static bool TemperFloatEqualsInternal( const float a, const float b, const float epsilon ) {
+	return fabsf( a - b ) <= epsilon;
+}
+
+//----------------------------------------------------------
+
+static const char* TemperGetNextArgInternal( const int argIndex, const int argc, char** argv ) {
+	TEMPER_ASSERT( argc );
+	TEMPER_ASSERT( argv );
+
+	return ( argIndex + 1 < argc ) ? argv[argIndex + 1] : NULL;
+}
+
+//----------------------------------------------------------
+
+static bool TemperStringEqualsInternal( const char* a, const char* b ) {
+	TEMPER_ASSERT( a );
+	TEMPER_ASSERT( b );
+
+	return strcmp( a, b ) == 0;
+}
+
+//----------------------------------------------------------
+
+static bool TemperStringContainsInternal( const char* str, const char* substring ) {
+	return strstr( str, substring ) != NULL;
+}
+
+//----------------------------------------------------------
+
+static double TemperGetTimestampInternal( void ) {
+#if defined( _WIN32 )
+	LARGE_INTEGER now;
+	QueryPerformanceCounter( &now );
+
+	switch ( g_temperTestContext.timeUnit ) {
+		case TEMPER_TIME_UNIT_CLOCKS:	return ( (double) now.QuadPart );
+		case TEMPER_TIME_UNIT_NS:		return ( (double) ( now.QuadPart * 1000000000 ) / (double) g_temperTestContext.timestampFrequency.QuadPart );
+		case TEMPER_TIME_UNIT_US:		return ( (double) ( now.QuadPart * 1000000 ) / (double) g_temperTestContext.timestampFrequency.QuadPart );
+		case TEMPER_TIME_UNIT_MS:		return ( (double) ( now.QuadPart * 1000 ) / (double) g_temperTestContext.timestampFrequency.QuadPart );
+		case TEMPER_TIME_UNIT_SECONDS:	return ( (double) ( now.QuadPart ) / (double) g_temperTestContext.timestampFrequency.QuadPart );
+	}
+#elif defined( __APPLE__ ) || defined( __linux__ )	// defined( _WIN32 )
+	struct timespec now;
+	clock_gettime( CLOCK_MONOTONIC, &now );
+
+	int64_t clocks = (int64_t) ( now.tv_sec * 1000000000 + now.tv_nsec );
+
+	switch ( g_temperTestContext.timeUnit ) {
+		case TEMPER_TIME_UNIT_CLOCKS:	return (double) clocks;
+		case TEMPER_TIME_UNIT_NS:		return (double) clocks;
+		case TEMPER_TIME_UNIT_US:		return (double) clocks / 1000.0;
+		case TEMPER_TIME_UNIT_MS:		return (double) clocks / 1000000.0;
+		case TEMPER_TIME_UNIT_SECONDS:	return (double) clocks / 1000000000.0;
+	}
+#else	// defined( _WIN32 )
+#error Uncrecognised platform.  It appears Temper does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Temper/issues
+#endif	// defined( _WIN32 )
+
+	// should never get here
+	TEMPER_ASSERT( false && "Unrecognised time unit passed into TemperGetTimestampInternal().\n" );
+
+	return 0.0;
+}
+
+//----------------------------------------------------------
+
 static void TemperShowUsageInternal( void ) {
-	TEMPER_LOG(
+	g_temperTestContext.callbacks.Log(
 		"Arguments:\n"
 		"    [-h|--help]\n"
 		"        Shows this help and then exits.\n"
@@ -892,20 +813,22 @@ static void TemperShowUsageInternal( void ) {
 	);
 }
 
+//----------------------------------------------------------
+
 static bool TemperHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 	// parse command line args
 	for ( int argIndex = 0; argIndex < argc; argIndex++ ) {
 		const char* arg = argv[argIndex];
 
-		if ( TEMPER_STRING_EQUALS( arg, "-h" ) || TEMPER_STRING_EQUALS( arg, "--help" ) ) {
+		if ( g_temperTestContext.callbacks.StringEquals( arg, "-h" ) || g_temperTestContext.callbacks.StringEquals( arg, "--help" ) ) {
 			TemperShowUsageInternal();
 			return false;
 		}
 
-		if ( TEMPER_STRING_EQUALS( arg, "-s" ) ) {
+		if ( g_temperTestContext.callbacks.StringEquals( arg, "-s" ) ) {
 			const char* nextArg = TemperGetNextArgInternal( argIndex, argc, argv );
 			if ( !nextArg ) {
-				TEMPER_LOG_ERROR( "Value for argument \"%s\" was not set.\n", arg );
+				g_temperTestContext.callbacks.LogError( "Value for argument \"%s\" was not set.\n", arg );
 				TemperShowUsageInternal();
 				return false;
 			}
@@ -915,10 +838,10 @@ static bool TemperHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 			continue;
 		}
 
-		if ( TEMPER_STRING_EQUALS( arg, "-t" ) ) {
+		if ( g_temperTestContext.callbacks.StringEquals( arg, "-t" ) ) {
 			const char* nextArg = TemperGetNextArgInternal( argIndex, argc, argv );
 			if ( !nextArg ) {
-				TEMPER_LOG_ERROR( "Value for argument \"%s\" was not set.\n", arg );
+				g_temperTestContext.callbacks.LogError( "Value for argument \"%s\" was not set.\n", arg );
 				TemperShowUsageInternal();
 				return false;
 			}
@@ -928,31 +851,31 @@ static bool TemperHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 			continue;
 		}
 
-		if ( TEMPER_STRING_EQUALS( arg, "-p" ) ) {
+		if ( g_temperTestContext.callbacks.StringEquals( arg, "-p" ) ) {
 			g_temperTestContext.partialFilter = true;
 			continue;
 		}
 
-		if ( TEMPER_STRING_EQUALS( arg, "--time-unit" ) ) {
+		if ( g_temperTestContext.callbacks.StringEquals( arg, "--time-unit" ) ) {
 			const char* nextArg = TemperGetNextArgInternal( argIndex, argc, argv );
 			if ( !nextArg ) {
-				TEMPER_LOG_ERROR( "Value for argument \"%s\" was not set.\n", arg );
+				g_temperTestContext.callbacks.LogError( "Value for argument \"%s\" was not set.\n", arg );
 				TemperShowUsageInternal();
 				return false;
 			}
 
-			if ( TEMPER_STRING_EQUALS( nextArg, "seconds" ) ) {
+			if ( g_temperTestContext.callbacks.StringEquals( nextArg, "seconds" ) ) {
 				g_temperTestContext.timeUnit = TEMPER_TIME_UNIT_SECONDS;
-			} else if ( TEMPER_STRING_EQUALS( nextArg, "ms" ) ) {
+			} else if ( g_temperTestContext.callbacks.StringEquals( nextArg, "ms" ) ) {
 				g_temperTestContext.timeUnit = TEMPER_TIME_UNIT_MS;
-			} else if ( TEMPER_STRING_EQUALS( nextArg, "us" ) ) {
+			} else if ( g_temperTestContext.callbacks.StringEquals( nextArg, "us" ) ) {
 				g_temperTestContext.timeUnit = TEMPER_TIME_UNIT_US;
-			} else if ( TEMPER_STRING_EQUALS( nextArg, "ns" ) ) {
+			} else if ( g_temperTestContext.callbacks.StringEquals( nextArg, "ns" ) ) {
 				g_temperTestContext.timeUnit = TEMPER_TIME_UNIT_NS;
-			} else if ( TEMPER_STRING_EQUALS( nextArg, "clocks" ) ) {
+			} else if ( g_temperTestContext.callbacks.StringEquals( nextArg, "clocks" ) ) {
 				g_temperTestContext.timeUnit = TEMPER_TIME_UNIT_CLOCKS;
 			} else {
-				TEMPER_LOG_ERROR(
+				g_temperTestContext.callbacks.LogError(
 					"Invalid time unit \"%s\" specified.  Please select from one of the following:\n"
 					"\t- seconds\n"
 					"\t- ms\n"
@@ -975,7 +898,7 @@ static bool TemperHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 	// if partial filtering was enabled but the user did not then specify a suite or test filter then they need to know about incorrect usage
 	if ( g_temperTestContext.partialFilter ) {
 		if ( !g_temperTestContext.suiteFilter && !g_temperTestContext.testFilter ) {
-			TEMPER_LOG_ERROR( "Partial filtering (-p) was enabled but suite or test filtering (-s, -t) was not.\n\n" );
+			g_temperTestContext.callbacks.LogError( "Partial filtering (-p) was enabled but suite or test filtering (-s, -t) was not.\n\n" );
 
 			TemperShowUsageInternal();
 
@@ -1027,7 +950,7 @@ static void* TemperGetProcAddressInternal( void* handle, const char* funcName ) 
 			"E.G.: Using \"--export-dynamic\" or some other variant.\n";
 #endif
 
-		TEMPER_LOG_ERROR( "Failed to find function \"%s\".%s\n", funcName, platformErrorMsg );
+		g_temperTestContext.callbacks.LogError( "Failed to find function \"%s\".%s\n", funcName, platformErrorMsg );
 	}
 
 	return proc;
@@ -1035,7 +958,7 @@ static void* TemperGetProcAddressInternal( void* handle, const char* funcName ) 
 
 //----------------------------------------------------------
 
-static void TemperCloseEXEHandleInternal( void* handle ) {
+static void TemperUnloadEXEHandleInternal( void* handle ) {
 	TEMPER_ASSERT( handle );
 
 #if defined( _WIN32 )
@@ -1044,7 +967,7 @@ static void TemperCloseEXEHandleInternal( void* handle ) {
 #elif defined( __APPLE__ ) || defined( __linux__ )	// _WIN32
 	int closeError = dlclose( handle );
 	if ( closeError ) {
-		TEMPER_LOG_ERROR( "%s.\n", dlerror() );
+		g_temperTestContext.callbacks.LogError( "%s.\n", dlerror() );
 	}
 
 	handle = NULL;
@@ -1055,48 +978,11 @@ static void TemperCloseEXEHandleInternal( void* handle ) {
 
 //----------------------------------------------------------
 
-static double TemperGetTimestampInternal( void ) {
-#if defined( _WIN32 )
-	LARGE_INTEGER now;
-	QueryPerformanceCounter( &now );
-
-	switch ( g_temperTestContext.timeUnit ) {
-		case TEMPER_TIME_UNIT_CLOCKS:	return ( (double) now.QuadPart );
-		case TEMPER_TIME_UNIT_NS:		return ( (double) ( now.QuadPart * 1000000000 ) / (double) g_temperTestContext.timestampFrequency.QuadPart );
-		case TEMPER_TIME_UNIT_US:		return ( (double) ( now.QuadPart * 1000000 ) / (double) g_temperTestContext.timestampFrequency.QuadPart );
-		case TEMPER_TIME_UNIT_MS:		return ( (double) ( now.QuadPart * 1000 ) / (double) g_temperTestContext.timestampFrequency.QuadPart );
-		case TEMPER_TIME_UNIT_SECONDS:	return ( (double) ( now.QuadPart ) / (double) g_temperTestContext.timestampFrequency.QuadPart );
-	}
-#elif defined( __APPLE__ ) || defined( __linux__ )	// defined( _WIN32 )
-	struct timespec now;
-	clock_gettime( CLOCK_MONOTONIC, &now );
-
-	int64_t clocks = (int64_t) ( now.tv_sec * 1000000000 + now.tv_nsec );
-
-	switch ( g_temperTestContext.timeUnit ) {
-		case TEMPER_TIME_UNIT_CLOCKS:	return (double) clocks;
-		case TEMPER_TIME_UNIT_NS:		return (double) clocks;
-		case TEMPER_TIME_UNIT_US:		return (double) clocks / 1000.0;
-		case TEMPER_TIME_UNIT_MS:		return (double) clocks / 1000000.0;
-		case TEMPER_TIME_UNIT_SECONDS:	return (double) clocks / 1000000000.0;
-	}
-#else	// defined( _WIN32 )
-#error Uncrecognised platform.  It appears Temper does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Temper/issues
-#endif	// defined( _WIN32 )
-
-	// should never get here
-	TEMPER_ASSERT( false && "Unrecognised time unit passed into TemperGetTimestampInternal().\n" );
-
-	return 0.0;
-}
-
-//----------------------------------------------------------
-
 static bool TemperGetFullEXEPathInternal( void ) {
 #if defined( _WIN32 )
 	DWORD fullExePathLength = GetModuleFileName( NULL, g_temperTestContext.programName, MAX_PATH );
 	if ( fullExePathLength == 0 ) {
-		TEMPER_LOG_ERROR( "WinAPI call GetModuleFileName() failed: 0x%lX\n", GetLastError() );
+		g_temperTestContext.callbacks.LogError( "WinAPI call GetModuleFileName() failed: 0x%lX\n", GetLastError() );
 		return false;
 	}
 
@@ -1109,14 +995,14 @@ static bool TemperGetFullEXEPathInternal( void ) {
 	struct stat exeFileInfo;
 	if ( lstat( exeFilenameVirtual, &exeFileInfo ) == -1 ) {
 		err = errno;
-		TEMPER_LOG_ERROR( "lstat() failed: %s.\n", strerror( err ) );
+		g_temperTestContext.callbacks.LogError( "lstat() failed: %s.\n", strerror( err ) );
 		return false;
 	}
 
 	ssize_t fullExePathLength = readlink( exeFilenameVirtual, g_temperTestContext.programName, (size_t) exeFileInfo.st_size + 1 );
 	err = errno;
 	if ( fullExePathLength == -1 ) {
-		TEMPER_LOG_ERROR( "readlink() failed: %s.\n", strerror( err ) );
+		g_temperTestContext.callbacks.LogError( "readlink() failed: %s.\n", strerror( err ) );
 		return false;
 	}
 
@@ -1128,7 +1014,7 @@ static bool TemperGetFullEXEPathInternal( void ) {
 
 	if ( _NSGetExecutablePath( g_temperTestContext.programName, &bufsize ) != 0 ) {
 		err = errno;
-		TEMPER_LOG_ERROR( "_NSGetExecutablePath() failed: %s.\n", strerror( err ) );
+		g_temperTestContext.callbacks.LogError( "_NSGetExecutablePath() failed: %s.\n", strerror( err ) );
 		return false;
 	}
 
@@ -1158,9 +1044,9 @@ static temperThreadHandle_t TemperThreadProcInternal( void* data ) {
 	temperSuiteTestInfo_t* information = (temperSuiteTestInfo_t*) data;
 	TEMPER_ASSERT( information );
 
-	g_temperTestContext.currentTestStartTime = TEMPER_GET_TIMESTAMP();
-	information->callback();
-	g_temperTestContext.currentTestEndTime = TEMPER_GET_TIMESTAMP();
+	g_temperTestContext.currentTestStartTime = g_temperTestContext.callbacks.GetTimestamp();
+	information->Callback();
+	g_temperTestContext.currentTestEndTime = g_temperTestContext.callbacks.GetTimestamp();
 
 	return 0;
 }
@@ -1191,14 +1077,14 @@ static void TemperRunTestThreadInternal( temperSuiteTestInfo_t* information ) {
 	pthread_attr_init( &threadAttribs );
 	if ( pthread_create( &thread, &threadAttribs, TemperThreadProcInternal, information ) != 0 ) {
 		err = errno;
-		TEMPER_LOG_ERROR( "Failed to create test thread: %s.\n", strerror( err ) );
+		g_temperTestContext.callbacks.LogError( "Failed to create test thread: %s.\n", strerror( err ) );
 		return;
 	}
 
 	void* exitCode;
 	if ( pthread_join( thread, &exitCode ) != 0 ) {
 		err = errno;
-		TEMPER_LOG_ERROR( "Failed to wait for test thread to finish: %s.\n", strerror( err ) );
+		g_temperTestContext.callbacks.LogError( "Failed to wait for test thread to finish: %s.\n", strerror( err ) );
 		return;
 	}
 #else	// defined( _WIN32 )
@@ -1208,9 +1094,73 @@ static void TemperRunTestThreadInternal( temperSuiteTestInfo_t* information ) {
 
 //----------------------------------------------------------
 
+static const char* TemperGetTimeUnitStringInternal( void ) {
+	switch ( g_temperTestContext.timeUnit ) {
+		case TEMPER_TIME_UNIT_CLOCKS:	return "clocks";
+		case TEMPER_TIME_UNIT_NS:		return "nanoseconds";
+		case TEMPER_TIME_UNIT_US:		return "microseconds";
+		case TEMPER_TIME_UNIT_MS:		return "milliseconds";
+		case TEMPER_TIME_UNIT_SECONDS:	return "seconds";
+
+		default:
+			TEMPER_ASSERT( false && "Temper test context time unit was invalid somehow!?" );
+			return NULL;
+	}
+}
+
+//----------------------------------------------------------
+
+static void TemperOnBeforeTestInternal( const temperSuiteTestInfo_t* information ) {
+	TEMPER_ASSERT( information );
+
+	if ( g_temperTestContext.suiteFilterPrevious && information->suiteNameStr ) {
+		if ( !g_temperTestContext.callbacks.StringEquals( g_temperTestContext.suiteFilterPrevious, information->suiteNameStr ) ) {
+			g_temperTestContext.callbacks.Log( "------------------------------------------------------------\n\n" );
+			g_temperTestContext.suiteFilterPrevious = information->suiteNameStr;
+		}
+	}
+
+	if ( information->suiteNameStr ) {
+		g_temperTestContext.callbacks.Log( "TEST \t- \"%s\" : \"%s\"\n", information->suiteNameStr, information->testNameStr );
+	} else {
+		g_temperTestContext.callbacks.Log( "TEST \t- \"%s\"\n", information->testNameStr );
+	}
+}
+
+//----------------------------------------------------------
+
+static void TemperOnAfterTestInternal( const temperSuiteTestInfo_t* information ) {
+	TEMPER_ASSERT( information );
+
+	if ( information->testingFlag == TEMPER_TEST_FLAG_SHOULD_RUN ) {
+		const char* timeUnitStr = TemperGetTimeUnitStringInternal();
+
+		if ( g_temperTestContext.currentTestWasAborted ) {
+			TemperSetTextColorInternal( TEMPER_COLOR_RED );
+			g_temperTestContext.callbacks.Log( "=== TEST ABORTED (%.3f %s) ===\n\n", g_temperTestContext.currentTestEndTime - g_temperTestContext.currentTestStartTime, timeUnitStr );
+			TemperSetTextColorInternal( TEMPER_COLOR_DEFAULT );
+		} else if ( g_temperTestContext.currentTestErrorCount > 0 ) {
+			TemperSetTextColorInternal( TEMPER_COLOR_RED );
+			g_temperTestContext.callbacks.Log( "TEST FAILED (%.3f %s)\n\n", g_temperTestContext.currentTestEndTime - g_temperTestContext.currentTestStartTime, timeUnitStr );
+			TemperSetTextColorInternal( TEMPER_COLOR_DEFAULT );
+		} else {
+			TemperSetTextColorInternal( TEMPER_COLOR_GREEN );
+			g_temperTestContext.callbacks.Log( "TEST SUCCEEDED (%.3f %s)\n\n", g_temperTestContext.currentTestEndTime - g_temperTestContext.currentTestStartTime, timeUnitStr );
+			TemperSetTextColorInternal( TEMPER_COLOR_DEFAULT );
+		}
+	} else {
+		const char* skipReason = information->testingFlag == TEMPER_TEST_FLAG_DEPRECATED ? "DEPRECATED" : "SHOULD_SKIP";
+		TemperSetTextColorInternal( TEMPER_COLOR_YELLOW );
+		g_temperTestContext.callbacks.Log( "TEST FLAGGED \"%s\"\n\n", skipReason );
+		TemperSetTextColorInternal( TEMPER_COLOR_DEFAULT );
+	}
+}
+
+//----------------------------------------------------------
+
 static void TemperAbortTestOnFailInternal( const bool abortOnFail ) {
 	if ( abortOnFail ) {
-		g_temperTestContext.currentTestEndTime = TEMPER_GET_TIMESTAMP();
+		g_temperTestContext.currentTestEndTime = g_temperTestContext.callbacks.GetTimestamp();
 		g_temperTestContext.testsAborted += 1;
 		g_temperTestContext.currentTestWasAborted = true;
 
@@ -1238,13 +1188,115 @@ static void TemperTestTrueInternal( const bool condition, const char* conditionS
 			}
 
 			TemperSetTextColorInternal( TEMPER_COLOR_RED );
-			TEMPER_LOG( "FAILED: " );
+			g_temperTestContext.callbacks.Log( "FAILED: " );
 			TemperSetTextColorInternal( TEMPER_COLOR_YELLOW );
-			TEMPER_LOG( "%s at %s line %d.\n%s%s", conditionStr, file, line, actualMessage, newLine );
+			g_temperTestContext.callbacks.Log( "%s at %s line %d.\n%s%s", conditionStr, file, line, actualMessage, newLine );
 			TemperSetTextColorInternal( TEMPER_COLOR_DEFAULT );
 		}
 
 		TemperAbortTestOnFailInternal( abortOnFail );
+	}
+}
+
+//----------------------------------------------------------
+
+static void TemperOnAllTestsFinishedInternal( void ) {
+	g_temperTestContext.callbacks.Log(
+		"------------------------------------------------------------\n"
+		"\n"
+		"\n=== TEMPER TESTING REPORT ===\n"
+		"Total tests defined: %d\n", g_temperTestContext.totalTestsDeclared
+	);
+
+	if ( g_temperTestContext.suiteFilter || g_temperTestContext.testFilter ) {
+		g_temperTestContext.callbacks.Log( "\t- Total tests matching filters: %d\n\t- Suite filter: %s\n\t- Test filter: %s\n\t- Partial results %s\n",
+				g_temperTestContext.totalTestsFoundWithFilters,
+				g_temperTestContext.suiteFilter,
+				g_temperTestContext.testFilter,
+				g_temperTestContext.partialFilter ? "PERMITTED" : "DISCARDED" );
+	}
+
+	uint32_t totalFound = g_temperTestContext.totalTestsFoundWithFilters;
+	g_temperTestContext.callbacks.Log(
+		"Passed:   %d ( %d%% )\n"
+		"Failed:   %d ( %d%% )\n"
+		"Aborted:  %d ( %d%% )\n"
+		"Skipped:  %d ( %d%% )\n",
+		g_temperTestContext.testsPassed,  TemperGetPercentInternal( g_temperTestContext.testsPassed, totalFound  ),
+		g_temperTestContext.testsFailed,  TemperGetPercentInternal( g_temperTestContext.testsFailed, totalFound  ),
+		g_temperTestContext.testsAborted, TemperGetPercentInternal( g_temperTestContext.testsAborted, totalFound ),
+		g_temperTestContext.testsSkipped, TemperGetPercentInternal( g_temperTestContext.testsSkipped, totalFound )
+	);
+}
+
+//----------------------------------------------------------
+
+// MY: I'd like to eventually add more security around this,
+// such as ensuring it's only ever called/used once and thowing
+// an error if it isn't. Maybe also (SOMEHOW) ensuring no test
+// ever has a higher count.
+static void TemperSetupInternal( void ) {
+	// for any callbacks that werent overridden just set the default internal implementation
+	{
+		if ( !g_temperTestContext.callbacks.Log )					g_temperTestContext.callbacks.Log = TemperLogInternal;
+		if ( !g_temperTestContext.callbacks.LogWarning )			g_temperTestContext.callbacks.LogWarning = TemperLogWarningInternal;
+		if ( !g_temperTestContext.callbacks.LogError )				g_temperTestContext.callbacks.LogError = TemperLogErrorInternal;
+		if ( !g_temperTestContext.callbacks.StringEquals )			g_temperTestContext.callbacks.StringEquals = TemperStringEqualsInternal;
+		if ( !g_temperTestContext.callbacks.StringContains )		g_temperTestContext.callbacks.StringContains = TemperStringContainsInternal;
+		if ( !g_temperTestContext.callbacks.GetProcAddress )		g_temperTestContext.callbacks.GetProcAddress = TemperGetProcAddressInternal;
+		if ( !g_temperTestContext.callbacks.OnBeforeTest )			g_temperTestContext.callbacks.OnBeforeTest = TemperOnBeforeTestInternal;
+		if ( !g_temperTestContext.callbacks.RunTestThread )			g_temperTestContext.callbacks.RunTestThread = TemperRunTestThreadInternal;
+		if ( !g_temperTestContext.callbacks.FloatEquals )			g_temperTestContext.callbacks.FloatEquals = TemperFloatEqualsInternal;
+		if ( !g_temperTestContext.callbacks.GetTimestamp )			g_temperTestContext.callbacks.GetTimestamp = TemperGetTimestampInternal;
+		if ( !g_temperTestContext.callbacks.OnAfterTest )			g_temperTestContext.callbacks.OnAfterTest = TemperOnAfterTestInternal;
+		if ( !g_temperTestContext.callbacks.OnAllTestsFinished )	g_temperTestContext.callbacks.OnAllTestsFinished = TemperOnAllTestsFinishedInternal;
+		if ( !g_temperTestContext.callbacks.LoadEXEHandle )			g_temperTestContext.callbacks.LoadEXEHandle = TemperLoadEXEHandleInternal;
+		if ( !g_temperTestContext.callbacks.UnloadEXEHandle )		g_temperTestContext.callbacks.UnloadEXEHandle = TemperUnloadEXEHandleInternal;
+	}
+
+#ifdef _WIN32
+	QueryPerformanceFrequency( &g_temperTestContext.timestampFrequency );
+#endif
+
+	g_temperTestContext.timeUnit = TEMPER_TIME_UNIT_US;
+
+	g_temperTestContext.suiteFilter = NULL;
+	g_temperTestContext.testFilter = NULL;
+}
+
+//----------------------------------------------------------
+
+static bool TemperIsSuiteFilteredInternal( const char* suiteName ) {
+	if ( !g_temperTestContext.suiteFilter ) {
+		return true;
+	}
+
+	if ( !suiteName ) {
+		return false;
+	}
+
+	if ( g_temperTestContext.partialFilter ) {
+		return g_temperTestContext.callbacks.StringContains( suiteName, g_temperTestContext.suiteFilter );
+	} else {
+		return g_temperTestContext.callbacks.StringEquals( suiteName, g_temperTestContext.suiteFilter );
+	}
+}
+
+//----------------------------------------------------------
+
+static bool TemperIsTestFilteredInternal( const char* testName ) {
+	if ( !g_temperTestContext.testFilter ) {
+		return true;
+	}
+
+	if ( !testName ) {
+		return false;
+	}
+
+	if ( g_temperTestContext.partialFilter ) {
+		return g_temperTestContext.callbacks.StringContains( testName, g_temperTestContext.testFilter );
+	} else {
+		return g_temperTestContext.callbacks.StringEquals( testName, g_temperTestContext.testFilter );
 	}
 }
 
@@ -1256,22 +1308,18 @@ static int TemperExecuteAllTestsInternal() {
 	}
 
 	// make the exe load itself
-	void* handle = TemperLoadEXEHandleInternal();
+	void* handle = g_temperTestContext.callbacks.LoadEXEHandle();
 
 	// DM: I have never seen a function name exceed 64 characters, let alone 1024
 	// so this shouldn't be a problem
 	// I wonder if it's possible we could perhaps make this string length constant an overridable #define ?
 	char testFuncName[1024];
 
-	// if partial suite/test filtering is enabled then we want to check if the queried filter is in a part of the name they specified
-	// otherwise partial filtering is off so we want to check for an exact string match
-	temperStringCompareFunc_t stringCompareFunc = g_temperTestContext.partialFilter ? TEMPER_STRING_CONTAINS : TEMPER_STRING_EQUALS;
-
 	for ( uint32_t i = 0; i < g_temperTestContext.totalTestsDeclared; i++ ) {
 		TEMPER_SNPRINTF( testFuncName, 1024, "temper_test_info_fetcher_%d", i );
 
 		// get the test grabber function out of the binary
-		temperTestInfoFetcherFunc_t funcInfoGrabber = (temperTestInfoFetcherFunc_t) TemperGetProcAddressInternal( handle, testFuncName );
+		temperTestInfoFetcherFunc_t funcInfoGrabber = (temperTestInfoFetcherFunc_t) g_temperTestContext.callbacks.GetProcAddress( handle, testFuncName );
 
 		if ( !funcInfoGrabber ) {
 			return TEMPER_EXIT_FAILURE;
@@ -1279,22 +1327,20 @@ static int TemperExecuteAllTestsInternal() {
 
 		temperSuiteTestInfo_t information = funcInfoGrabber();
 
-		bool isFilteredSuite = g_temperTestContext.suiteFilter && information.suiteNameStr && stringCompareFunc( information.suiteNameStr, g_temperTestContext.suiteFilter );
-
-		if ( isFilteredSuite || !g_temperTestContext.suiteFilter ) {
-			bool isFilteredTest = g_temperTestContext.testFilter && stringCompareFunc( information.testNameStr, g_temperTestContext.testFilter );
-
-			if ( isFilteredTest || !g_temperTestContext.testFilter ) {
+		// TODO(DM): profile doing a loop like this with branching vs. adding everything that passes the filter first to a list of things to run
+		// we care only about raw execution time in that test and whether or not the initial pass was faster than just running the loop with branching
+		if ( TemperIsSuiteFilteredInternal( information.suiteNameStr ) ) {
+			if ( TemperIsTestFilteredInternal( information.testNameStr ) ) {
 				g_temperTestContext.totalTestsFoundWithFilters += 1;
 
-				TemperOnBeforeTest_UserModdable( &information );
+				g_temperTestContext.callbacks.OnBeforeTest( &information );
 
 				// MY : I'm not checking the flag first as it'd still be helpful for search queries to see if the test even appears
 				if ( information.testingFlag == TEMPER_TEST_FLAG_SHOULD_RUN ) {
 					g_temperTestContext.currentTestErrorCount = 0;
 					g_temperTestContext.currentTestWasAborted = false;
 
-					TemperRunTestThreadInternal( &information );
+					g_temperTestContext.callbacks.RunTestThread( &information );
 
 					information.testTimeTaken = g_temperTestContext.currentTestEndTime - g_temperTestContext.currentTestStartTime;
 
@@ -1314,14 +1360,12 @@ static int TemperExecuteAllTestsInternal() {
 						g_temperTestContext.testsPassed += 1;
 
 						// we only care about un-exected aborts / failures
-						g_temperTestContext.testsAborted -= expectedToAbort && g_temperTestContext.currentTestWasAborted ? 1 : 0;
+						g_temperTestContext.testsAborted -= ( expectedToAbort && g_temperTestContext.currentTestWasAborted ) ? 1 : 0;
 						g_temperTestContext.currentTestErrorCount = 0;
 						g_temperTestContext.currentTestWasAborted = false;
-					}
-					else if ( g_temperTestContext.currentTestErrorCount == 0 ) {
+					} else if ( g_temperTestContext.currentTestErrorCount == 0 ) {
 						g_temperTestContext.testsPassed += 1;
-					}
-					else {
+					} else {
 						g_temperTestContext.testsFailed += 1;
 					}
 #endif //TEMPER_SELF_TEST_ENABLED
@@ -1329,15 +1373,15 @@ static int TemperExecuteAllTestsInternal() {
 					g_temperTestContext.testsSkipped += 1;
 				}
 
-				TemperOnAfterTest_UserModdable( &information );
+				g_temperTestContext.callbacks.OnAfterTest( &information );
 			}
 		}
 	}
 
-	TemperPrintTestExecutionInformation_UserModdable();
+	g_temperTestContext.callbacks.OnAllTestsFinished();
 
 	// cleanup
-	TemperCloseEXEHandleInternal( handle );
+	g_temperTestContext.callbacks.UnloadEXEHandle( handle );
 
 	return g_temperTestContext.testsFailed == 0 ? TEMPER_EXIT_SUCCESS : TEMPER_EXIT_FAILURE;
 }
