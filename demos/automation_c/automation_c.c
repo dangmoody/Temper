@@ -50,9 +50,10 @@ TEMPER_TEST( GivenIsolatedTest_WhenDeclaredWithDeprecatedFlag_IsNotExecuted, TEM
 int main( int argc, char** argv )
 {
 	TEMPER_SETUP();
-	int returnValue = TEMPER_RUN_ALL_TESTS_WITH_ARGS( argc, argv );
+	int exitCode = TEMPER_RUN_ALL_TESTS_WITH_ARGS( argc, argv );
+	printf( "\nAutomation returned: %d.\n", exitCode );
 	//getchar();
-	return returnValue;
+	return exitCode;
 }
 
 //----------------------------------------------------------
