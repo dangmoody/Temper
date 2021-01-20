@@ -111,6 +111,12 @@ TEMPER_TEST_TRUE_OR_ABORT( 5 == 6 ); // Will just log a standard error and make 
 TEMPER_TEST_TRUE_OR_ABORT_M( 5 == 6, "Maths is broken." ); // Will make your test exit early and print your messsage.
 ```
 
+## Overriding internal functions
+
+The `g_temperTestContext` contains a member called `callbacks` which, in turn, contains a set of functions that you can use to override Temper's default functionality.  This can be used to help hook Temper into your codebase.
+
+If you are running on a platform that **ISN'T** Windows, Mac OS, or Linux then you will definitely want to override these functions as some of Temper's internal functions make calls to their respective OS-level API.
+
 ## Command line arguments
 
 ```
