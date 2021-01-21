@@ -428,6 +428,7 @@ typedef struct temperTestContext_t {
 #endif
 	double				currentTestStartTime;
 	double				currentTestEndTime;
+	double				totalExecutionTime;
 	uint32_t			testsPassed;
 	uint32_t			testsFailed;
 	uint32_t			testsAborted;
@@ -1204,8 +1205,11 @@ static void TemperOnAllTestsFinishedInternal( void ) {
 	g_temperTestContext.callbacks.Log(
 		"------------------------------------------------------------\n"
 		"\n"
-		"\n=== TEMPER TESTING REPORT ===\n"
-		"Total tests defined: %d\n", g_temperTestContext.totalTestsDeclared
+		"\n=== ALL TESTS FINISHED ===\n"
+		"Total time taken: %.3f %s\n"
+		"Total tests defined: %d\n"
+		, g_temperTestContext.totalExecutionTime, TemperGetTimeUnitStringInternal()
+		, g_temperTestContext.totalTestsDeclared
 	);
 
 	if ( g_temperTestContext.suiteFilter || g_temperTestContext.testFilter ) {
@@ -1222,8 +1226,8 @@ static void TemperOnAllTestsFinishedInternal( void ) {
 		"Failed:   %d ( %d%% )\n"
 		"Aborted:  %d ( %d%% )\n"
 		"Skipped:  %d ( %d%% )\n",
-		g_temperTestContext.testsPassed,  TemperGetPercentInternal( g_temperTestContext.testsPassed, totalFound  ),
-		g_temperTestContext.testsFailed,  TemperGetPercentInternal( g_temperTestContext.testsFailed, totalFound  ),
+		g_temperTestContext.testsPassed,  TemperGetPercentInternal( g_temperTestContext.testsPassed,  totalFound ),
+		g_temperTestContext.testsFailed,  TemperGetPercentInternal( g_temperTestContext.testsFailed,  totalFound ),
 		g_temperTestContext.testsAborted, TemperGetPercentInternal( g_temperTestContext.testsAborted, totalFound ),
 		g_temperTestContext.testsSkipped, TemperGetPercentInternal( g_temperTestContext.testsSkipped, totalFound )
 	);
@@ -1258,8 +1262,20 @@ static void TemperSetupInternal( void ) {
 	QueryPerformanceFrequency( &g_temperTestContext.timestampFrequency );
 #endif
 
+	g_temperTestContext.currentTestStartTime = 0.0;
+	g_temperTestContext.currentTestEndTime = 0.0;
+	g_temperTestContext.totalExecutionTime = 0.0;
+	g_temperTestContext.testsPassed = 0;
+	g_temperTestContext.testsFailed = 0;
+	g_temperTestContext.testsAborted = 0;
+	g_temperTestContext.testsSkipped = 0;
+	g_temperTestContext.totalTestsFoundWithFilters = 0;
+	g_temperTestContext.totalTestsExecuted = 0;
+	g_temperTestContext.currentTestErrorCount = 0;
+	g_temperTestContext.currentTestWasAborted = false;
+	g_temperTestContext.partialFilter = false;
 	g_temperTestContext.timeUnit = TEMPER_TIME_UNIT_US;
-
+	g_temperTestContext.suiteFilterPrevious = NULL;
 	g_temperTestContext.suiteFilter = NULL;
 	g_temperTestContext.testFilter = NULL;
 }
@@ -1312,8 +1328,9 @@ static int TemperExecuteAllTestsInternal() {
 
 	// DM: I have never seen a function name exceed 64 characters, let alone 1024
 	// so this shouldn't be a problem
-	// I wonder if it's possible we could perhaps make this string length constant an overridable #define ?
 	char testFuncName[1024];
+
+	double start = g_temperTestContext.callbacks.GetTimestamp();
 
 	for ( uint32_t i = 0; i < g_temperTestContext.totalTestsDeclared; i++ ) {
 		TEMPER_SNPRINTF( testFuncName, 1024, "temper_test_info_fetcher_%d", i );
@@ -1327,6 +1344,8 @@ static int TemperExecuteAllTestsInternal() {
 
 		temperSuiteTestInfo_t information = funcInfoGrabber();
 
+		// check if whether the suite/test passed the filter first before checking if the run flag was set
+		// otherwise the test could be marked as run/skip but still pass the filter and it would never show in the output
 		// TODO(DM): profile doing a loop like this with branching vs. adding everything that passes the filter first to a list of things to run
 		// we care only about raw execution time in that test and whether or not the initial pass was faster than just running the loop with branching
 		if ( TemperIsSuiteFilteredInternal( information.suiteNameStr ) ) {
@@ -1335,7 +1354,6 @@ static int TemperExecuteAllTestsInternal() {
 
 				g_temperTestContext.callbacks.OnBeforeTest( &information );
 
-				// MY : I'm not checking the flag first as it'd still be helpful for search queries to see if the test even appears
 				if ( information.testingFlag == TEMPER_TEST_FLAG_SHOULD_RUN ) {
 					g_temperTestContext.currentTestErrorCount = 0;
 					g_temperTestContext.currentTestWasAborted = false;
@@ -1377,6 +1395,9 @@ static int TemperExecuteAllTestsInternal() {
 			}
 		}
 	}
+
+	double end = g_temperTestContext.callbacks.GetTimestamp();
+	g_temperTestContext.totalExecutionTime = end - start;
 
 	g_temperTestContext.callbacks.OnAllTestsFinished();
 
