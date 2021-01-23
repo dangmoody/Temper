@@ -1,4 +1,4 @@
-#define XXX_TEMPER_SELF_TEST_ENABLED // This is for testing temper only. Please don't add this in your production environment
+#define TEMPER_ENABLE_SELF_TEST 1 // This is for testing temper only. Please don't add this in your production environment
 
 #include "../../temper.h"
 

@@ -356,10 +356,6 @@ do { \
 #define __TEMPER_STRSTR						strstr
 #endif
 
-#ifndef __TEMPER_FABSF
-#define __TEMPER_FABSF						fabsf
-#endif
-
 #ifndef __TEMPER_FLOAT_EQUALS
 #define __TEMPER_FLOAT_EQUALS				TemperFloatEqualsInternal
 #endif
@@ -505,7 +501,7 @@ static temperTestContext_t		g_temperTestContext;
 
 //----------------------------------------------------------
 
-#define TEMPER_DEFAULT_EPSILON					0.00001f
+#define TEMPER_DEFAULT_EPSILON			0.00001f
 
 //----------------------------------------------------------
 
@@ -548,23 +544,23 @@ static temperTestContext_t		g_temperTestContext;
 
 //----------------------------------------------------------
 
-#ifdef XXX_TEMPER_SELF_TEST_ENABLED
+#ifdef TEMPER_ENABLE_SELF_TEST
 #define TEMPER_TEST( testName, expectationFlags, runFlag ) \
 	__TEMPER_DEFINE_TEST( __COUNTER__, NULL, testName, expectationFlags, runFlag )
 #else
 #define TEMPER_TEST( testName, runFlag ) \
 	__TEMPER_DEFINE_TEST( __COUNTER__, NULL, testName, __TEMPER_TEST_EXPECT_FLAG_SUCCESS, runFlag )
-#endif //XXX_TEMPER_SELF_TEST_ENABLED
+#endif //TEMPER_ENABLE_SELF_TEST
 
 //----------------------------------------------------------
 
-#ifdef XXX_TEMPER_SELF_TEST_ENABLED
+#ifdef TEMPER_ENABLE_SELF_TEST
 #define TEMPER_SUITE_TEST( suiteName, testName, testExpectationFlags, runFlag ) \
 	__TEMPER_DEFINE_TEST( __COUNTER__, #suiteName, testName, testExpectationFlags, runFlag )
 #else
 #define TEMPER_SUITE_TEST( suiteName, testName, runFlag ) \
 	__TEMPER_DEFINE_TEST( __COUNTER__, #suiteName, testName, __TEMPER_TEST_EXPECT_FLAG_SUCCESS, runFlag )
-#endif //XXX_TEMPER_SELF_TEST_ENABLED
+#endif //TEMPER_ENABLE_SELF_TEST
 
 //----------------------------------------------------------
 
@@ -579,10 +575,10 @@ static temperTestContext_t		g_temperTestContext;
 	/*3. Stash this function and run info in a struct unique to this.*/ \
 	typedef struct __TEMPER_CONCAT( testName, _ParametricTestInfo ) { \
 		__TEMPER_CONCAT( testName, _FuncType ) Callback; \
-		temperTestFlag_t				testingFlag; \
+		temperTestFlag_t		testingFlag; \
 		temperTestExpectFlags_t	expectationFlags; \
-		const char*						testNameStr; \
-		const char*						suiteNameStr; \
+		const char*				testNameStr; \
+		const char*				suiteNameStr; \
 	} __TEMPER_CONCAT( testName, _ParametricTestInfo ); \
 \
 	/*4. Create a global instance of this new struct for us to access and write data about this test to.*/ \
@@ -605,23 +601,23 @@ static temperTestContext_t		g_temperTestContext;
 
 //----------------------------------------------------------
 
-#ifdef XXX_TEMPER_SELF_TEST_ENABLED
+#ifdef TEMPER_ENABLE_SELF_TEST
 #define TEMPER_PARAMETRIC( testName, testExpectationFlags, runFlag, ... )\
 	__TEMPER_PARAMETRIC_SUITE( NULL, testName, testExpectationFlags, runFlag, __VA_ARGS__ )
 #else
 #define TEMPER_PARAMETRIC( testName, runFlag, ... )\
 	__TEMPER_PARAMETRIC_SUITE( NULL, testName, __TEMPER_TEST_EXPECT_FLAG_SUCCESS, runFlag, __VA_ARGS__ )
-#endif //XXX_TEMPER_SELF_TEST_ENABLED
+#endif //TEMPER_ENABLE_SELF_TEST
 
 //----------------------------------------------------------
 
-#ifdef XXX_TEMPER_SELF_TEST_ENABLED
+#ifdef TEMPER_ENABLE_SELF_TEST
 #define TEMPER_PARAMETRIC_SUITE( suiteName, testName, testExpectationFlags, runFlag, ... )\
 	__TEMPER_PARAMETRIC_SUITE( #suiteName, testName, testExpectationFlags, runFlag, __VA_ARGS__ )
 #else
 #define TEMPER_PARAMETRIC_SUITE( suiteName, testName, runFlag, ... )\
 	__TEMPER_PARAMETRIC_SUITE( #suiteName, testName, __TEMPER_TEST_EXPECT_FLAG_SUCCESS, runFlag, __VA_ARGS__ )
-#endif //XXX_TEMPER_SELF_TEST_ENABLED
+#endif //TEMPER_ENABLE_SELF_TEST
 
 //----------------------------------------------------------
 
@@ -662,13 +658,13 @@ static temperTestContext_t		g_temperTestContext;
 
 //----------------------------------------------------------
 
-#ifdef XXX_TEMPER_SELF_TEST_ENABLED
+#ifdef TEMPER_ENABLE_SELF_TEST
 #define TEMPER_INVOKE_PARAMETRIC_TEST( nameOfTestToCall, testExpectationFlags, ... ) \
 	__TEMPER_INVOKE_PARAMETRIC_TEST( __COUNTER__, nameOfTestToCall, testExpectationFlags, __VA_ARGS__ )
 #else
 #define TEMPER_INVOKE_PARAMETRIC_TEST( nameOfTestToCall, ... ) \
 	__TEMPER_INVOKE_PARAMETRIC_TEST( __COUNTER__, nameOfTestToCall, __TEMPER_TEST_EXPECT_FLAG_SUCCESS, __VA_ARGS__ )
-#endif // XXX_TEMPER_SELF_TEST_ENABLED
+#endif // TEMPER_ENABLE_SELF_TEST
 
 //==========================================================
 // Internal Functions
@@ -679,14 +675,14 @@ static temperTestContext_t		g_temperTestContext;
 #if defined( _WIN32 )
 #define __TEMPER_COLOR_DEFAULT	0x07
 #define __TEMPER_COLOR_RED		0x0C
-#define __TEMPER_COLOR_GREEN		0x02
+#define __TEMPER_COLOR_GREEN	0x02
 #define __TEMPER_COLOR_YELLOW	0x0E
 
 typedef uint32_t				temperTextColor_t;
 #elif defined( __linux__ ) || defined( __APPLE__ )
 #define __TEMPER_COLOR_DEFAULT	"\033[0m"
 #define __TEMPER_COLOR_RED		"\033[0;31m"
-#define __TEMPER_COLOR_GREEN		"\033[0;32m"
+#define __TEMPER_COLOR_GREEN	"\033[0;32m"
 #define __TEMPER_COLOR_YELLOW	"\033[1;33m"
 
 typedef const char*				temperTextColor_t;
@@ -766,7 +762,7 @@ static uint32_t TemperGetPercentInternal( uint32_t yourValue, uint32_t yourMax )
 //----------------------------------------------------------
 
 static bool TemperFloatEqualsInternal( const float a, const float b, const float epsilon ) {
-	return __TEMPER_FABSF( a - b ) <= epsilon;
+	return fabsf( a - b ) <= epsilon;
 }
 
 //----------------------------------------------------------
@@ -799,10 +795,10 @@ static double TemperGetTimestampInternal( void ) {
 	int64_t clocks = (int64_t) ( now.tv_sec * 1000000000 + now.tv_nsec );
 
 	switch ( g_temperTestContext.timeUnit ) {
-		case __TEMPER_TIME_UNIT_CLOCKS:	return (double) clocks;
-		case __TEMPER_TIME_UNIT_NS:		return (double) clocks;
-		case __TEMPER_TIME_UNIT_US:		return (double) clocks / 1000.0;
-		case __TEMPER_TIME_UNIT_MS:		return (double) clocks / 1000000.0;
+		case __TEMPER_TIME_UNIT_CLOCKS:		return (double) clocks;
+		case __TEMPER_TIME_UNIT_NS:			return (double) clocks;
+		case __TEMPER_TIME_UNIT_US:			return (double) clocks / 1000.0;
+		case __TEMPER_TIME_UNIT_MS:			return (double) clocks / 1000000.0;
 		case __TEMPER_TIME_UNIT_SECONDS:	return (double) clocks / 1000000000.0;
 	}
 #else	// defined( _WIN32 )
@@ -1125,10 +1121,10 @@ static void TemperRunTestThreadInternal( temperTestInfo_t* information ) {
 
 static const char* TemperGetTimeUnitStringInternal( void ) {
 	switch ( g_temperTestContext.timeUnit ) {
-		case __TEMPER_TIME_UNIT_CLOCKS:	return "clocks";
-		case __TEMPER_TIME_UNIT_NS:		return "nanoseconds";
-		case __TEMPER_TIME_UNIT_US:		return "microseconds";
-		case __TEMPER_TIME_UNIT_MS:		return "milliseconds";
+		case __TEMPER_TIME_UNIT_CLOCKS:		return "clocks";
+		case __TEMPER_TIME_UNIT_NS:			return "nanoseconds";
+		case __TEMPER_TIME_UNIT_US:			return "microseconds";
+		case __TEMPER_TIME_UNIT_MS:			return "milliseconds";
 		case __TEMPER_TIME_UNIT_SECONDS:	return "seconds";
 
 		default:
@@ -1374,7 +1370,7 @@ static int TemperExecuteAllTestsInternal() {
 
 					g_temperTestContext.totalTestsExecuted += 1;
 
-#ifndef XXX_TEMPER_SELF_TEST_ENABLED
+#ifndef TEMPER_ENABLE_SELF_TEST
 					if ( g_temperTestContext.currentTestErrorCount > 0 ) {
 						g_temperTestContext.testsFailed += 1;
 					} else {
@@ -1396,7 +1392,7 @@ static int TemperExecuteAllTestsInternal() {
 					} else {
 						g_temperTestContext.testsFailed += 1;
 					}
-#endif //XXX_TEMPER_SELF_TEST_ENABLED
+#endif //TEMPER_ENABLE_SELF_TEST
 				} else {
 					g_temperTestContext.testsSkipped += 1;
 				}
