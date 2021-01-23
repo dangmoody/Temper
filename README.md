@@ -13,14 +13,15 @@ Distributed under the MIT license.  See [LICENSE](https://github.com/dangmoody/T
 - Early exits for tests and a bunch of new condition macros.
 - Handling errors from your program's log output (requires a bit of extra work on your part). `// DM: I'm thinking about this`
 - Low friction, easily overridable functions to help hook Temper into your codebase.
+- Support for Clang, GCC, and MSVC across Windows, Mac OS, and Linux on x64 ISAs (support for ARM in progress).
 
 `// DM: rework this maybe?`
 `// DM: I like the marketing - be more human`
-It's not a new feature but worth stressing. It's still just the one header file. No .libs or .dlls to link against. Drop it into your project, tell it to run all tests somewhere in code and you're good to go! And once again; it's all written in C99 compliant code.
+It's not a new feature but worth stressing. It's still just the one header file.  Drop it into your project, tell it to run all tests somewhere in code and you're good to go! And once again; it's all written in C99 compliant code.
 
 ## Installation
 
-Download `temper.h` from the [releases](https://github.com/dangmoody/Tantrum/releases/latest) tab and `#include` it.
+Download the latest release from the [releases](https://github.com/dangmoody/Tantrum/releases/latest) tab and include `temper.h`.
 
 ## Quick start guide:
 
@@ -36,11 +37,19 @@ int main( int argc, char** argv )
 }
 ```
 
+#### Compiling
+
+On Windows and Mac OS you shouldn't need to do anything extra on your part to get Temper to compile correctly.  There should be no other dependencies that are required.  If you find that there are, please submit a [bug report](https://github.com/dangmoody/Tantrum/issues).
+
+If you are compiling Temper on Linux and you are NOT overriding the default internal functions then you will need to make sure you pass the following arguments to your compiler/linker:
+- `-lm` - required if you're not overriding `TEMPER_FABSF`.
+- `-ldl` - required if you're not overriding the `LoadEXEHandle()` and `UnloadEXEHandle()` functions.
+- `-lpthread` - required if you're not overriding the `RunTestThread()` function.
+- `--export-dynamic` - or some other equivalent, required to allow the compiler to export the test functions so they can be called dynamically by Temper at runtime.
+
 When compiled, this will then produce an executable that will run all tests you have defined and return `EXIT_SUCCESS` (by default) if there were no errors.  If there were errors then the program will return `EXIT_FAILURE` (by default).
 
-Following on from that we need to add some tests.
-
-#### Defining tests
+#### Writing tests
 
 A test can be defined either as a part of or not a part of a suite and with or without parameters.
 
@@ -147,4 +156,4 @@ If you want to submit code then we are open to pull requests.  See [contributing
 
 ## Special thanks to:
 
-* Zack Dutton - bug reports and testing
+* Zack Dutton - Bug reports and testing.
