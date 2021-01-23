@@ -13,24 +13,24 @@ this is also the best I can do for unifying TEMPER_TEST() and TEMPER_SUITE_TEST(
 I'm not so sure I like the unification of tests and "suite tests" because the NULL suite name string has added a lot of extra branching
 */
 
-TEMPER_TEST( OrderingBeer, TEMPER_TEST_FLAG_SHOULD_RUN ) {
+TEMPER_TEST( OrderingBeer, TEMPER_FLAG_SHOULD_RUN ) {
 }
 
-TEMPER_TEST( ReOrderingBeer, TEMPER_TEST_FLAG_SHOULD_RUN ) {
+TEMPER_TEST( ReOrderingBeer, TEMPER_FLAG_SHOULD_RUN ) {
 	TEMPER_CHECK_EQUAL( 5, 5 );
 	TEMPER_CHECK_NOT_EQUAL( 5, 9 );
 }
 
-TEMPER_TEST( ReReOrderingBeer, TEMPER_TEST_FLAG_DEPRECATED ) {
+TEMPER_TEST( ReReOrderingBeer, TEMPER_FLAG_DEPRECATED ) {
 }
 
-TEMPER_TEST( TableFlippingForBeer, TEMPER_TEST_FLAG_SHOULD_SKIP ) {
+TEMPER_TEST( TableFlippingForBeer, TEMPER_FLAG_SHOULD_SKIP ) {
 }
 
-TEMPER_SUITE_TEST( MySuite, DansSuiteTest, TEMPER_TEST_FLAG_SHOULD_RUN ) {
+TEMPER_SUITE_TEST( MySuite, DansSuiteTest, TEMPER_FLAG_SHOULD_RUN ) {
 }
 
-TEMPER_SUITE_TEST( MySuite, DansSuiteTest2, TEMPER_TEST_FLAG_SHOULD_RUN ) {
+TEMPER_SUITE_TEST( MySuite, DansSuiteTest2, TEMPER_FLAG_SHOULD_RUN ) {
 }
 
 int main( int argc, char** argv ){
