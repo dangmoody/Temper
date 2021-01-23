@@ -505,7 +505,7 @@ static temperTestContext_t		g_temperTestContext;
 
 //----------------------------------------------------------
 
-#define TEMPER_DEFAULT_EPSILON					0.00001f
+#define TEMPER_DEFAULT_EPSILON			0.00001f
 
 //----------------------------------------------------------
 
@@ -580,7 +580,7 @@ static temperTestContext_t		g_temperTestContext;
 	typedef struct __TEMPER_CONCAT( testName, _ParametricTestInfo ) { \
 		__TEMPER_CONCAT( testName, _FuncType ) Callback; \
 		temperTestFlag_t				testingFlag; \
-		temperTestExpectFlags_t	expectationFlags; \
+		temperTestExpectFlags_t			expectationFlags; \
 		const char*						testNameStr; \
 		const char*						suiteNameStr; \
 	} __TEMPER_CONCAT( testName, _ParametricTestInfo ); \
@@ -679,14 +679,14 @@ static temperTestContext_t		g_temperTestContext;
 #if defined( _WIN32 )
 #define __TEMPER_COLOR_DEFAULT	0x07
 #define __TEMPER_COLOR_RED		0x0C
-#define __TEMPER_COLOR_GREEN		0x02
+#define __TEMPER_COLOR_GREEN	0x02
 #define __TEMPER_COLOR_YELLOW	0x0E
 
 typedef uint32_t				temperTextColor_t;
 #elif defined( __linux__ ) || defined( __APPLE__ )
 #define __TEMPER_COLOR_DEFAULT	"\033[0m"
 #define __TEMPER_COLOR_RED		"\033[0;31m"
-#define __TEMPER_COLOR_GREEN		"\033[0;32m"
+#define __TEMPER_COLOR_GREEN	"\033[0;32m"
 #define __TEMPER_COLOR_YELLOW	"\033[1;33m"
 
 typedef const char*				temperTextColor_t;
@@ -786,10 +786,10 @@ static double TemperGetTimestampInternal( void ) {
 	QueryPerformanceCounter( &now );
 
 	switch ( g_temperTestContext.timeUnit ) {
-		case __TEMPER_TIME_UNIT_CLOCKS:	return ( (double) now.QuadPart );
-		case __TEMPER_TIME_UNIT_NS:		return ( (double) ( now.QuadPart * 1000000000 ) / (double) g_temperTestContext.timestampFrequency.QuadPart );
-		case __TEMPER_TIME_UNIT_US:		return ( (double) ( now.QuadPart * 1000000 ) / (double) g_temperTestContext.timestampFrequency.QuadPart );
-		case __TEMPER_TIME_UNIT_MS:		return ( (double) ( now.QuadPart * 1000 ) / (double) g_temperTestContext.timestampFrequency.QuadPart );
+		case __TEMPER_TIME_UNIT_CLOCKS:		return ( (double) now.QuadPart );
+		case __TEMPER_TIME_UNIT_NS:			return ( (double) ( now.QuadPart * 1000000000 ) / (double) g_temperTestContext.timestampFrequency.QuadPart );
+		case __TEMPER_TIME_UNIT_US:			return ( (double) ( now.QuadPart * 1000000 ) / (double) g_temperTestContext.timestampFrequency.QuadPart );
+		case __TEMPER_TIME_UNIT_MS:			return ( (double) ( now.QuadPart * 1000 ) / (double) g_temperTestContext.timestampFrequency.QuadPart );
 		case __TEMPER_TIME_UNIT_SECONDS:	return ( (double) ( now.QuadPart ) / (double) g_temperTestContext.timestampFrequency.QuadPart );
 	}
 #elif defined( __APPLE__ ) || defined( __linux__ )	// defined( _WIN32 )
@@ -799,10 +799,10 @@ static double TemperGetTimestampInternal( void ) {
 	int64_t clocks = (int64_t) ( now.tv_sec * 1000000000 + now.tv_nsec );
 
 	switch ( g_temperTestContext.timeUnit ) {
-		case __TEMPER_TIME_UNIT_CLOCKS:	return (double) clocks;
-		case __TEMPER_TIME_UNIT_NS:		return (double) clocks;
-		case __TEMPER_TIME_UNIT_US:		return (double) clocks / 1000.0;
-		case __TEMPER_TIME_UNIT_MS:		return (double) clocks / 1000000.0;
+		case __TEMPER_TIME_UNIT_CLOCKS:		return (double) clocks;
+		case __TEMPER_TIME_UNIT_NS:			return (double) clocks;
+		case __TEMPER_TIME_UNIT_US:			return (double) clocks / 1000.0;
+		case __TEMPER_TIME_UNIT_MS:			return (double) clocks / 1000000.0;
 		case __TEMPER_TIME_UNIT_SECONDS:	return (double) clocks / 1000000000.0;
 	}
 #else	// defined( _WIN32 )
@@ -1125,10 +1125,10 @@ static void TemperRunTestThreadInternal( temperTestInfo_t* information ) {
 
 static const char* TemperGetTimeUnitStringInternal( void ) {
 	switch ( g_temperTestContext.timeUnit ) {
-		case __TEMPER_TIME_UNIT_CLOCKS:	return "clocks";
-		case __TEMPER_TIME_UNIT_NS:		return "nanoseconds";
-		case __TEMPER_TIME_UNIT_US:		return "microseconds";
-		case __TEMPER_TIME_UNIT_MS:		return "milliseconds";
+		case __TEMPER_TIME_UNIT_CLOCKS:		return "clocks";
+		case __TEMPER_TIME_UNIT_NS:			return "nanoseconds";
+		case __TEMPER_TIME_UNIT_US:			return "microseconds";
+		case __TEMPER_TIME_UNIT_MS:			return "milliseconds";
 		case __TEMPER_TIME_UNIT_SECONDS:	return "seconds";
 
 		default:
