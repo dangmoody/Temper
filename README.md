@@ -51,7 +51,7 @@ When compiled, this will then produce an executable that will run all tests you 
 
 #### Writing tests
 
-A test can be defined either as a part of or not a part of a suite and with or without parameters. You can even mute it so it will be skipped when it comes time for TEMPER to run it by just changing the TEMPER_FLAG parameter.
+A test can be defined either as a part of or not a part of a suite and with or without parameters. You can even mute it so it will be skipped when it comes time for Temper to run it by just changing the `TEMPER_FLAG` parameter.
 
 ```c
 // Define a simple test with a Name only
