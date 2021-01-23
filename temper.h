@@ -575,17 +575,10 @@ static temperTestContext_t		g_temperTestContext;
 	/*3. Stash this function and run info in a struct unique to this.*/ \
 	typedef struct __TEMPER_CONCAT( testName, _ParametricTestInfo ) { \
 		__TEMPER_CONCAT( testName, _FuncType ) Callback; \
-<<<<<<< HEAD
-		temperTestFlag_t		testingFlag; \
-		temperTestExpectFlags_t	expectationFlags; \
-		const char*				testNameStr; \
-		const char*				suiteNameStr; \
-=======
 		temperTestFlag_t				testingFlag; \
 		temperTestExpectFlags_t			expectationFlags; \
 		const char*						testNameStr; \
 		const char*						suiteNameStr; \
->>>>>>> 2d5e792083aa534e75d2b39b77287cf8a6244734
 	} __TEMPER_CONCAT( testName, _ParametricTestInfo ); \
 \
 	/*4. Create a global instance of this new struct for us to access and write data about this test to.*/ \
