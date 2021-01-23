@@ -1,7 +1,7 @@
 #include "../../temper.h"
 
 static void CheckIntDoesNotEqual( const uint32_t a, const uint32_t b ) {
-	TEMPER_TEST_FALSE_OR_ABORT_M( a == b, "A is equal to B now!" );
+	TEMPER_CHECK_FALSE_AM( a == b, "A is equal to B now!" );
 }
 
 TEMPER_TEST( DanTest0, TEMPER_TEST_FLAG_SHOULD_RUN ) {
@@ -13,13 +13,13 @@ TEMPER_TEST( DanTest0, TEMPER_TEST_FLAG_SHOULD_RUN ) {
 
 TEMPER_TEST( DanTest1, TEMPER_TEST_FLAG_SHOULD_RUN ) {
 	for ( uint32_t i = 0; i < 10; i++ ) {
-		TEMPER_TEST_EQUAL_M( i, i, "NO" );
+		TEMPER_CHECK_EQUAL_M( i, i, "NO" );
 	}
 }
 
 TEMPER_TEST( DanTest2, TEMPER_TEST_FLAG_SHOULD_RUN ) {
 	for ( uint32_t i = 0; i < 10; i++ ) {
-		TEMPER_TEST_NOT_EQUAL_M( i, i + 1, "NO2" );
+		TEMPER_CHECK_NOT_EQUAL_M( i, i + 1, "NO2" );
 	}
 }
 

@@ -57,19 +57,19 @@ A test can be defined either as a part of or not a part of a suite and with or w
 // Define a simple test with a Name only
 TEMPER_TEST( TestName, TEMPER_TEST_FLAG_SHOULD_RUN )
 {
-	TEMPER_TEST_TRUE( 69 == 105 );
+	TEMPER_CHECK_TRUE( 69 == 105 );
 }
 
 // Define a test as a part of a suite
 TEMPER_SUITE_TEST( SuiteName, TestName2, TEMPER_TEST_FLAG_SHOULD_RUN )
 {
-	TEMPER_TEST_TRUE( 69 == 420 );
+	TEMPER_CHECK_TRUE( 69 == 420 );
 }
 
 // Define a parametric test (can take whatever parameters you like)
-TEMPER_DECLARE_PARAMETRIC_TEST( TestName3, TEMPER_TEST_FLAG_SHOULD_RUN, int param1, int param2 )
+TEMPER_PARAMETRIC( TestName3, TEMPER_TEST_FLAG_SHOULD_RUN, int param1, int param2 )
 {
-	TEMPER_TEST_EQUAL( param1, param2 );
+	TEMPER_CHECK_EQUAL( param1, param2 );
 }
 
 // Declare invokations to the parametric test. Must have matching arguments filled out.
@@ -78,9 +78,9 @@ TEMPER_INVOKE_PARAMETRIC_TEST( TestName3, Check5And6, 5, 6 ); // will fail
 TEMPER_INVOKE_PARAMETRIC_TEST( TestName3, Check7And7, 7, 7 ); // will work
 
 // Define a parametric test as a part of a suite
-TEMPER_DECLARE_PARAMETRIC_SUITE_TEST( SuiteName, TestName4, TEMPER_TEST_FLAG_SHOULD_RUN, int param1, int param2 )
+TEMPER_PARAMETRIC_SUITE( SuiteName, TestName4, TEMPER_TEST_FLAG_SHOULD_RUN, int param1, int param2 )
 {
-	TEMPER_TEST_EQUAL( param1, param2 );
+	TEMPER_CHECK_EQUAL( param1, param2 );
 }
 
 // You invoke a suite parametric test in the same way you would a non-suite parametric test.
@@ -91,15 +91,15 @@ TEMPER_INVOKE_PARAMETRIC_TEST( TestName4, Check7And7, 7, 7 ); // will work
 
 #### Test cases / Conditional macros
 
-|                        Name                        |                                               Description                                                |
-| -------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `TEST_TRUE( 5 == 5 )`                              | Passes if the condition is true, otherwise it'll log an error                                            |
-| `TEMPER_TEST_FALSE( 5 == 6 )`                      | Passes if the condition is false, otheriwse it'll log an error                                           |
-| `TEMPER_TEST_EQUAL( 5, 5 )`                        | Passes if the two parameters are the same, otheriwse it'll log an error                                  |
-| `TEMPER_TEST_NOT_EQUAL( 5, 6 )`                    | Passes if two parameters are NOT the same, otheriwse it'll log an error                                  |
-| `TEMPER_TEST_FLOAT_EQUAL( 5.5f, 5.5f )`            | Passes if the two parameters are the same or within a predefined tolerance, otheriwse it'll log an error |
-| `TEMPER_TEST_ALMOST_EQUAL( 5.5f, 6.7f, 2.0f )`     | Passes if the two parameters are the same or within a specified tolerance, otheriwse it'll log an error  |
-| `TEMPER_TEST_NOT_ALMOST_EQUAL( 5.5f, 6.7f, 1.0f )` | Passes if the two parameters are different beyond a specified tolerance, otheriwse it'll log an error    |
+|                        Name                         |                                               Description                                                |
+| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `TEMPER_CHECK_TRUE( 5 == 5 )`                       | Passes if the condition is true, otherwise it'll log an error                                            |
+| `TEMPER_CHECK_FALSE( 5 == 6 )`                      | Passes if the condition is false, otheriwse it'll log an error                                           |
+| `TEMPER_CHECK_EQUAL( 5, 5 )`                        | Passes if the two parameters are the same, otheriwse it'll log an error                                  |
+| `TEMPER_CHECK_NOT_EQUAL( 5, 6 )`                    | Passes if two parameters are NOT the same, otheriwse it'll log an error                                  |
+| `TEMPER_CHECK_FLOAT_EQUAL( 5.5f, 5.5f )`            | Passes if the two parameters are the same or within a predefined tolerance, otheriwse it'll log an error |
+| `TEMPER_CHECK_ALMOST_EQUAL( 5.5f, 6.7f, 2.0f )`     | Passes if the two parameters are the same or within a specified tolerance, otheriwse it'll log an error  |
+| `TEMPER_CHECK_NOT_ALMOST_EQUAL( 5.5f, 6.7f, 1.0f )` | Passes if the two parameters are different beyond a specified tolerance, otheriwse it'll log an error    |
 
 It's worth pointing out that all of these conditions have optional suffixes which you can apply for more options:
 
@@ -108,16 +108,16 @@ It's worth pointing out that all of these conditions have optional suffixes whic
 |    Suffix     |                                                        Description                                                         |
 | ------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | `_M`          | Allows you to append a string parameter that will be output if the condition fails.                                        |
-| `_OR_ABORT`   | If this condition fails the whole test will exit early                                                                     |
-| `_OR_ABORT_M` | Allows you to append a string parameter that will be output if the condition fails, it will also have the test exit early. |
+| `_A`          | If this condition fails the whole test will exit early                                                                     |
+| `_AM`         | Allows you to append a string parameter that will be output if the condition fails, it will also have the test exit early. |
 
 #### Examples of Suffixes:
 
 ```c
-TEMPER_TEST_TRUE( 5 == 6 ); // Will just log a standard error when it fails
-TEMPER_TEST_TRUE_M( 5 == 6, "Maths is broken." ); // Will print your message as well when it fails.
-TEMPER_TEST_TRUE_OR_ABORT( 5 == 6 ); // Will just log a standard error and make the test exit early when it fails.
-TEMPER_TEST_TRUE_OR_ABORT_M( 5 == 6, "Maths is broken." ); // Will make your test exit early and print your messsage.
+TEMPER_CHECK_TRUE( 5 == 6 ); // Will just log a standard error when it fails
+TEMPER_CHECK_TRUE_M( 5 == 6, "Maths is broken." ); // Will print your message as well when it fails.
+TEMPER_CHECK_TRUE_A( 5 == 6 ); // Will just log a standard error and make the test exit early when it fails.
+TEMPER_CHECK_TRUE_AM( 5 == 6, "Maths is broken." ); // Will make your test exit early and print your messsage.
 ```
 
 ## Overriding internal functions

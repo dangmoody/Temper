@@ -7,7 +7,7 @@
 int main( int argc, char** argv ) {
 	TEMPER_SETUP();
 	int returnValue = TEMPER_RUN_ALL_TESTS_WITH_ARGS( argc, argv );
-	//getchar();
+	getchar();
 	return returnValue;
 }
 //#else
