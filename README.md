@@ -51,7 +51,7 @@ When compiled, this will then produce an executable that will run all tests you 
 
 #### Writing tests
 
-A test can be defined either as a part of or not a part of a suite and with or without parameters.
+A test can be defined either as a part of or not a part of a suite and with or without parameters. You can even mute it so it will be skipped when it comes time for TEMPER to run it by just changing the TEMPER_FLAG parameter.
 
 ```c
 // Define a simple test with a Name only
@@ -73,9 +73,9 @@ TEMPER_PARAMETRIC( TestName3, TEMPER_FLAG_SHOULD_RUN, int param1, int param2 )
 }
 
 // Declare invokations to the parametric test. Must have matching arguments filled out.
-TEMPER_INVOKE_PARAMETRIC_TEST( TestName3, Check5And5, 5, 5 ); // will work
-TEMPER_INVOKE_PARAMETRIC_TEST( TestName3, Check5And6, 5, 6 ); // will fail
-TEMPER_INVOKE_PARAMETRIC_TEST( TestName3, Check7And7, 7, 7 ); // will work
+TEMPER_INVOKE_PARAMETRIC_TEST( TestName3, 5, 5 ); // will work
+TEMPER_INVOKE_PARAMETRIC_TEST( TestName3, 5, 6 ); // will fail
+TEMPER_INVOKE_PARAMETRIC_TEST( TestName3, 7, 7 ); // will work
 
 // Define a parametric test as a part of a suite
 TEMPER_PARAMETRIC_SUITE( SuiteName, TestName4, TEMPER_FLAG_SHOULD_RUN, int param1, int param2 )
@@ -84,9 +84,9 @@ TEMPER_PARAMETRIC_SUITE( SuiteName, TestName4, TEMPER_FLAG_SHOULD_RUN, int param
 }
 
 // You invoke a suite parametric test in the same way you would a non-suite parametric test.
-TEMPER_INVOKE_PARAMETRIC_TEST( TestName4, Check5And5, 5, 5 ); // will work
-TEMPER_INVOKE_PARAMETRIC_TEST( TestName4, Check5And6, 5, 6 ); // will fail
-TEMPER_INVOKE_PARAMETRIC_TEST( TestName4, Check7And7, 7, 7 ); // will work
+TEMPER_INVOKE_PARAMETRIC_TEST( TestName4, 5, 5 ); // will work
+TEMPER_INVOKE_PARAMETRIC_TEST( TestName4, 5, 6 ); // will fail
+TEMPER_INVOKE_PARAMETRIC_TEST( TestName4, 7, 7 ); // will work
 ```
 
 #### Test cases / Conditional macros
