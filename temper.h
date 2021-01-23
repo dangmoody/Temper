@@ -496,9 +496,9 @@ static temperTestContext_t		g_temperTestContext;
 //==========================================================
 
 #if defined( _WIN32 )
-#define TEMPER_UTIL_EXIT_TEST_THREAD_INTERNAL()		ExitThread( TEMPER_UTIL_EXIT_FAILURE )
+#define TEMPER_UTIL_EXIT_TEST_THREAD()		ExitThread( TEMPER_UTIL_EXIT_FAILURE )
 #else
-#define TEMPER_UTIL_EXIT_TEST_THREAD_INTERNAL()		pthread_exit( NULL )
+#define TEMPER_UTIL_EXIT_TEST_THREAD()		pthread_exit( NULL )
 #endif
 
 //----------------------------------------------------------
@@ -507,38 +507,38 @@ static temperTestContext_t		g_temperTestContext;
 
 //----------------------------------------------------------
 
-#define TEMPER_UTIL_CONCAT_INTERNAL_FINAL( a, b )	a ## b
+#define TEMPER_UTIL_CONCAT_FINAL( a, b )	a ## b
 
 //----------------------------------------------------------
 
-#define TEMPER_UTIL_CONCAT_INTERNAL( a, b )			TEMPER_UTIL_CONCAT_INTERNAL_FINAL( a, b )
+#define TEMPER_UTIL_CONCAT( a, b )			TEMPER_UTIL_CONCAT_FINAL( a, b )
 
 //----------------------------------------------------------
 
-#define TEMPER_UTIL_DEFINE_TEST_INTERNAL( counter, suiteNameString, testName, testExpectationFlags, runFlag ) \
+#define TEMPER_UTIL_DEFINE_TEST( counter, suiteNameString, testName, testExpectationFlags, runFlag ) \
 \
 	/*1. Create a function with a name matching the test.*/ \
 	void ( testName )( void ); \
 \
 	/*2. Create a testName_TestInfo struct that will just wrap the test information meta data.*/ \
-	typedef struct TEMPER_UTIL_CONCAT_INTERNAL( testName, _TestInfo ) { \
+	typedef struct TEMPER_UTIL_CONCAT( testName, _TestInfo ) { \
 		temperSuiteTestInfo_t testInformation; \
-	} TEMPER_UTIL_CONCAT_INTERNAL( testName, _TestInfo ); \
+	} TEMPER_UTIL_CONCAT( testName, _TestInfo ); \
 \
 	/*3. Create a global instance of this new struct for us to access and write data about this test to.*/ \
-	extern TEMPER_UTIL_CONCAT_INTERNAL( testName, _TestInfo ) TEMPER_UTIL_CONCAT_INTERNAL( testName, _GlobalInfo ); \
-	TEMPER_UTIL_CONCAT_INTERNAL( testName, _TestInfo ) TEMPER_UTIL_CONCAT_INTERNAL( testName, _GlobalInfo ); \
+	extern TEMPER_UTIL_CONCAT( testName, _TestInfo ) TEMPER_UTIL_CONCAT( testName, _GlobalInfo ); \
+	TEMPER_UTIL_CONCAT( testName, _TestInfo ) TEMPER_UTIL_CONCAT( testName, _GlobalInfo ); \
 \
 	/*4. Create our invoker_n function. This is what the runner will loop over to grab the test function as well as all the information concerning it*/ \
 	/* HACK(DM): I shouldn't have to add extern "C" before each declaration here to make this work for c++ compiled binaries.  I already did that at the top of the header! How is that NOT a compiler bug!? */ \
-	TEMPER_UTIL_EXTERN_C temperSuiteTestInfo_t TEMPER_API TEMPER_UTIL_CONCAT_INTERNAL( temper_test_info_fetcher_, counter )( void ); \
-	temperSuiteTestInfo_t TEMPER_UTIL_CONCAT_INTERNAL( temper_test_info_fetcher_, counter )( void ) { \
-		TEMPER_UTIL_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.Callback = testName; \
-		TEMPER_UTIL_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.suiteNameStr = suiteNameString; \
-		TEMPER_UTIL_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.expectationFlags = testExpectationFlags; \
-		TEMPER_UTIL_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.testNameStr = #testName; \
-		TEMPER_UTIL_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation.testingFlag = runFlag; \
-		return TEMPER_UTIL_CONCAT_INTERNAL( testName, _GlobalInfo ).testInformation; \
+	TEMPER_UTIL_EXTERN_C temperSuiteTestInfo_t TEMPER_API TEMPER_UTIL_CONCAT( temper_test_info_fetcher_, counter )( void ); \
+	temperSuiteTestInfo_t TEMPER_UTIL_CONCAT( temper_test_info_fetcher_, counter )( void ) { \
+		TEMPER_UTIL_CONCAT( testName, _GlobalInfo ).testInformation.Callback = testName; \
+		TEMPER_UTIL_CONCAT( testName, _GlobalInfo ).testInformation.suiteNameStr = suiteNameString; \
+		TEMPER_UTIL_CONCAT( testName, _GlobalInfo ).testInformation.expectationFlags = testExpectationFlags; \
+		TEMPER_UTIL_CONCAT( testName, _GlobalInfo ).testInformation.testNameStr = #testName; \
+		TEMPER_UTIL_CONCAT( testName, _GlobalInfo ).testInformation.testingFlag = runFlag; \
+		return TEMPER_UTIL_CONCAT( testName, _GlobalInfo ).testInformation; \
 	} \
 \
 	/*5. The test function declared at Step1 is now declared here by the user*/ \
@@ -548,54 +548,54 @@ static temperTestContext_t		g_temperTestContext;
 
 #ifdef TEMPER_UTIL_SELF_TEST_ENABLED
 #define TEMPER_TEST( testName, expectationFlags, runFlag ) \
-	TEMPER_UTIL_DEFINE_TEST_INTERNAL( __COUNTER__, NULL, testName, expectationFlags, runFlag )
+	TEMPER_UTIL_DEFINE_TEST( __COUNTER__, NULL, testName, expectationFlags, runFlag )
 #else
 #define TEMPER_TEST( testName, runFlag ) \
-	TEMPER_UTIL_DEFINE_TEST_INTERNAL( __COUNTER__, NULL, testName, TEMPER_UTIL_EXPECT_SUCCESS, runFlag )
+	TEMPER_UTIL_DEFINE_TEST( __COUNTER__, NULL, testName, TEMPER_UTIL_EXPECT_SUCCESS, runFlag )
 #endif //TEMPER_UTIL_SELF_TEST_ENABLED
 
 //----------------------------------------------------------
 
 #ifdef TEMPER_UTIL_SELF_TEST_ENABLED
 #define TEMPER_SUITE_TEST( suiteName, testName, testExpectationFlags, runFlag ) \
-	TEMPER_UTIL_DEFINE_TEST_INTERNAL( __COUNTER__, #suiteName, testName, testExpectationFlags, runFlag )
+	TEMPER_UTIL_DEFINE_TEST( __COUNTER__, #suiteName, testName, testExpectationFlags, runFlag )
 #else
 #define TEMPER_SUITE_TEST( suiteName, testName, runFlag ) \
-	TEMPER_UTIL_DEFINE_TEST_INTERNAL( __COUNTER__, #suiteName, testName, TEMPER_UTIL_EXPECT_SUCCESS, runFlag )
+	TEMPER_UTIL_DEFINE_TEST( __COUNTER__, #suiteName, testName, TEMPER_UTIL_EXPECT_SUCCESS, runFlag )
 #endif //TEMPER_UTIL_SELF_TEST_ENABLED
 
 //----------------------------------------------------------
 
-#define TEMPER_UTIL_PARAMETRIC_SUITE_INTERNAL( suiteName, testName, testExpectationFlags, runFlag, ... )\
+#define TEMPER_UTIL_PARAMETRIC_SUITE( suiteName, testName, testExpectationFlags, runFlag, ... )\
 \
 	/*1. Create a function with a name matching the test with the provided parameters.*/\
 	void ( testName )( __VA_ARGS__ ); \
 \
 	/*2. Typedef this function type.*/ \
-	typedef void ( *TEMPER_UTIL_CONCAT_INTERNAL( testName, _FuncType ) )( __VA_ARGS__ ); \
+	typedef void ( *TEMPER_UTIL_CONCAT( testName, _FuncType ) )( __VA_ARGS__ ); \
 \
 	/*3. Stash this function and run info in a struct unique to this.*/ \
-	typedef struct TEMPER_UTIL_CONCAT_INTERNAL( testName, _ParametricTestInfo ) { \
-		TEMPER_UTIL_CONCAT_INTERNAL( testName, _FuncType ) Callback; \
+	typedef struct TEMPER_UTIL_CONCAT( testName, _ParametricTestInfo ) { \
+		TEMPER_UTIL_CONCAT( testName, _FuncType ) Callback; \
 		temperTestFlag_t				testingFlag; \
 		temperTestExpectationFlags_t	expectationFlags; \
 		const char*						testNameStr; \
 		const char*						suiteNameStr; \
-	} TEMPER_UTIL_CONCAT_INTERNAL( testName, _ParametricTestInfo ); \
+	} TEMPER_UTIL_CONCAT( testName, _ParametricTestInfo ); \
 \
 	/*4. Create a global instance of this new struct for us to access and write data about this test to.*/ \
-	extern TEMPER_UTIL_CONCAT_INTERNAL( testName, _ParametricTestInfo ) TEMPER_UTIL_CONCAT_INTERNAL( testName, _GlobalParametricInfo ); \
-	TEMPER_UTIL_CONCAT_INTERNAL( testName, _ParametricTestInfo ) TEMPER_UTIL_CONCAT_INTERNAL( testName, _GlobalParametricInfo ); \
+	extern TEMPER_UTIL_CONCAT( testName, _ParametricTestInfo ) TEMPER_UTIL_CONCAT( testName, _GlobalParametricInfo ); \
+	TEMPER_UTIL_CONCAT( testName, _ParametricTestInfo ) TEMPER_UTIL_CONCAT( testName, _GlobalParametricInfo ); \
 \
 	/*5. Define an info binding function to tie all this information into the struct*/ \
 	/* HACK(DM): I shouldn't have to add extern "C" before each declaration here to make this work for c++ compiled binaries.  I already did that at the top of the header! How is that NOT a compiler bug!? */ \
-	TEMPER_UTIL_EXTERN_C void TEMPER_API TEMPER_UTIL_CONCAT_INTERNAL( testName, _ParametricTestInfoBinder )( void ); \
-	void TEMPER_UTIL_CONCAT_INTERNAL( testName, _ParametricTestInfoBinder )( void ) { \
-		TEMPER_UTIL_CONCAT_INTERNAL( testName, _GlobalParametricInfo ).Callback = testName; \
-		TEMPER_UTIL_CONCAT_INTERNAL( testName, _GlobalParametricInfo ).testingFlag = runFlag; \
-		TEMPER_UTIL_CONCAT_INTERNAL( testName, _GlobalParametricInfo ).expectationFlags = testExpectationFlags; \
-		TEMPER_UTIL_CONCAT_INTERNAL( testName, _GlobalParametricInfo ).testNameStr = #testName; \
-		TEMPER_UTIL_CONCAT_INTERNAL( testName, _GlobalParametricInfo ).suiteNameStr = suiteName; \
+	TEMPER_UTIL_EXTERN_C void TEMPER_API TEMPER_UTIL_CONCAT( testName, _ParametricTestInfoBinder )( void ); \
+	void TEMPER_UTIL_CONCAT( testName, _ParametricTestInfoBinder )( void ) { \
+		TEMPER_UTIL_CONCAT( testName, _GlobalParametricInfo ).Callback = testName; \
+		TEMPER_UTIL_CONCAT( testName, _GlobalParametricInfo ).testingFlag = runFlag; \
+		TEMPER_UTIL_CONCAT( testName, _GlobalParametricInfo ).expectationFlags = testExpectationFlags; \
+		TEMPER_UTIL_CONCAT( testName, _GlobalParametricInfo ).testNameStr = #testName; \
+		TEMPER_UTIL_CONCAT( testName, _GlobalParametricInfo ).suiteNameStr = suiteName; \
 	}\
 \
 	/*6. The test function declared at Step1 is now declared here by the user*/\
@@ -605,67 +605,67 @@ static temperTestContext_t		g_temperTestContext;
 
 #ifdef TEMPER_UTIL_SELF_TEST_ENABLED
 #define TEMPER_PARAMETRIC( testName, testExpectationFlags, runFlag, ... )\
-	TEMPER_UTIL_PARAMETRIC_SUITE_INTERNAL( NULL, testName, testExpectationFlags, runFlag, __VA_ARGS__ )
+	TEMPER_UTIL_PARAMETRIC_SUITE( NULL, testName, testExpectationFlags, runFlag, __VA_ARGS__ )
 #else
 #define TEMPER_PARAMETRIC( testName, runFlag, ... )\
-	TEMPER_UTIL_PARAMETRIC_SUITE_INTERNAL( NULL, testName, TEMPER_UTIL_EXPECT_SUCCESS, runFlag, __VA_ARGS__ )
+	TEMPER_UTIL_PARAMETRIC_SUITE( NULL, testName, TEMPER_UTIL_EXPECT_SUCCESS, runFlag, __VA_ARGS__ )
 #endif //TEMPER_UTIL_SELF_TEST_ENABLED
 
 //----------------------------------------------------------
 
 #ifdef TEMPER_UTIL_SELF_TEST_ENABLED
 #define TEMPER_PARAMETRIC_SUITE( suiteName, testName, testExpectationFlags, runFlag, ... )\
-	TEMPER_UTIL_PARAMETRIC_SUITE_INTERNAL( #suiteName, testName, testExpectationFlags, runFlag, __VA_ARGS__ )
+	TEMPER_UTIL_PARAMETRIC_SUITE( #suiteName, testName, testExpectationFlags, runFlag, __VA_ARGS__ )
 #else
 #define TEMPER_PARAMETRIC_SUITE( suiteName, testName, runFlag, ... )\
-	TEMPER_UTIL_PARAMETRIC_SUITE_INTERNAL( #suiteName, testName, TEMPER_UTIL_EXPECT_SUCCESS, runFlag, __VA_ARGS__ )
+	TEMPER_UTIL_PARAMETRIC_SUITE( #suiteName, testName, TEMPER_UTIL_EXPECT_SUCCESS, runFlag, __VA_ARGS__ )
 #endif //TEMPER_UTIL_SELF_TEST_ENABLED
 
 //----------------------------------------------------------
 
-#define TEMPER_UTIL_INVOKE_PARAMETRIC_TEST_INTERNAL( counter, nameOfTestToCall, testExpectationFlags, ... ) \
+#define TEMPER_UTIL_INVOKE_PARAMETRIC_TEST( counter, nameOfTestToCall, testExpectationFlags, ... ) \
 \
 	/*1. Create a function with a name matching the test.*/ \
-	void ( TEMPER_UTIL_CONCAT_INTERNAL( temper_parametric_wrapper_, counter ) )( void ); \
+	void ( TEMPER_UTIL_CONCAT( temper_parametric_wrapper_, counter ) )( void ); \
 \
 	/*2. Define this test body immediately*/ \
-	void ( TEMPER_UTIL_CONCAT_INTERNAL( temper_parametric_wrapper_, counter ) )( void ) { \
-		TEMPER_UTIL_CONCAT_INTERNAL( nameOfTestToCall, _GlobalParametricInfo ).Callback( __VA_ARGS__ ); \
+	void ( TEMPER_UTIL_CONCAT( temper_parametric_wrapper_, counter ) )( void ) { \
+		TEMPER_UTIL_CONCAT( nameOfTestToCall, _GlobalParametricInfo ).Callback( __VA_ARGS__ ); \
 	} \
 \
 	/*3. Create a testName_TestInfo struct that will just wrap the test information meta data.*/ \
-	typedef struct TEMPER_UTIL_CONCAT_INTERNAL( TEMPER_UTIL_CONCAT_INTERNAL( temper_parametric_wrapper_, counter ), _TestInfo ) { \
+	typedef struct TEMPER_UTIL_CONCAT( TEMPER_UTIL_CONCAT( temper_parametric_wrapper_, counter ), _TestInfo ) { \
 		temperSuiteTestInfo_t testInformation; \
-	} TEMPER_UTIL_CONCAT_INTERNAL( TEMPER_UTIL_CONCAT_INTERNAL( temper_parametric_wrapper_, counter ), _TestInfo ); \
+	} TEMPER_UTIL_CONCAT( TEMPER_UTIL_CONCAT( temper_parametric_wrapper_, counter ), _TestInfo ); \
 \
 	/*4. Create a global instance of this new struct for us to access and write data about this test to.*/ \
-	extern TEMPER_UTIL_CONCAT_INTERNAL( TEMPER_UTIL_CONCAT_INTERNAL( temper_parametric_wrapper_, counter ), _TestInfo ) TEMPER_UTIL_CONCAT_INTERNAL( TEMPER_UTIL_CONCAT_INTERNAL( temper_parametric_wrapper_, counter ), _GlobalInfo ); \
-	TEMPER_UTIL_CONCAT_INTERNAL( TEMPER_UTIL_CONCAT_INTERNAL( temper_parametric_wrapper_, counter ), _TestInfo ) TEMPER_UTIL_CONCAT_INTERNAL( TEMPER_UTIL_CONCAT_INTERNAL( temper_parametric_wrapper_, counter ), _GlobalInfo ); \
+	extern TEMPER_UTIL_CONCAT( TEMPER_UTIL_CONCAT( temper_parametric_wrapper_, counter ), _TestInfo ) TEMPER_UTIL_CONCAT( TEMPER_UTIL_CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ); \
+	TEMPER_UTIL_CONCAT( TEMPER_UTIL_CONCAT( temper_parametric_wrapper_, counter ), _TestInfo ) TEMPER_UTIL_CONCAT( TEMPER_UTIL_CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ); \
 \
 	/*5. Create our invoker_n function. This is what the runner will loop over to grab the test function as well as all the information concerning it*/ \
 	/* HACK(DM): I shouldn't have to add extern "C" before each declaration here to make this work for c++ compiled binaries.  I already did that at the top of the header! How is that NOT a compiler bug!? */ \
-	TEMPER_UTIL_EXTERN_C temperSuiteTestInfo_t TEMPER_API TEMPER_UTIL_CONCAT_INTERNAL( temper_test_info_fetcher_, counter )( void ); \
-	temperSuiteTestInfo_t TEMPER_UTIL_CONCAT_INTERNAL( temper_test_info_fetcher_, counter )( void ) { \
-		TEMPER_UTIL_CONCAT_INTERNAL( nameOfTestToCall, _ParametricTestInfoBinder )();/*Make it so we can grab the needed information out of the test function's global info*/\
-		TEMPER_UTIL_CONCAT_INTERNAL( TEMPER_UTIL_CONCAT_INTERNAL( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.Callback = TEMPER_UTIL_CONCAT_INTERNAL( temper_parametric_wrapper_, counter ); \
-		TEMPER_UTIL_CONCAT_INTERNAL( TEMPER_UTIL_CONCAT_INTERNAL( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.suiteNameStr = TEMPER_UTIL_CONCAT_INTERNAL( nameOfTestToCall, _GlobalParametricInfo ).suiteNameStr; \
-		TEMPER_UTIL_CONCAT_INTERNAL( TEMPER_UTIL_CONCAT_INTERNAL( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.expectationFlags = testExpectationFlags; \
-		TEMPER_UTIL_CONCAT_INTERNAL( TEMPER_UTIL_CONCAT_INTERNAL( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.testNameStr = #nameOfTestToCall; \
-		TEMPER_UTIL_CONCAT_INTERNAL( TEMPER_UTIL_CONCAT_INTERNAL( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.testingFlag = TEMPER_UTIL_CONCAT_INTERNAL( nameOfTestToCall, _GlobalParametricInfo ).testingFlag; \
-		return TEMPER_UTIL_CONCAT_INTERNAL( TEMPER_UTIL_CONCAT_INTERNAL( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation; \
+	TEMPER_UTIL_EXTERN_C temperSuiteTestInfo_t TEMPER_API TEMPER_UTIL_CONCAT( temper_test_info_fetcher_, counter )( void ); \
+	temperSuiteTestInfo_t TEMPER_UTIL_CONCAT( temper_test_info_fetcher_, counter )( void ) { \
+		TEMPER_UTIL_CONCAT( nameOfTestToCall, _ParametricTestInfoBinder )();/*Make it so we can grab the needed information out of the test function's global info*/\
+		TEMPER_UTIL_CONCAT( TEMPER_UTIL_CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.Callback = TEMPER_UTIL_CONCAT( temper_parametric_wrapper_, counter ); \
+		TEMPER_UTIL_CONCAT( TEMPER_UTIL_CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.suiteNameStr = TEMPER_UTIL_CONCAT( nameOfTestToCall, _GlobalParametricInfo ).suiteNameStr; \
+		TEMPER_UTIL_CONCAT( TEMPER_UTIL_CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.expectationFlags = testExpectationFlags; \
+		TEMPER_UTIL_CONCAT( TEMPER_UTIL_CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.testNameStr = #nameOfTestToCall; \
+		TEMPER_UTIL_CONCAT( TEMPER_UTIL_CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.testingFlag = TEMPER_UTIL_CONCAT( nameOfTestToCall, _GlobalParametricInfo ).testingFlag; \
+		return TEMPER_UTIL_CONCAT( TEMPER_UTIL_CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation; \
 	} \
 \
 	/* leave this at the end so the macro can end with a semicolon */ \
-	temperSuiteTestInfo_t TEMPER_API TEMPER_UTIL_CONCAT_INTERNAL( temper_test_info_fetcher_, counter )( void )
+	temperSuiteTestInfo_t TEMPER_API TEMPER_UTIL_CONCAT( temper_test_info_fetcher_, counter )( void )
 
 //----------------------------------------------------------
 
 #ifdef TEMPER_UTIL_SELF_TEST_ENABLED
 #define TEMPER_INVOKE_PARAMETRIC_TEST( nameOfTestToCall, testExpectationFlags, ... ) \
-	TEMPER_UTIL_INVOKE_PARAMETRIC_TEST_INTERNAL( __COUNTER__, nameOfTestToCall, testExpectationFlags, __VA_ARGS__ )
+	TEMPER_UTIL_INVOKE_PARAMETRIC_TEST( __COUNTER__, nameOfTestToCall, testExpectationFlags, __VA_ARGS__ )
 #else
 #define TEMPER_INVOKE_PARAMETRIC_TEST( nameOfTestToCall, ... ) \
-	TEMPER_UTIL_INVOKE_PARAMETRIC_TEST_INTERNAL( __COUNTER__, nameOfTestToCall, TEMPER_UTIL_EXPECT_SUCCESS, __VA_ARGS__ )
+	TEMPER_UTIL_INVOKE_PARAMETRIC_TEST( __COUNTER__, nameOfTestToCall, TEMPER_UTIL_EXPECT_SUCCESS, __VA_ARGS__ )
 #endif // TEMPER_UTIL_SELF_TEST_ENABLED
 
 //==========================================================
@@ -1191,7 +1191,7 @@ static void TemperAbortTestOnFailInternal( const bool abortOnFail ) {
 		g_temperTestContext.testsAborted += 1;
 		g_temperTestContext.currentTestWasAborted = true;
 
-		TEMPER_UTIL_EXIT_TEST_THREAD_INTERNAL();
+		TEMPER_UTIL_EXIT_TEST_THREAD();
 	}
 }
 
