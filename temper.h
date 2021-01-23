@@ -169,16 +169,7 @@ extern "C" {
 // Public API
 //==========================================================
 
-#define TEMPER_RUN() \
-do { \
-	g_temperTestContext.totalTestsDeclared = __COUNTER__; /* MUST NOT be in a function otherwise value of __COUNTER__ is not correct */ \
-	TemperSetupInternal(); \
-	g_temperTestContext.exitCode = TemperExecuteAllTestsInternal();\
-} while ( 0 )
-
-//----------------------------------------------------------
-
-#define TEMPER_RUN_WITH_ARGS( argc, argv ) \
+#define TEMPER_RUN( argc, argv ) \
 do { \
 	g_temperTestContext.totalTestsDeclared = __COUNTER__; /* MUST NOT be in a function otherwise value of __COUNTER__ is not correct */ \
 	TemperSetupInternal(); \

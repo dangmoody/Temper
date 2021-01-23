@@ -32,7 +32,7 @@ Download the latest release from the [releases](https://github.com/dangmoody/Tan
 
 int main( int argc, char** argv )
 {
-	TEMPER_RUN_WITH_ARGS( argc, argv ); // Runs all your tests
+	TEMPER_RUN( argc, argv ); // Runs all your tests - parse 0 and NULL as parameters if you don't use start Args
 	return TEMPER_GET_EXIT_CODE(); // Fetches your return code
 }
 ```
