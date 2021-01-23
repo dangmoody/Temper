@@ -32,8 +32,8 @@ Download the latest release from the [releases](https://github.com/dangmoody/Tan
 
 int main( int argc, char** argv )
 {
-	TEMPER_SETUP(); // You MUST call this first for Temper to set itself up correctly.
-	return TEMPER_RUN_ALL_TESTS_WITH_ARGS( argc, argv ); // This actually executes the tests.
+	TEMPER_RUN_WITH_ARGS( argc, argv ); // Runs all your tests
+	return TEMPER_GET_EXIT_CODE(); // Fetches your return code
 }
 ```
 

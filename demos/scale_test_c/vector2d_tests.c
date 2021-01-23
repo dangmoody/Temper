@@ -23,14 +23,14 @@ TEMPER_SUITE_TEST( VectorOperators, GivenTwoVectors_WhenMultipliedTogether_ThenM
 	vector2d B = { 4.f,6.f };
 	vector2d Result = Vector2D_Mul( A, B );
 	TEMPER_CHECK_FLOAT_EQUAL_M( Result.x, 8.f, "Vector2D_Mul function is broken" );
-	//TEMPER_CHECK_FLOAT_EQUAL_M( Result.y, 99.f, "Vector2D_Mul function is broken" ); // expecting this to fail - to test temper's internal system
+	TEMPER_CHECK_FLOAT_EQUAL_M( Result.y, 99.f, "Vector2D_Mul function is broken" ); // expecting this to fail - to test temper's internal system
 }
 
 TEMPER_SUITE_TEST( VectorOperators, GivenTwoVectors_WhenDividedTogether_ThenDivideCorrectly, TEMPER_FLAG_SHOULD_SKIP ) {
 	vector2d A = { 2.f,4.f };
 	vector2d B = { 4.f,6.f };
 	vector2d Result = Vector2D_Div( A, B );
-	//TEMPER_CHECK_ALMOST_EQUAL_M( Result.x, 99.f, 0.2f, "Vector2D_Div function is broken" ); // expecting this to fail - to test temper's internal system
+	TEMPER_CHECK_ALMOST_EQUAL_M( Result.x, 99.f, 0.2f, "Vector2D_Div function is broken" ); // expecting this to fail - to test temper's internal system
 	TEMPER_CHECK_ALMOST_EQUAL_M( Result.y, 0.5f, 0.2f, "Vector2D_Div function is broken" );
 }
 
@@ -48,7 +48,7 @@ TEMPER_PARAMETRIC_SUITE( AdditionSuite, AdditionPowerSet, TEMPER_FLAG_SHOULD_RUN
 
 TEMPER_INVOKE_PARAMETRIC_TEST( AdditionPowerSet, 5, 15.f, 20.f );
 TEMPER_INVOKE_PARAMETRIC_TEST( AdditionPowerSet, 7, 3.f, 10.f );
-//TEMPER_INVOKE_PARAMETRIC_TEST( AdditionPowerSet, -9.1f, 14.6f, 7.5f ); // expecting this to fail
+TEMPER_INVOKE_PARAMETRIC_TEST( AdditionPowerSet, -9.1f, 14.6f, 7.5f ); // expecting this to fail
 TEMPER_INVOKE_PARAMETRIC_TEST( AdditionPowerSet, -63.f, 2.f, -61.f );
 
 TEMPER_PARAMETRIC( SubtractionPowerSet, TEMPER_FLAG_DEPRECATED, float left, float right, float expected )

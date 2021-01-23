@@ -169,20 +169,25 @@ extern "C" {
 // Public API
 //==========================================================
 
-#define TEMPER_SETUP() \
+#define TEMPER_RUN() \
 do { \
 	g_temperTestContext.totalTestsDeclared = __COUNTER__; /* MUST NOT be in a function otherwise value of __COUNTER__ is not correct */ \
-\
 	TemperSetupInternal(); \
+	g_temperTestContext.exitCode = TemperExecuteAllTestsInternal();\
 } while ( 0 )
 
 //----------------------------------------------------------
 
-#define TEMPER_RUN_ALL_TESTS()							TemperExecuteAllTestsInternal()
+#define TEMPER_RUN_WITH_ARGS( argc, argv ) \
+do { \
+	g_temperTestContext.totalTestsDeclared = __COUNTER__; /* MUST NOT be in a function otherwise value of __COUNTER__ is not correct */ \
+	TemperSetupInternal(); \
+	g_temperTestContext.exitCode = TemperExecuteAllTestsWithArgumentsInternal( argc, argv );\
+} while ( 0 )
 
 //----------------------------------------------------------
 
-#define TEMPER_RUN_ALL_TESTS_WITH_ARGS( argc, argv )	TemperExecuteAllTestsWithArgumentsInternal( argc, argv )
+#define TEMPER_GET_EXIT_CODE() g_temperTestContext.exitCode
 
 //----------------------------------------------------------
 
@@ -473,6 +478,7 @@ typedef struct temperTestContext_t {
 	uint32_t			totalTestsFoundWithFilters;
 	uint32_t			totalTestsExecuted;
 	uint32_t			currentTestErrorCount;
+	int					exitCode;
 	temperBool32		currentTestWasAborted;
 	temperBool32		partialFilter;
 	temperTimeUnit_t	timeUnit;

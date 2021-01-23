@@ -5,8 +5,8 @@
 
 //#ifdef TEMPER_TESTS_ENABLED
 int main( int argc, char** argv ) {
-	TEMPER_SETUP();
-	int returnValue = TEMPER_RUN_ALL_TESTS_WITH_ARGS( argc, argv );
+	TEMPER_RUN_WITH_ARGS( argc, argv );
+	int returnValue = TEMPER_GET_EXIT_CODE();
 	getchar();
 	return returnValue;
 }
