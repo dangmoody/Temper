@@ -1407,7 +1407,7 @@ static int TemperExecuteAllTestsInternal() {
 	// cleanup
 	__TEMPER_UNLOAD_EXE_HANDLE( handle );
 
-	return g_temperTestContext.testsFailed == 0 ? __TEMPER_EXIT_SUCCESS : __TEMPER_EXIT_FAILURE;
+	return g_temperTestContext.testsFailed == 0 && g_temperTestContext.testsAborted == 0 ? __TEMPER_EXIT_SUCCESS : __TEMPER_EXIT_FAILURE;
 }
 
 //----------------------------------------------------------
