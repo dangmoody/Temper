@@ -4,7 +4,7 @@
 
 //----------------------------------------------------------
 
-TEMPER_TEST(GivenIsolatedTest_WhenDeclared_IsExecuted, __TEMPER_TEST_EXPECT_FLAG_SUCCESS, TEMPER_FLAG_SHOULD_RUN)
+TEMPER_TEST( GivenIsolatedTest_WhenDeclared_IsExecuted, __TEMPER_TEST_EXPECT_FLAG_SUCCESS, TEMPER_FLAG_SHOULD_RUN )
 {
 	TEMPER_CHECK_TRUE(true);
 }
@@ -43,6 +43,35 @@ TEMPER_TEST( GivenIsolatedTest_WhenDeclaredWithSkipFlag_IsNotExecuted, __TEMPER_
 TEMPER_TEST( GivenIsolatedTest_WhenDeclaredWithDeprecatedFlag_IsNotExecuted, __TEMPER_TEST_EXPECT_FLAG_SUCCESS, TEMPER_FLAG_DEPRECATED )
 {
 	TEMPER_CHECK_TRUE_M( false, "The 'deprecated' flag is broken. This should NOT have run!" );
+}
+
+//----------------------------------------------------------
+
+static void OnBeforeTest()
+{
+	TEMPER_CHECK_TRUE_M( false, "OnBefore Called" );
+}
+
+//----------------------------------------------------------
+
+static void OnAfterTest()
+{
+	TEMPER_CHECK_TRUE_M( false, "OnAfter Called");
+	g_temperTestContext.currentTestErrorCount -= 2; // Asserting tests can be written in this fashion for self automation
+}
+
+//----------------------------------------------------------
+
+TEMPER_TEST_C( TestOnBefore, OnBeforeTest, OnAfterTest, __TEMPER_TEST_EXPECT_FLAG_SUCCESS, TEMPER_FLAG_SHOULD_RUN )
+{
+	TEMPER_CHECK_TRUE_M( true, "Expected this to run" );
+}
+
+//----------------------------------------------------------
+
+TEMPER_TEST_C( TestOnAfter, OnBeforeTest, OnAfterTest, __TEMPER_TEST_EXPECT_FLAG_SUCCESS, TEMPER_FLAG_SHOULD_RUN )
+{
+	TEMPER_CHECK_TRUE_M( true, "Expected this to run" );
 }
 
 //----------------------------------------------------------

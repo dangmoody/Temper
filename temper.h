@@ -440,7 +440,9 @@ typedef void( *temperTestCallback_t )( void );
 //----------------------------------------------------------
 
 typedef struct temperTestInfo_t {
-	temperTestCallback_t			Callback;
+	temperTestCallback_t			OnBeforeTest;
+	temperTestCallback_t			TestFuncCallback;
+	temperTestCallback_t			OnAfterTest;
 	double							testTimeTaken;
 	temperTestFlag_t				testingFlag;
 	temperTestExpectFlags_t			expectationFlags;
@@ -510,7 +512,7 @@ static temperTestContext_t		g_temperTestContext;
 
 //----------------------------------------------------------
 
-#define __TEMPER_DEFINE_TEST( counter, suiteNameString, testName, testExpectationFlags, runFlag ) \
+#define __TEMPER_DEFINE_TEST( counter, suiteNameString, onBeforeName, testName, onAfterName, testExpectationFlags, runFlag ) \
 \
 	/*1. Create a function with a name matching the test.*/ \
 	void ( testName )( void ); \
@@ -528,7 +530,9 @@ static temperTestContext_t		g_temperTestContext;
 	/* HACK(DM): I shouldn't have to add extern "C" before each declaration here to make this work for c++ compiled binaries.  I already did that at the top of the header! How is that NOT a compiler bug!? */ \
 	__TEMPER_EXTERN_C temperTestInfo_t __TEMPER_API __TEMPER_CONCAT( __temper_test_info_fetcher_, counter )( void ); \
 	temperTestInfo_t __TEMPER_CONCAT( __temper_test_info_fetcher_, counter )( void ) { \
-		__TEMPER_CONCAT( testName, _GlobalInfo ).testInformation.Callback = testName; \
+		__TEMPER_CONCAT( testName, _GlobalInfo ).testInformation.OnBeforeTest = onBeforeName; \
+		__TEMPER_CONCAT( testName, _GlobalInfo ).testInformation.TestFuncCallback = testName; \
+		__TEMPER_CONCAT( testName, _GlobalInfo ).testInformation.OnAfterTest = onAfterName; \
 		__TEMPER_CONCAT( testName, _GlobalInfo ).testInformation.suiteNameStr = suiteNameString; \
 		__TEMPER_CONCAT( testName, _GlobalInfo ).testInformation.expectationFlags = testExpectationFlags; \
 		__TEMPER_CONCAT( testName, _GlobalInfo ).testInformation.testNameStr = #testName; \
@@ -543,25 +547,37 @@ static temperTestContext_t		g_temperTestContext;
 
 #ifdef TEMPER_ENABLE_SELF_TEST
 #define TEMPER_TEST( testName, expectationFlags, runFlag ) \
-	__TEMPER_DEFINE_TEST( __COUNTER__, NULL, testName, expectationFlags, runFlag )
+	__TEMPER_DEFINE_TEST( __COUNTER__, NULL, NULL, testName, NULL, expectationFlags, runFlag )
+
+#define TEMPER_TEST_C( testName, onBefore, onAfter, expectationFlags, runFlag ) \
+	__TEMPER_DEFINE_TEST( __COUNTER__, NULL, onBefore, testName, onAfter, expectationFlags, runFlag )
 #else
 #define TEMPER_TEST( testName, runFlag ) \
-	__TEMPER_DEFINE_TEST( __COUNTER__, NULL, testName, __TEMPER_TEST_EXPECT_FLAG_SUCCESS, runFlag )
+	__TEMPER_DEFINE_TEST( __COUNTER__, NULL, NULL, testName, NULL, __TEMPER_TEST_EXPECT_FLAG_SUCCESS, runFlag )
+
+#define TEMPER_TEST_C( testName, onBefore, onAfter, runFlag ) \
+	__TEMPER_DEFINE_TEST( __COUNTER__, NULL, onBefore, testName, onAfter, __TEMPER_TEST_EXPECT_FLAG_SUCCESS, runFlag )
 #endif //TEMPER_ENABLE_SELF_TEST
 
 //----------------------------------------------------------
 
 #ifdef TEMPER_ENABLE_SELF_TEST
 #define TEMPER_SUITE_TEST( suiteName, testName, testExpectationFlags, runFlag ) \
-	__TEMPER_DEFINE_TEST( __COUNTER__, #suiteName, testName, testExpectationFlags, runFlag )
+	__TEMPER_DEFINE_TEST( __COUNTER__, #suiteName, NULL, testName, NULL, testExpectationFlags, runFlag )
+
+#define TEMPER_SUITE_TEST_C( suiteName,  testName, onBefore, onAfter, testExpectationFlags, runFlag ) \
+	__TEMPER_DEFINE_TEST( __COUNTER__, #suiteName, onBefore, testName, onAfter, testExpectationFlags, runFlag )
 #else
 #define TEMPER_SUITE_TEST( suiteName, testName, runFlag ) \
-	__TEMPER_DEFINE_TEST( __COUNTER__, #suiteName, testName, __TEMPER_TEST_EXPECT_FLAG_SUCCESS, runFlag )
+	__TEMPER_DEFINE_TEST( __COUNTER__, #suiteName, NULL, testName, NULL, __TEMPER_TEST_EXPECT_FLAG_SUCCESS, runFlag )
+
+#define TEMPER_SUITE_TEST_C( suiteName,  testName, onBefore, onAfter, runFlag ) \
+	__TEMPER_DEFINE_TEST( __COUNTER__, #suiteName, onBefore, testName, onAfter, __TEMPER_TEST_EXPECT_FLAG_SUCCESS, runFlag )
 #endif //TEMPER_ENABLE_SELF_TEST
 
 //----------------------------------------------------------
 
-#define __TEMPER_PARAMETRIC_SUITE( suiteName, testName, testExpectationFlags, runFlag, ... )\
+#define __TEMPER_DEFINE_PARAMETRIC( suiteName, onBeforeName, testName, onAfterName, testExpectationFlags, runFlag, ... )\
 \
 	/*1. Create a function with a name matching the test with the provided parameters.*/\
 	void ( testName )( __VA_ARGS__ ); \
@@ -571,7 +587,9 @@ static temperTestContext_t		g_temperTestContext;
 \
 	/*3. Stash this function and run info in a struct unique to this.*/ \
 	typedef struct __TEMPER_CONCAT( testName, _ParametricTestInfo ) { \
-		__TEMPER_CONCAT( testName, _FuncType ) Callback; \
+		temperTestCallback_t			OnBeforeTest; \
+		__TEMPER_CONCAT( testName, _FuncType ) TestFuncCallback; \
+		temperTestCallback_t			OnAfterTest; \
 		temperTestFlag_t				testingFlag; \
 		temperTestExpectFlags_t			expectationFlags; \
 		const char*						testNameStr; \
@@ -586,7 +604,9 @@ static temperTestContext_t		g_temperTestContext;
 	/* HACK(DM): I shouldn't have to add extern "C" before each declaration here to make this work for c++ compiled binaries.  I already did that at the top of the header! How is that NOT a compiler bug!? */ \
 	__TEMPER_EXTERN_C void __TEMPER_API __TEMPER_CONCAT( testName, _ParametricTestInfoBinder )( void ); \
 	void __TEMPER_CONCAT( testName, _ParametricTestInfoBinder )( void ) { \
-		__TEMPER_CONCAT( testName, _GlobalParametricInfo ).Callback = testName; \
+		__TEMPER_CONCAT( testName, _GlobalParametricInfo ).OnBeforeTest = onBeforeName; \
+		__TEMPER_CONCAT( testName, _GlobalParametricInfo ).TestFuncCallback = testName; \
+		__TEMPER_CONCAT( testName, _GlobalParametricInfo ).OnAfterTest = onAfterName; \
 		__TEMPER_CONCAT( testName, _GlobalParametricInfo ).testingFlag = runFlag; \
 		__TEMPER_CONCAT( testName, _GlobalParametricInfo ).expectationFlags = testExpectationFlags; \
 		__TEMPER_CONCAT( testName, _GlobalParametricInfo ).testNameStr = #testName; \
@@ -600,20 +620,32 @@ static temperTestContext_t		g_temperTestContext;
 
 #ifdef TEMPER_ENABLE_SELF_TEST
 #define TEMPER_PARAMETRIC( testName, testExpectationFlags, runFlag, ... )\
-	__TEMPER_PARAMETRIC_SUITE( NULL, testName, testExpectationFlags, runFlag, __VA_ARGS__ )
+	__TEMPER_DEFINE_PARAMETRIC( NULL, NULL, testName, NULL, testExpectationFlags, runFlag, __VA_ARGS__ )
+
+#define TEMPER_PARAMETRIC_C( testName, onBefore, onAfter, testExpectationFlags, runFlag, ... )\
+	__TEMPER_DEFINE_PARAMETRIC( NULL, onBefore, testName, onAfter, testExpectationFlags, runFlag, __VA_ARGS__ )
 #else
 #define TEMPER_PARAMETRIC( testName, runFlag, ... )\
-	__TEMPER_PARAMETRIC_SUITE( NULL, testName, __TEMPER_TEST_EXPECT_FLAG_SUCCESS, runFlag, __VA_ARGS__ )
+	__TEMPER_DEFINE_PARAMETRIC( NULL, NULL, testName, NULL, __TEMPER_TEST_EXPECT_FLAG_SUCCESS, runFlag, __VA_ARGS__ )
+
+#define TEMPER_PARAMETRIC_C( testName, onBefore, onAfter, runFlag, ... )\
+	__TEMPER_DEFINE_PARAMETRIC( NULL, onBefore, testName, onAfter, __TEMPER_TEST_EXPECT_FLAG_SUCCESS, runFlag, __VA_ARGS__ )
 #endif //TEMPER_ENABLE_SELF_TEST
 
 //----------------------------------------------------------
 
 #ifdef TEMPER_ENABLE_SELF_TEST
 #define TEMPER_PARAMETRIC_SUITE( suiteName, testName, testExpectationFlags, runFlag, ... )\
-	__TEMPER_PARAMETRIC_SUITE( #suiteName, testName, testExpectationFlags, runFlag, __VA_ARGS__ )
+	__TEMPER_DEFINE_PARAMETRIC( #suiteName, NULL, testName, NULL, testExpectationFlags, runFlag, __VA_ARGS__ )
+
+#define TEMPER_PARAMETRIC_SUITE_C( suiteName, testName, onBefore, onAfter, testExpectationFlags, runFlag, ... )\
+	__TEMPER_DEFINE_PARAMETRIC( #suiteName, onBefore, testName, onAfter, testExpectationFlags, runFlag, __VA_ARGS__ )
 #else
 #define TEMPER_PARAMETRIC_SUITE( suiteName, testName, runFlag, ... )\
-	__TEMPER_PARAMETRIC_SUITE( #suiteName, testName, __TEMPER_TEST_EXPECT_FLAG_SUCCESS, runFlag, __VA_ARGS__ )
+	__TEMPER_DEFINE_PARAMETRIC( #suiteName, NULL, testName, NULL, __TEMPER_TEST_EXPECT_FLAG_SUCCESS, runFlag, __VA_ARGS__ )
+
+#define TEMPER_PARAMETRIC_SUITE_C( suiteName, testName, onBefore, onAfter, runFlag, ... )\
+	__TEMPER_DEFINE_PARAMETRIC( #suiteName, onBefore, testName, onAfter, __TEMPER_TEST_EXPECT_FLAG_SUCCESS, runFlag, __VA_ARGS__ )
 #endif //TEMPER_ENABLE_SELF_TEST
 
 //----------------------------------------------------------
@@ -625,7 +657,7 @@ static temperTestContext_t		g_temperTestContext;
 \
 	/*2. Define this test body immediately*/ \
 	void ( __TEMPER_CONCAT( temper_parametric_wrapper_, counter ) )( void ) { \
-		__TEMPER_CONCAT( nameOfTestToCall, _GlobalParametricInfo ).Callback( __VA_ARGS__ ); \
+		__TEMPER_CONCAT( nameOfTestToCall, _GlobalParametricInfo ).TestFuncCallback( __VA_ARGS__ ); \
 	} \
 \
 	/*3. Create a testName_TestInfo struct that will just wrap the test information meta data.*/ \
@@ -642,7 +674,7 @@ static temperTestContext_t		g_temperTestContext;
 	__TEMPER_EXTERN_C temperTestInfo_t __TEMPER_API __TEMPER_CONCAT( __temper_test_info_fetcher_, counter )( void ); \
 	temperTestInfo_t __TEMPER_CONCAT( __temper_test_info_fetcher_, counter )( void ) { \
 		__TEMPER_CONCAT( nameOfTestToCall, _ParametricTestInfoBinder )();/*Make it so we can grab the needed information out of the test function's global info*/\
-		__TEMPER_CONCAT( __TEMPER_CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.Callback = __TEMPER_CONCAT( temper_parametric_wrapper_, counter ); \
+		__TEMPER_CONCAT( __TEMPER_CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.TestFuncCallback = __TEMPER_CONCAT( temper_parametric_wrapper_, counter ); \
 		__TEMPER_CONCAT( __TEMPER_CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.suiteNameStr = __TEMPER_CONCAT( nameOfTestToCall, _GlobalParametricInfo ).suiteNameStr; \
 		__TEMPER_CONCAT( __TEMPER_CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.expectationFlags = testExpectationFlags; \
 		__TEMPER_CONCAT( __TEMPER_CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.testNameStr = #nameOfTestToCall; \
@@ -1060,15 +1092,27 @@ typedef void*			temperThreadHandle_t;
 
 // its ok to write directly to the global because only one test thread runs at a time
 // if multiple test threads were running asynchronously then probably want to atomic increment at the very end of the test thread
+// we don't factor OnBefore and OnAfter calls into the time as they're just for setting up the testing enviornment
+// OnBefore and OnAfter should still permit all errors and aborts be heard by the Temper system at large incase any setup or shutdown fails.
 static temperThreadHandle_t TemperThreadProcInternal( void* data ) {
 	__TEMPER_ASSERT( data );
 
 	temperTestInfo_t* information = (temperTestInfo_t*) data;
 	__TEMPER_ASSERT( information );
 
+	if( information->OnBeforeTest )
+	{
+		information->OnBeforeTest();
+	}
+
 	g_temperTestContext.currentTestStartTime = __TEMPER_GET_TIMESTAMP();
-	information->Callback();
+	information->TestFuncCallback();
 	g_temperTestContext.currentTestEndTime = __TEMPER_GET_TIMESTAMP();
+
+	if( information->OnAfterTest )
+	{
+		information->OnAfterTest();
+	}
 
 	return 0;
 }
