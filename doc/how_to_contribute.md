@@ -32,6 +32,6 @@ Your PR has a higher chance of being accepted if it fulfills at least one of the
 * You have fixed an un-named `TODO` for us in the code somewhere.
 * It does something completely awesome that will definitely help Temper in some way.
 
-If your change doesn't do any of these things that doesn't mean it won't get accepted, it just means your PR stands less of a chance of being accepted.
+If your change doesn't do any of these things then it doesn't mean it won't get accepted, it just means your PR stands less of a chance of being accepted.
 
 We don't bite and we're open to ideas.

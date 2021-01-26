@@ -116,26 +116,25 @@ extern "C" {
 #include <Windows.h>
 #elif defined( __APPLE__ ) || defined( __linux__ )
 #include <unistd.h>
-#include <dlfcn.h>
+#include <dlfcn.h>			// dlopen, dlsym, dlclose
 #include <errno.h>
-#include <sys/stat.h>
+#include <sys/stat.h>		// lstat
 #if defined( __linux__ )
-#include <linux/limits.h>
+#include <linux/limits.h>	// PATH_MAX
 #elif defined( __APPLE__ )
-#include <sys/syslimits.h>
-#include <mach-o/dyld.h>
+#include <sys/syslimits.h>	// PATH_MAX
+#include <mach-o/dyld.h>	// _NSGetExecutablePath()
 #endif
 #include <time.h>
 #include <pthread.h>
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <stdint.h>
-#include <string.h>
+#include <stdio.h>	// printf, snprintf
+#include <stdarg.h>	// va_arg
+#include <string.h>	// strcmp, strstr
+#include <math.h>	// fabsf
 #include <assert.h>
-#include <math.h>
+#include <stdint.h>
 
 #ifndef __cplusplus
 #include <stdbool.h>
@@ -435,19 +434,24 @@ typedef uint32_t temperBool32;
 
 //----------------------------------------------------------
 
+typedef struct temperTestInfo_t temperTestInfo_t;
+
+typedef void( *temperTestCallbackOnBeforeTest_t )( temperTestInfo_t* testInfo );
+typedef void( *temperTestCallbackOnAfterTest_t )( temperTestInfo_t* testInfo );
+
 typedef void( *temperTestCallback_t )( void );
 
 //----------------------------------------------------------
 
 typedef struct temperTestInfo_t {
-	temperTestCallback_t			OnBeforeTest;
-	temperTestCallback_t			TestFuncCallback;
-	temperTestCallback_t			OnAfterTest;
-	double							testTimeTaken;
-	temperTestFlag_t				testingFlag;
-	temperTestExpectFlags_t			expectationFlags;
-	const char*						testNameStr;
-	const char*						suiteNameStr;
+	temperTestCallbackOnBeforeTest_t	OnBeforeTest;
+	temperTestCallback_t				TestFuncCallback;
+	temperTestCallbackOnAfterTest_t		OnAfterTest;
+	double								testTimeTaken;
+	temperTestFlag_t					testingFlag;
+	temperTestExpectFlags_t				expectationFlags;
+	const char*							testNameStr;
+	const char*							suiteNameStr;
 } temperTestInfo_t;
 
 //----------------------------------------------------------
@@ -1099,19 +1103,18 @@ static temperThreadHandle_t TemperThreadProcInternal( void* data ) {
 
 	temperTestInfo_t* information = (temperTestInfo_t*) data;
 	__TEMPER_ASSERT( information );
+	__TEMPER_ASSERT( information->TestFuncCallback );
 
-	if( information->OnBeforeTest )
-	{
-		information->OnBeforeTest();
+	if ( information->OnBeforeTest ) {
+		information->OnBeforeTest( information );
 	}
 
 	g_temperTestContext.currentTestStartTime = __TEMPER_GET_TIMESTAMP();
 	information->TestFuncCallback();
 	g_temperTestContext.currentTestEndTime = __TEMPER_GET_TIMESTAMP();
 
-	if( information->OnAfterTest )
-	{
-		information->OnAfterTest();
+	if ( information->OnAfterTest ) {
+		information->OnAfterTest( information );
 	}
 
 	return 0;
