@@ -10,8 +10,7 @@
 
 //----------------------------------------------------------
 
-typedef enum AutomationAccountFor_t
-{
+typedef enum AutomationAccountFor_t {
 	ACCOUNT_FOR_ONE_FAILURE = 0,
 	ACCOUNT_FOR_ONE_ABORT,
 	ACCOUNT_FOR_ONE_SKIP
@@ -26,8 +25,7 @@ static uint32_t CapturedSkipCount = 0;
 
 //----------------------------------------------------------
 
-static void CaptureTestCounts()
-{
+static void CaptureTestCounts() {
 	CapturedPassCount = g_temperTestContext.testsPassed;
 	CapturedFailCount = g_temperTestContext.testsFailed;
 	CapturedAbortCount = g_temperTestContext.testsAborted;
@@ -36,8 +34,7 @@ static void CaptureTestCounts()
 
 //----------------------------------------------------------
 
-static bool AssertResults( uint32_t passDiff, uint32_t failDiff, uint32_t abortDiff, uint32_t skipDiff )
-{
+static bool AssertResults( uint32_t passDiff, uint32_t failDiff, uint32_t abortDiff, uint32_t skipDiff ) {
 	// BUG - CONDITIONS SHOULD TAKE "const char* fmt, ..." - this is embarising.
 	TEMPER_CHECK_EQUAL( g_temperTestContext.testsPassed, ( CapturedPassCount + passDiff ) );
 	printf( "The passed test counter is not as expected: %d, %d\n", g_temperTestContext.testsPassed, CapturedPassCount + passDiff );
@@ -53,19 +50,15 @@ static bool AssertResults( uint32_t passDiff, uint32_t failDiff, uint32_t abortD
 
 //----------------------------------------------------------
 
-//	static bool AssertTestCounts( uint32_t errorCount )
-//	{
+//	static bool AssertTestCounts( uint32_t errorCount ) {
 //		TEMPER_CHECK_EQUAL_M( g_temperTestContext.currentTestErrorCount, errorCount, "this test has not produced the expected number of errors." );
-//	
 //		return g_temperTestContext.currentTestErrorCount == 0;
 //	}
 
 //----------------------------------------------------------
 
-static void AbsolveTest(const bool condition)
-{
-	if( condition )
-	{
+static void AbsolveTest( const bool condition ) {
+	if ( condition ) {
 		g_temperTestContext.currentTestErrorCount = 0;
 
 		TemperSetTextColorInternal( __TEMPER_COLOR_GREEN );
@@ -76,28 +69,22 @@ static void AbsolveTest(const bool condition)
 
 //----------------------------------------------------------
 
-static void AbsolvePreviousTest( const AutomationAccountFor_t claim )
-{
+static void AbsolvePreviousTest( const AutomationAccountFor_t claim ) {
 	TemperSetTextColorInternal( __TEMPER_COLOR_GREEN );
 
-	if( claim == ACCOUNT_FOR_ONE_FAILURE )
-	{
+	if ( claim == ACCOUNT_FOR_ONE_FAILURE ) {
 		__TEMPER_ASSERT( g_temperTestContext.testsFailed > 0 );
 		g_temperTestContext.testsPassed += 1;
 		g_temperTestContext.testsFailed -= 1;
 		__TEMPER_LOG( "Absolved previous fail\n" );
-	}
-	else if( claim == ACCOUNT_FOR_ONE_ABORT )
-	{
+	}else if ( claim == ACCOUNT_FOR_ONE_ABORT ) {
 		__TEMPER_ASSERT( g_temperTestContext.testsFailed > 0 );
 		__TEMPER_ASSERT( g_temperTestContext.testsAborted > 0 );
 		g_temperTestContext.testsPassed += 1;
 		g_temperTestContext.testsFailed -= 1;
 		g_temperTestContext.testsAborted -= 1;
 		__TEMPER_LOG( "Absolved previous abort\n" );
-	}
-	else if( claim == ACCOUNT_FOR_ONE_SKIP )
-	{
+	}else if ( claim == ACCOUNT_FOR_ONE_SKIP ) {
 		__TEMPER_ASSERT( g_temperTestContext.testsSkipped > 0 );
 		g_temperTestContext.testsPassed += 1;
 		g_temperTestContext.testsSkipped -= 1;
@@ -115,13 +102,11 @@ static void AbsolvePreviousTest( const AutomationAccountFor_t claim )
 // EXCEL_TestName - When a test is marked as "Should Run" it runs
 //----------------------------------------------------------
 
-RESULT_DEPENDANT_TEST( GivenIsolatedTest_WhenDeclared_IsExecuted, TEMPER_FLAG_SHOULD_RUN )
-{
-	TEMPER_CHECK_TRUE(true);
+RESULT_DEPENDANT_TEST( GivenIsolatedTest_WhenDeclared_IsExecuted, TEMPER_FLAG_SHOULD_RUN ) {
+	TEMPER_CHECK_TRUE( true );
 }
 
-TEMPER_TEST( CheckAndCleanResults_0, TEMPER_FLAG_SHOULD_RUN )
-{
+TEMPER_TEST( CheckAndCleanResults_0, TEMPER_FLAG_SHOULD_RUN ) {
 	AssertResults( 1, 0, 0, 0 );
 }
 
@@ -131,15 +116,12 @@ TEMPER_TEST( CheckAndCleanResults_0, TEMPER_FLAG_SHOULD_RUN )
 // EXCEL_TestName - If a test is flagged with Skip, total tests skipped increments
 //----------------------------------------------------------
 
-TEMPER_TEST( GivenIsolatedTest_WithSkipFlag_TriggersSkipCount, TEMPER_FLAG_SHOULD_SKIP )
-{
+TEMPER_TEST( GivenIsolatedTest_WithSkipFlag_TriggersSkipCount, TEMPER_FLAG_SHOULD_SKIP ) {
 	TEMPER_CHECK_TRUE_AM( false, "This test shouldn't have executed, it's flagged with Skip." );
 }
 
-TEMPER_TEST( CheckAndCleanResults_1, TEMPER_FLAG_SHOULD_RUN )
-{
-	if( g_temperTestContext.testsSkipped == 1 )
-	{
+TEMPER_TEST( CheckAndCleanResults_1, TEMPER_FLAG_SHOULD_RUN ) {
+	if ( g_temperTestContext.testsSkipped == 1 ) {
 		AbsolvePreviousTest( ACCOUNT_FOR_ONE_SKIP );
 	}
 }
@@ -155,10 +137,8 @@ TEMPER_TEST( GivenIsolatedTest_WithDepricatedFlag_TriggersSkipCount, TEMPER_FLAG
 	TEMPER_CHECK_TRUE_AM( false, "This test shouldn't have executed, it's flagged as Deprecated." );
 }
 
-TEMPER_TEST( CheckAndCleanResults_2, TEMPER_FLAG_SHOULD_RUN )
-{
-	if( g_temperTestContext.testsSkipped == 1 )
-	{
+TEMPER_TEST( CheckAndCleanResults_2, TEMPER_FLAG_SHOULD_RUN ) {
+	if ( g_temperTestContext.testsSkipped == 1 ) {
 		AbsolvePreviousTest( ACCOUNT_FOR_ONE_SKIP );
 	}
 }
@@ -167,8 +147,7 @@ TEMPER_TEST( CheckAndCleanResults_2, TEMPER_FLAG_SHOULD_RUN )
 // EXCEL_TestName - When a test triggers any errors it increments the error count for the test correctly
 //----------------------------------------------------------
 
-TEMPER_TEST( GivenCheckTrue_WhenFails_ErrorCountIncrements, TEMPER_FLAG_SHOULD_RUN )
-{
+TEMPER_TEST( GivenCheckTrue_WhenFails_ErrorCountIncrements, TEMPER_FLAG_SHOULD_RUN ) {
 	bool countIsCorrect = true;
 	TEMPER_CHECK_TRUE_M( false, "We expect this test to fail." );
 	countIsCorrect = g_temperTestContext.currentTestErrorCount == 1 ? countIsCorrect : false;
@@ -183,15 +162,12 @@ TEMPER_TEST( GivenCheckTrue_WhenFails_ErrorCountIncrements, TEMPER_FLAG_SHOULD_R
 // EXCEL_TestName - If a test triggered any errors, total tests failed increments
 //----------------------------------------------------------
 
-RESULT_DEPENDANT_TEST( GivenIsolatedTest_WhenDeclaredButHasError_IsExecutedAndFails, TEMPER_FLAG_SHOULD_RUN )
-{
+RESULT_DEPENDANT_TEST( GivenIsolatedTest_WhenDeclaredButHasError_IsExecutedAndFails, TEMPER_FLAG_SHOULD_RUN ) {
 	TEMPER_CHECK_TRUE_M( false, "We expect this test to fail." );
 }
 
-TEMPER_TEST( CheckAndCleanResults_3, TEMPER_FLAG_SHOULD_RUN )
-{
-	if( AssertResults( 0, 1, 0, 0 ) )
-	{
+TEMPER_TEST( CheckAndCleanResults_3, TEMPER_FLAG_SHOULD_RUN ) {
+	if ( AssertResults( 0, 1, 0, 0 ) ) {
 		AbsolvePreviousTest( ACCOUNT_FOR_ONE_FAILURE );
 	}
 }
@@ -200,23 +176,19 @@ TEMPER_TEST( CheckAndCleanResults_3, TEMPER_FLAG_SHOULD_RUN )
 // EXCEL_TestName - If a test triggered an aborts, total tests aborted increments
 //----------------------------------------------------------
 
-RESULT_DEPENDANT_TEST( GivenIsolatedTest_WhenDeclaredButWillAbort_IsExecutedAndAborts, TEMPER_FLAG_SHOULD_RUN )
-{
+RESULT_DEPENDANT_TEST( GivenIsolatedTest_WhenDeclaredButWillAbort_IsExecutedAndAborts, TEMPER_FLAG_SHOULD_RUN ) {
 	TEMPER_CHECK_TRUE_AM( false, "We expect this test to abort." );
 }
 
-TEMPER_TEST( CheckAndCleanResults_4, TEMPER_FLAG_SHOULD_RUN )
-{
-	if( AssertResults( 0, 1, 1, 0 ) )
-	{
+TEMPER_TEST( CheckAndCleanResults_4, TEMPER_FLAG_SHOULD_RUN ) {
+	if ( AssertResults( 0, 1, 1, 0 ) ) {
 		AbsolvePreviousTest( ACCOUNT_FOR_ONE_ABORT );
 	}
 }
 
 //----------------------------------------------------------
 
-int main( int argc, char** argv )
-{
+int main( int argc, char** argv ) {
 	TEMPER_RUN( argc, argv );
 	int exitCode = TEMPER_GET_EXIT_CODE();
 	printf( "\nAutomation returned: %d.\n", exitCode );
