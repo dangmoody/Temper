@@ -47,15 +47,19 @@ TEMPER_TEST( GivenIsolatedTest_WhenDeclaredWithDeprecatedFlag_IsNotExecuted, __T
 
 //----------------------------------------------------------
 
-static void OnBeforeTest()
+static void OnBeforeTest( temperTestInfo_t* testInfo )
 {
+	( (void) testInfo );
+
 	TEMPER_CHECK_TRUE_M( false, "OnBefore Called" );
 }
 
 //----------------------------------------------------------
 
-static void OnAfterTest()
+static void OnAfterTest( temperTestInfo_t* testInfo )
 {
+	( (void) testInfo );
+
 	TEMPER_CHECK_TRUE_M( false, "OnAfter Called");
 	g_temperTestContext.currentTestErrorCount -= 2; // Asserting tests can be written in this fashion for self automation
 }
