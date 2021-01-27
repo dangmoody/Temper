@@ -88,6 +88,7 @@ extern "C" {
 #pragma clang diagnostic ignored "-Wold-style-cast"
 #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
 #pragma clang diagnostic ignored "-Wc++98-compat-pedantic"
+#pragma clang diagnostic ignored "-Wtypedef-redefinition"
 #if defined( __APPLE__ )
 // DM: only disabling this one to avoid a warning that gets generated when trying to convert function pointers to void*
 // if anyone knows of a better way to get around that without disabling all pedantic warnings I'd love to hear about it
@@ -130,6 +131,7 @@ extern "C" {
 #endif
 
 #include <stdio.h>	// printf, snprintf
+#include <stdlib.h>	// EXIT_SUCCESS, EXIT_FAILURE
 #include <stdarg.h>	// va_arg
 #include <string.h>	// strcmp, strstr
 #include <math.h>	// fabsf
@@ -475,11 +477,10 @@ typedef struct temperTestContext_t {
 	uint32_t			totalTestsFoundWithFilters;
 	uint32_t			totalTestsExecuted;
 	uint32_t			currentTestErrorCount;
-	int					exitCode;
+	int32_t				exitCode;
 	temperBool32		currentTestWasAborted;
 	temperBool32		partialFilter;
 	temperTimeUnit_t	timeUnit;
-	uint32_t			pad0;
 	char				programName[__TEMPER_MAX_PATH];
 	const char*			suiteFilterPrevious;
 	const char*			suiteFilter;
