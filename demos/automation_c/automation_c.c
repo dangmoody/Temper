@@ -1,4 +1,4 @@
-//#define TEMPER_ENABLE_SELF_TEST 1 // This is for testing temper only. Please don't add this in your production environment
+//#define TEMPERDEV__ENABLE_SELF_TEST 1 // This is for testing temper only. Please don't add this in your production environment
 
 #include "../../temper.h"
 
@@ -18,32 +18,32 @@ typedef enum AutomationAccountFor_t {
 
 //----------------------------------------------------------
 
-static uint32_t CapturedPassCount = 0;
-static uint32_t CapturedFailCount = 0;
-static uint32_t CapturedAbortCount = 0;
-static uint32_t CapturedSkipCount = 0;
+static uint32_t capturedPassCount = 0;
+static uint32_t capturedFailCount = 0;
+static uint32_t capturedAbortCount = 0;
+static uint32_t capturedSkipCount = 0;
 
 //----------------------------------------------------------
 
-static void CaptureTestCounts() {
-	CapturedPassCount = g_temperTestContext.testsPassed;
-	CapturedFailCount = g_temperTestContext.testsFailed;
-	CapturedAbortCount = g_temperTestContext.testsAborted;
-	CapturedSkipCount = g_temperTestContext.testsSkipped;
+static void CaptureTestCounts( void ) {
+	capturedPassCount = g_temperTestContext.testsPassed;
+	capturedFailCount = g_temperTestContext.testsFailed;
+	capturedAbortCount = g_temperTestContext.testsAborted;
+	capturedSkipCount = g_temperTestContext.testsSkipped;
 }
 
 //----------------------------------------------------------
 
 static bool AssertResults( uint32_t passDiff, uint32_t failDiff, uint32_t abortDiff, uint32_t skipDiff ) {
 	// BUG - CONDITIONS SHOULD TAKE "const char* fmt, ..." - this is embarising.
-	TEMPER_CHECK_EQUAL( g_temperTestContext.testsPassed, ( CapturedPassCount + passDiff ) );
-	printf( "The passed test counter is not as expected: %d, %d\n", g_temperTestContext.testsPassed, CapturedPassCount + passDiff );
-	TEMPER_CHECK_EQUAL( g_temperTestContext.testsFailed, ( CapturedFailCount + failDiff ) );
-	printf( "The failed test counter is not as expected: %d, %d\n", g_temperTestContext.testsFailed, CapturedFailCount + failDiff );
-	TEMPER_CHECK_EQUAL( g_temperTestContext.testsAborted, ( CapturedAbortCount + abortDiff ) );
-	printf( "The aborted test counter is not as expected: %d, %d\n", g_temperTestContext.testsAborted, CapturedAbortCount + abortDiff );
-	TEMPER_CHECK_EQUAL( g_temperTestContext.testsSkipped, ( CapturedSkipCount + skipDiff ) );
-	printf( "The skipped test counter is not as expected: %d, %d\n", g_temperTestContext.testsSkipped, CapturedSkipCount + skipDiff );
+	TEMPER_CHECK_EQUAL( g_temperTestContext.testsPassed, ( capturedPassCount + passDiff ) );
+	printf( "The passed test counter is not as expected: %d, %d\n", g_temperTestContext.testsPassed, capturedPassCount + passDiff );
+	TEMPER_CHECK_EQUAL( g_temperTestContext.testsFailed, ( capturedFailCount + failDiff ) );
+	printf( "The failed test counter is not as expected: %d, %d\n", g_temperTestContext.testsFailed, capturedFailCount + failDiff );
+	TEMPER_CHECK_EQUAL( g_temperTestContext.testsAborted, ( capturedAbortCount + abortDiff ) );
+	printf( "The aborted test counter is not as expected: %d, %d\n", g_temperTestContext.testsAborted, capturedAbortCount + abortDiff );
+	TEMPER_CHECK_EQUAL( g_temperTestContext.testsSkipped, ( capturedSkipCount + skipDiff ) );
+	printf( "The skipped test counter is not as expected: %d, %d\n", g_temperTestContext.testsSkipped, capturedSkipCount + skipDiff );
 
 	return g_temperTestContext.currentTestErrorCount == 0;
 }
@@ -61,37 +61,37 @@ static void AbsolveTest( const bool condition ) {
 	if ( condition ) {
 		g_temperTestContext.currentTestErrorCount = 0;
 
-		TemperSetTextColorInternal( __TEMPER_COLOR_GREEN );
-		__TEMPER_LOG( "Current test absolved\n" );
-		TemperSetTextColorInternal( __TEMPER_COLOR_DEFAULT );
+		TemperSetTextColorInternal( TEMPERDEV__COLOR_GREEN );
+		TEMPERDEV__LOG( "Current test absolved\n" );
+		TemperSetTextColorInternal( TEMPERDEV__COLOR_DEFAULT );
 	}
 }
 
 //----------------------------------------------------------
 
 static void AbsolvePreviousTest( const AutomationAccountFor_t claim ) {
-	TemperSetTextColorInternal( __TEMPER_COLOR_GREEN );
+	TemperSetTextColorInternal( TEMPERDEV__COLOR_GREEN );
 
 	if ( claim == ACCOUNT_FOR_ONE_FAILURE ) {
-		__TEMPER_ASSERT( g_temperTestContext.testsFailed > 0 );
+		TEMPERDEV__ASSERT( g_temperTestContext.testsFailed > 0 );
 		g_temperTestContext.testsPassed += 1;
 		g_temperTestContext.testsFailed -= 1;
-		__TEMPER_LOG( "Absolved previous fail\n" );
-	}else if ( claim == ACCOUNT_FOR_ONE_ABORT ) {
-		__TEMPER_ASSERT( g_temperTestContext.testsFailed > 0 );
-		__TEMPER_ASSERT( g_temperTestContext.testsAborted > 0 );
+		TEMPERDEV__LOG( "Absolved previous fail\n" );
+	} else if ( claim == ACCOUNT_FOR_ONE_ABORT ) {
+		TEMPERDEV__ASSERT( g_temperTestContext.testsFailed > 0 );
+		TEMPERDEV__ASSERT( g_temperTestContext.testsAborted > 0 );
 		g_temperTestContext.testsPassed += 1;
 		g_temperTestContext.testsFailed -= 1;
 		g_temperTestContext.testsAborted -= 1;
-		__TEMPER_LOG( "Absolved previous abort\n" );
-	}else if ( claim == ACCOUNT_FOR_ONE_SKIP ) {
-		__TEMPER_ASSERT( g_temperTestContext.testsSkipped > 0 );
+		TEMPERDEV__LOG( "Absolved previous abort\n" );
+	} else if ( claim == ACCOUNT_FOR_ONE_SKIP ) {
+		TEMPERDEV__ASSERT( g_temperTestContext.testsSkipped > 0 );
 		g_temperTestContext.testsPassed += 1;
 		g_temperTestContext.testsSkipped -= 1;
-		__TEMPER_LOG( "Absolved previous skip\n" );
+		TEMPERDEV__LOG( "Absolved previous skip\n" );
 	}
 
-	TemperSetTextColorInternal( __TEMPER_COLOR_DEFAULT );
+	TemperSetTextColorInternal( TEMPERDEV__COLOR_DEFAULT );
 }
 
 //----------------------------------------------------------
@@ -127,13 +127,12 @@ TEMPER_TEST( CheckAndCleanResults_1, TEMPER_FLAG_SHOULD_RUN ) {
 }
 
 //----------------------------------------------------------
-// EXCEL_TestName - When a test is marked as "Depricated" it doesn't run
+// EXCEL_TestName - When a test is marked as "Deprecated" it doesn't run
 // &
 // EXCEL_TestName - If a test is flagged with Deprecated, total tests skipped increments
 //----------------------------------------------------------
 
-TEMPER_TEST( GivenIsolatedTest_WithDepricatedFlag_TriggersSkipCount, TEMPER_FLAG_DEPRECATED )
-{
+TEMPER_TEST( GivenIsolatedTest_WithDeprecatedFlag_TriggersSkipCount, TEMPER_FLAG_DEPRECATED ) {
 	TEMPER_CHECK_TRUE_AM( false, "This test shouldn't have executed, it's flagged as Deprecated." );
 }
 
