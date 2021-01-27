@@ -561,35 +561,19 @@ static temperTestContext_t		g_temperTestContext;
 
 //----------------------------------------------------------
 
-#ifdef TEMPERDEV__ENABLE_SELF_TEST
-#define TEMPER_TEST( testName, expectationFlags, runFlag ) \
-	TEMPERDEV__DEFINE_TEST( __COUNTER__, NULL, NULL, testName, NULL, expectationFlags, runFlag )
-
-#define TEMPER_TEST_C( testName, onBefore, onAfter, expectationFlags, runFlag ) \
-	TEMPERDEV__DEFINE_TEST( __COUNTER__, NULL, onBefore, testName, onAfter, expectationFlags, runFlag )
-#else
 #define TEMPER_TEST( testName, runFlag ) \
 	TEMPERDEV__DEFINE_TEST( __COUNTER__, NULL, NULL, testName, NULL, TEMPERDEV__TEST_EXPECT_FLAG_SUCCESS, runFlag )
 
 #define TEMPER_TEST_C( testName, onBefore, onAfter, runFlag ) \
 	TEMPERDEV__DEFINE_TEST( __COUNTER__, NULL, onBefore, testName, onAfter, TEMPERDEV__TEST_EXPECT_FLAG_SUCCESS, runFlag )
-#endif //TEMPERDEV__ENABLE_SELF_TEST
 
 //----------------------------------------------------------
 
-#ifdef TEMPERDEV__ENABLE_SELF_TEST
-#define TEMPER_SUITE_TEST( suiteName, testName, testExpectationFlags, runFlag ) \
-	TEMPERDEV__DEFINE_TEST( __COUNTER__, #suiteName, NULL, testName, NULL, testExpectationFlags, runFlag )
-
-#define TEMPER_SUITE_TEST_C( suiteName,  testName, onBefore, onAfter, testExpectationFlags, runFlag ) \
-	TEMPERDEV__DEFINE_TEST( __COUNTER__, #suiteName, onBefore, testName, onAfter, testExpectationFlags, runFlag )
-#else
 #define TEMPER_SUITE_TEST( suiteName, testName, runFlag ) \
 	TEMPERDEV__DEFINE_TEST( __COUNTER__, #suiteName, NULL, testName, NULL, TEMPERDEV__TEST_EXPECT_FLAG_SUCCESS, runFlag )
 
 #define TEMPER_SUITE_TEST_C( suiteName,  testName, onBefore, onAfter, runFlag ) \
 	TEMPERDEV__DEFINE_TEST( __COUNTER__, #suiteName, onBefore, testName, onAfter, TEMPERDEV__TEST_EXPECT_FLAG_SUCCESS, runFlag )
-#endif //TEMPERDEV__ENABLE_SELF_TEST
 
 //----------------------------------------------------------
 
@@ -634,35 +618,19 @@ static temperTestContext_t		g_temperTestContext;
 
 //----------------------------------------------------------
 
-#ifdef TEMPERDEV__ENABLE_SELF_TEST
-#define TEMPER_PARAMETRIC( testName, testExpectationFlags, runFlag, ... )\
-	TEMPERDEV__DEFINE_PARAMETRIC( NULL, NULL, testName, NULL, testExpectationFlags, runFlag, __VA_ARGS__ )
-
-#define TEMPER_PARAMETRIC_C( testName, onBefore, onAfter, testExpectationFlags, runFlag, ... )\
-	TEMPERDEV__DEFINE_PARAMETRIC( NULL, onBefore, testName, onAfter, testExpectationFlags, runFlag, __VA_ARGS__ )
-#else
 #define TEMPER_PARAMETRIC( testName, runFlag, ... )\
 	TEMPERDEV__DEFINE_PARAMETRIC( NULL, NULL, testName, NULL, TEMPERDEV__TEST_EXPECT_FLAG_SUCCESS, runFlag, __VA_ARGS__ )
 
 #define TEMPER_PARAMETRIC_C( testName, onBefore, onAfter, runFlag, ... )\
 	TEMPERDEV__DEFINE_PARAMETRIC( NULL, onBefore, testName, onAfter, TEMPERDEV__TEST_EXPECT_FLAG_SUCCESS, runFlag, __VA_ARGS__ )
-#endif //TEMPERDEV__ENABLE_SELF_TEST
 
 //----------------------------------------------------------
 
-#ifdef TEMPERDEV__ENABLE_SELF_TEST
-#define TEMPER_PARAMETRIC_SUITE( suiteName, testName, testExpectationFlags, runFlag, ... )\
-	TEMPERDEV__DEFINE_PARAMETRIC( #suiteName, NULL, testName, NULL, testExpectationFlags, runFlag, __VA_ARGS__ )
-
-#define TEMPER_PARAMETRIC_SUITE_C( suiteName, testName, onBefore, onAfter, testExpectationFlags, runFlag, ... )\
-	TEMPERDEV__DEFINE_PARAMETRIC( #suiteName, onBefore, testName, onAfter, testExpectationFlags, runFlag, __VA_ARGS__ )
-#else
 #define TEMPER_PARAMETRIC_SUITE( suiteName, testName, runFlag, ... )\
 	TEMPERDEV__DEFINE_PARAMETRIC( #suiteName, NULL, testName, NULL, TEMPERDEV__TEST_EXPECT_FLAG_SUCCESS, runFlag, __VA_ARGS__ )
 
 #define TEMPER_PARAMETRIC_SUITE_C( suiteName, testName, onBefore, onAfter, runFlag, ... )\
 	TEMPERDEV__DEFINE_PARAMETRIC( #suiteName, onBefore, testName, onAfter, TEMPERDEV__TEST_EXPECT_FLAG_SUCCESS, runFlag, __VA_ARGS__ )
-#endif //TEMPERDEV__ENABLE_SELF_TEST
 
 //----------------------------------------------------------
 
@@ -703,13 +671,8 @@ static temperTestContext_t		g_temperTestContext;
 
 //----------------------------------------------------------
 
-#ifdef TEMPERDEV__ENABLE_SELF_TEST
-#define TEMPER_INVOKE_PARAMETRIC_TEST( nameOfTestToCall, testExpectationFlags, ... ) \
-	TEMPERDEV__INVOKE_PARAMETRIC_TEST( __COUNTER__, nameOfTestToCall, testExpectationFlags, __VA_ARGS__ )
-#else
 #define TEMPER_INVOKE_PARAMETRIC_TEST( nameOfTestToCall, ... ) \
 	TEMPERDEV__INVOKE_PARAMETRIC_TEST( __COUNTER__, nameOfTestToCall, TEMPERDEV__TEST_EXPECT_FLAG_SUCCESS, __VA_ARGS__ )
-#endif // TEMPERDEV__ENABLE_SELF_TEST
 
 //==========================================================
 // Internal Functions
@@ -1438,29 +1401,11 @@ static int TemperExecuteAllTestsInternal() {
 
 					g_temperTestContext.totalTestsExecuted += 1;
 
-#ifndef TEMPERDEV__ENABLE_SELF_TEST
 					if ( g_temperTestContext.currentTestErrorCount > 0 ) {
 						g_temperTestContext.testsFailed += 1;
 					} else {
 						g_temperTestContext.testsPassed += 1;
 					}
-#else
-					temperBool32 expectedToAbort = ( information.expectationFlags & TEMPERDEV__TEST_EXPECT_FLAG_ABORT );
-
-					if ( ( expectedToAbort && g_temperTestContext.currentTestWasAborted ) ||
-						 ( ( information.expectationFlags & TEMPERDEV__TEST_EXPECT_FLAG_FAIL ) && g_temperTestContext.currentTestErrorCount > 0 ) ) {
-						g_temperTestContext.testsPassed += 1;
-
-						// we only care about un-exected aborts / failures
-						g_temperTestContext.testsAborted -= ( expectedToAbort && g_temperTestContext.currentTestWasAborted ) ? 1 : 0;
-						g_temperTestContext.currentTestErrorCount = 0;
-						g_temperTestContext.currentTestWasAborted = false;
-					} else if ( g_temperTestContext.currentTestErrorCount == 0 ) {
-						g_temperTestContext.testsPassed += 1;
-					} else {
-						g_temperTestContext.testsFailed += 1;
-					}
-#endif //TEMPERDEV__ENABLE_SELF_TEST
 				} else {
 					g_temperTestContext.testsSkipped += 1;
 				}
