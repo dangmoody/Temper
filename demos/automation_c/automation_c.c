@@ -1,5 +1,3 @@
-//#define TEMPER_ENABLE_SELF_TEST 1 // This is for testing temper only. Please don't add this in your production environment
-
 #include "../../temper.h"
 
 //----------------------------------------------------------
@@ -25,7 +23,7 @@ static uint32_t CapturedSkipCount = 0;
 
 //----------------------------------------------------------
 
-static void CaptureTestCounts() {
+static void CaptureTestCounts( temperTestInfo_t* testInfo ) {
 	CapturedPassCount = g_temperTestContext.testsPassed;
 	CapturedFailCount = g_temperTestContext.testsFailed;
 	CapturedAbortCount = g_temperTestContext.testsAborted;
