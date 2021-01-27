@@ -162,5 +162,5 @@ if [[ "${g_os_name}" != "macos" ]]; then
 	linker_options_passthrough="-Wl,--export-dynamic"
 fi
 
-echo ${g_compiler} ${std} -o ${g_bin_dir}/${g_output} ${symbols} ${optimisations} ${defines} ${g_source_files} ${warning_level} ${ignore_warnings} -lm -ldl -lpthread ${linker_options_passthrough}
-${g_compiler} ${std} -o ${g_bin_dir}/${g_output} ${symbols} ${optimisations} ${defines} ${g_source_files} ${warning_level} ${ignore_warnings} -lm -ldl -lpthread ${linker_options_passthrough}
+echo ${g_compiler} ${std} -o ${g_bin_dir}/${g_output} ${symbols} ${optimisations} ${defines} ${g_source_files} ${warning_level} ${ignore_warnings} -ldl -lpthread ${linker_options_passthrough}
+${g_compiler} ${std} -o ${g_bin_dir}/${g_output} ${symbols} ${optimisations} ${defines} ${g_source_files} ${warning_level} ${ignore_warnings} -ldl -lpthread ${linker_options_passthrough}

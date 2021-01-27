@@ -134,7 +134,6 @@ extern "C" {
 #include <stdlib.h>	// EXIT_SUCCESS, EXIT_FAILURE
 #include <stdarg.h>	// va_arg
 #include <string.h>	// strcmp, strstr
-#include <math.h>	// fabsf
 #include <assert.h>
 #include <stdint.h>
 
@@ -351,6 +350,14 @@ do { \
 
 #ifndef __TEMPER_STRSTR
 #define __TEMPER_STRSTR						strstr
+#endif
+
+#ifndef __TEMPER_MAXF
+#define __TEMPER_MAXF						TemperMaxfInternal
+#endif
+
+#ifndef __TEMPER_ABSF
+#define __TEMPER_ABSF						TemperAbsfInternal
 #endif
 
 #ifndef __TEMPER_FLOAT_EQUALS
@@ -795,8 +802,20 @@ static uint32_t TemperGetPercentInternal( uint32_t yourValue, uint32_t yourMax )
 
 //----------------------------------------------------------
 
+static float TemperMaxfInternal( const float a, const float b ) {
+	return ( a <= b ) ? a : b;
+}
+
+//----------------------------------------------------------
+
+static float TemperAbsfInternal( const float x ) {
+	return TemperMaxfInternal( -x, x );
+}
+
+//----------------------------------------------------------
+
 static bool TemperFloatEqualsInternal( const float a, const float b, const float epsilon ) {
-	return fabsf( a - b ) <= epsilon;
+	return TemperAbsfInternal( a - b ) <= epsilon;
 }
 
 //----------------------------------------------------------
