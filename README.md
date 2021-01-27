@@ -42,7 +42,6 @@ int main( int argc, char** argv )
 On Windows and Mac OS you shouldn't need to do anything extra on your part to get Temper to compile correctly.  There should be no other dependencies that are required.  If you find that there are, please submit a [bug report](https://github.com/dangmoody/Tantrum/issues).
 
 If you are compiling Temper on Linux and you are NOT overriding the default internal functions then you will need to make sure you pass the following arguments to your compiler/linker:
-- `-lm` - required if you're not overriding `TEMPER_FABSF`.
 - `-ldl` - required if you're not overriding the `LoadEXEHandle()` and `UnloadEXEHandle()` functions.
 - `-lpthread` - required if you're not overriding the `RunTestThread()` function.
 - `--export-dynamic` - or some other equivalent, required to allow the compiler to export the test functions so they can be called dynamically by Temper at runtime.
