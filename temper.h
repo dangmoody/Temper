@@ -396,6 +396,10 @@ do { \
 #define __TEMPER_GET_TIMESTAMP				TemperGetTimestampInternal
 #endif
 
+#ifndef __TEMPER_GET_FULL_EXE_PATH
+#define __TEMPER_GET_FULL_EXE_PATH			TemperGetFullEXEPathInternal
+#endif
+
 #ifndef __TEMPER_LOAD_EXE_HANDLE
 #define __TEMPER_LOAD_EXE_HANDLE			TemperLoadEXEHandleInternal
 #endif
@@ -1389,7 +1393,7 @@ static bool TemperIsTestFilteredInternal( const char* testName ) {
 //----------------------------------------------------------
 
 static int TemperExecuteAllTestsInternal() {
-	if ( !TemperGetFullEXEPathInternal() ) {
+	if ( !__TEMPER_GET_FULL_EXE_PATH() ) {
 		return __TEMPER_EXIT_FAILURE;
 	}
 
