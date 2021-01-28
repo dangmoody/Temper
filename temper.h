@@ -175,12 +175,16 @@ extern "C" {
 do { \
 	g_temperTestContext.totalTestsDeclared = __COUNTER__; /* MUST NOT be in a function otherwise value of __COUNTER__ is not correct */ \
 	TemperSetupInternal(); \
-	g_temperTestContext.exitCode = TemperExecuteAllTestsWithArgumentsInternal( argc, argv );\
+	g_temperTestContext.exitCode = TemperExecuteAllTestsWithArgumentsInternal( argc, argv ); \
 } while ( 0 )
 
 //----------------------------------------------------------
 
-#define TEMPER_GET_EXIT_CODE()	g_temperTestContext.exitCode
+#define TEMPER_GET_EXIT_CODE()				g_temperTestContext.exitCode
+
+//----------------------------------------------------------
+
+#define TEMPER_GET_TIMESTAMP_SECONDS( timeUnit )	TemperGetTimestampInternal( timeUnit )
 
 //----------------------------------------------------------
 
@@ -394,10 +398,6 @@ do { \
 #define TEMPERDEV__RUN_TEST_THREAD			TemperRunTestThreadInternal
 #endif
 
-#ifndef TEMPERDEV__GET_TIMESTAMP
-#define TEMPERDEV__GET_TIMESTAMP			TemperGetTimestampInternal
-#endif
-
 #ifndef TEMPERDEV__GET_FULL_EXE_PATH
 #define TEMPERDEV__GET_FULL_EXE_PATH		TemperGetFullEXEPathInternal
 #endif
@@ -427,11 +427,11 @@ typedef enum temperTestFlag_t {
 //----------------------------------------------------------
 
 typedef enum temperTimeUnit_t {
-	TEMPERDEV__TIME_UNIT_CLOCKS	= 0,
-	TEMPERDEV__TIME_UNIT_NS,
-	TEMPERDEV__TIME_UNIT_US,
-	TEMPERDEV__TIME_UNIT_MS,
-	TEMPERDEV__TIME_UNIT_SECONDS
+	TEMPER_TIME_UNIT_CLOCKS	= 0,
+	TEMPER_TIME_UNIT_NS,
+	TEMPER_TIME_UNIT_US,
+	TEMPER_TIME_UNIT_MS,
+	TEMPER_TIME_UNIT_SECONDS
 } temperTimeUnit_t;
 
 //----------------------------------------------------------
@@ -577,9 +577,9 @@ static temperTestContext_t		g_temperTestContext;
 
 //----------------------------------------------------------
 
-#define TEMPERDEV__DEFINE_PARAMETRIC( suiteName, onBeforeName, testName, onAfterName, testExpectationFlags, runFlag, ... )\
+#define TEMPERDEV__DEFINE_PARAMETRIC( suiteName, onBeforeName, testName, onAfterName, testExpectationFlags, runFlag, ... ) \
 \
-	/*1. Create a function with a name matching the test with the provided parameters.*/\
+	/*1. Create a function with a name matching the test with the provided parameters.*/ \
 	void ( testName )( __VA_ARGS__ ); \
 \
 	/*2. Typedef this function type.*/ \
@@ -796,17 +796,17 @@ static const char* TemperGetNextArgInternal( const int argIndex, const int argc,
 
 //----------------------------------------------------------
 
-static double TemperGetTimestampInternal( void ) {
+static double TemperGetTimestampInternal( const temperTimeUnit_t timeUnit ) {
 #if defined( _WIN32 )
 	LARGE_INTEGER now;
 	QueryPerformanceCounter( &now );
 
-	switch ( g_temperTestContext.timeUnit ) {
-		case TEMPERDEV__TIME_UNIT_CLOCKS:	return ( (double) now.QuadPart );
-		case TEMPERDEV__TIME_UNIT_NS:		return ( (double) ( now.QuadPart * 1000000000 ) / (double) g_temperTestContext.timestampFrequency.QuadPart );
-		case TEMPERDEV__TIME_UNIT_US:		return ( (double) ( now.QuadPart * 1000000 ) / (double) g_temperTestContext.timestampFrequency.QuadPart );
-		case TEMPERDEV__TIME_UNIT_MS:		return ( (double) ( now.QuadPart * 1000 ) / (double) g_temperTestContext.timestampFrequency.QuadPart );
-		case TEMPERDEV__TIME_UNIT_SECONDS:	return ( (double) ( now.QuadPart ) / (double) g_temperTestContext.timestampFrequency.QuadPart );
+	switch ( timeUnit ) {
+		case TEMPER_TIME_UNIT_CLOCKS:	return ( (double) now.QuadPart );
+		case TEMPER_TIME_UNIT_NS:		return ( (double) ( now.QuadPart * 1000000000 ) / (double) g_temperTestContext.timestampFrequency.QuadPart );
+		case TEMPER_TIME_UNIT_US:		return ( (double) ( now.QuadPart * 1000000 ) / (double) g_temperTestContext.timestampFrequency.QuadPart );
+		case TEMPER_TIME_UNIT_MS:		return ( (double) ( now.QuadPart * 1000 ) / (double) g_temperTestContext.timestampFrequency.QuadPart );
+		case TEMPER_TIME_UNIT_SECONDS:	return ( (double) ( now.QuadPart ) / (double) g_temperTestContext.timestampFrequency.QuadPart );
 	}
 #elif defined( __APPLE__ ) || defined( __linux__ )	// defined( _WIN32 )
 	struct timespec now;
@@ -814,12 +814,12 @@ static double TemperGetTimestampInternal( void ) {
 
 	int64_t clocks = (int64_t) ( now.tv_sec * 1000000000 + now.tv_nsec );
 
-	switch ( g_temperTestContext.timeUnit ) {
-		case TEMPERDEV__TIME_UNIT_CLOCKS:	return (double) clocks;
-		case TEMPERDEV__TIME_UNIT_NS:		return (double) clocks;
-		case TEMPERDEV__TIME_UNIT_US:		return (double) clocks / 1000.0;
-		case TEMPERDEV__TIME_UNIT_MS:		return (double) clocks / 1000000.0;
-		case TEMPERDEV__TIME_UNIT_SECONDS:	return (double) clocks / 1000000000.0;
+	switch ( timeUnit ) {
+		case TEMPER_TIME_UNIT_CLOCKS:	return (double) clocks;
+		case TEMPER_TIME_UNIT_NS:		return (double) clocks;
+		case TEMPER_TIME_UNIT_US:		return (double) clocks / 1000.0;
+		case TEMPER_TIME_UNIT_MS:		return (double) clocks / 1000000.0;
+		case TEMPER_TIME_UNIT_SECONDS:	return (double) clocks / 1000000000.0;
 	}
 #else	// defined( _WIN32 )
 #error Uncrecognised platform.  It appears Temper does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Temper/issues
@@ -907,15 +907,15 @@ static bool TemperHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 			}
 
 			if ( TEMPERDEV__STRCMP( nextArg, "seconds" ) == 0 ) {
-				g_temperTestContext.timeUnit = TEMPERDEV__TIME_UNIT_SECONDS;
+				g_temperTestContext.timeUnit = TEMPER_TIME_UNIT_SECONDS;
 			} else if ( TEMPERDEV__STRCMP( nextArg, "ms" ) == 0 ) {
-				g_temperTestContext.timeUnit = TEMPERDEV__TIME_UNIT_MS;
+				g_temperTestContext.timeUnit = TEMPER_TIME_UNIT_MS;
 			} else if ( TEMPERDEV__STRCMP( nextArg, "us" ) == 0 ) {
-				g_temperTestContext.timeUnit = TEMPERDEV__TIME_UNIT_US;
+				g_temperTestContext.timeUnit = TEMPER_TIME_UNIT_US;
 			} else if ( TEMPERDEV__STRCMP( nextArg, "ns" ) == 0 ) {
-				g_temperTestContext.timeUnit = TEMPERDEV__TIME_UNIT_NS;
+				g_temperTestContext.timeUnit = TEMPER_TIME_UNIT_NS;
 			} else if ( TEMPERDEV__STRCMP( nextArg, "clocks" ) == 0 ) {
-				g_temperTestContext.timeUnit = TEMPERDEV__TIME_UNIT_CLOCKS;
+				g_temperTestContext.timeUnit = TEMPER_TIME_UNIT_CLOCKS;
 			} else {
 				TEMPERDEV__LOG_ERROR(
 					"Invalid time unit \"%s\" specified.  Please select from one of the following:\n"
@@ -1096,9 +1096,9 @@ static temperThreadHandle_t TemperThreadProcInternal( void* data ) {
 		information->OnBeforeTest();
 	}
 
-	g_temperTestContext.currentTestStartTime = TEMPERDEV__GET_TIMESTAMP();
+	g_temperTestContext.currentTestStartTime = TEMPER_GET_TIMESTAMP( g_temperTestContext.timeUnit );
 	information->TestFuncCallback();
-	g_temperTestContext.currentTestEndTime = TEMPERDEV__GET_TIMESTAMP();
+	g_temperTestContext.currentTestEndTime = TEMPER_GET_TIMESTAMP( g_temperTestContext.timeUnit );
 
 	if ( information->OnAfterTest ) {
 		information->OnAfterTest();
@@ -1152,11 +1152,11 @@ static void TemperRunTestThreadInternal( temperTestInfo_t* information ) {
 
 static const char* TemperGetTimeUnitStringInternal( void ) {
 	switch ( g_temperTestContext.timeUnit ) {
-		case TEMPERDEV__TIME_UNIT_CLOCKS:	return "clocks";
-		case TEMPERDEV__TIME_UNIT_NS:		return "nanoseconds";
-		case TEMPERDEV__TIME_UNIT_US:		return "microseconds";
-		case TEMPERDEV__TIME_UNIT_MS:		return "milliseconds";
-		case TEMPERDEV__TIME_UNIT_SECONDS:	return "seconds";
+		case TEMPER_TIME_UNIT_CLOCKS:	return "clocks";
+		case TEMPER_TIME_UNIT_NS:		return "nanoseconds";
+		case TEMPER_TIME_UNIT_US:		return "microseconds";
+		case TEMPER_TIME_UNIT_MS:		return "milliseconds";
+		case TEMPER_TIME_UNIT_SECONDS:	return "seconds";
 
 		default:
 			TEMPERDEV__ASSERT( false && "Temper test context time unit was invalid somehow!?" );
@@ -1216,7 +1216,7 @@ static void TemperOnAfterTestInternal( const temperTestInfo_t* information ) {
 
 static void TemperAbortTestOnFailInternal( const bool abortOnFail ) {
 	if ( abortOnFail ) {
-		g_temperTestContext.currentTestEndTime = TEMPERDEV__GET_TIMESTAMP();
+		g_temperTestContext.currentTestEndTime = TEMPER_GET_TIMESTAMP( g_temperTestContext.timeUnit );
 		g_temperTestContext.testsAborted += 1;
 		g_temperTestContext.currentTestWasAborted = true;
 
@@ -1311,7 +1311,7 @@ static void TemperSetupInternal( void ) {
 	g_temperTestContext.currentTestErrorCount = 0;
 	g_temperTestContext.currentTestWasAborted = false;
 	g_temperTestContext.partialFilter = false;
-	g_temperTestContext.timeUnit = TEMPERDEV__TIME_UNIT_US;
+	g_temperTestContext.timeUnit = TEMPER_TIME_UNIT_US;
 	g_temperTestContext.suiteFilterPrevious = NULL;
 	g_temperTestContext.suiteFilter = NULL;
 	g_temperTestContext.testFilter = NULL;
@@ -1367,7 +1367,7 @@ static int TemperExecuteAllTestsInternal() {
 	// so this shouldn't be a problem
 	char testFuncName[128];
 
-	double start = TEMPERDEV__GET_TIMESTAMP();
+	double start = TEMPER_GET_TIMESTAMP( g_temperTestContext.timeUnit );
 
 	for ( uint32_t i = 0; i < g_temperTestContext.totalTestsDeclared; i++ ) {
 		TEMPERDEV__SNPRINTF( testFuncName, sizeof( testFuncName ), "__temper_test_info_fetcher_%d", i );
@@ -1415,7 +1415,7 @@ static int TemperExecuteAllTestsInternal() {
 		}
 	}
 
-	double end = TEMPERDEV__GET_TIMESTAMP();
+	double end = TEMPER_GET_TIMESTAMP( g_temperTestContext.timeUnit );
 	g_temperTestContext.totalExecutionTime = end - start;
 
 	TEMPERDEV__ON_ALL_TESTS_FINISHED();
