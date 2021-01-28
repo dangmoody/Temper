@@ -1377,6 +1377,12 @@ static bool TemperIsTestFilteredInternal( const char* testName ) {
 
 //----------------------------------------------------------
 
+static int TemperCalculateExitCode() {
+	return g_temperTestContext.testsFailed == 0 && g_temperTestContext.testsAborted == 0 ? TEMPERDEV__EXIT_SUCCESS : TEMPERDEV__EXIT_FAILURE;
+}
+
+//----------------------------------------------------------
+
 static int TemperExecuteAllTestsInternal() {
 	if ( !TEMPERDEV__GET_FULL_EXE_PATH() ) {
 		return TEMPERDEV__EXIT_FAILURE;
@@ -1443,7 +1449,7 @@ static int TemperExecuteAllTestsInternal() {
 	// cleanup
 	TEMPERDEV__UNLOAD_EXE_HANDLE( handle );
 
-	return g_temperTestContext.testsFailed == 0 && g_temperTestContext.testsAborted == 0 ? TEMPERDEV__EXIT_SUCCESS : TEMPERDEV__EXIT_FAILURE;
+	return TemperCalculateExitCode();
 }
 
 //----------------------------------------------------------
