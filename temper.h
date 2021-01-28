@@ -185,142 +185,142 @@ do { \
 //----------------------------------------------------------
 
 #define TEMPER_CHECK_TRUE( condition ) \
-	TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE(" #condition ")", false, NULL, __FILE__, __LINE__ )
+	TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE(" #condition ")", false, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-#define TEMPER_CHECK_TRUE_M( condition, message ) \
-	TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE_M(" #condition ", ...)", false, message, __FILE__, __LINE__ )
+#define TEMPER_CHECK_TRUE_M( condition, message, ... ) \
+	TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE_M(" #condition ", ...)", false, __FILE__, __LINE__, message, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
 #define TEMPER_CHECK_TRUE_A( condition ) \
-	TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE_A(" #condition ")", true, NULL, __FILE__, __LINE__ )
+	TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE_A(" #condition ")", true, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-#define TEMPER_CHECK_TRUE_AM( condition, message ) \
-	TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE_AM(" #condition ", ...)", true, message, __FILE__, __LINE__ )
+#define TEMPER_CHECK_TRUE_AM( condition, message, ... ) \
+	TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE_AM(" #condition ", ...)", true, __FILE__, __LINE__, message, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
 #define TEMPER_CHECK_FALSE( condition ) \
-	TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE(" #condition ")", false, NULL, __FILE__, __LINE__ )
+	TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE(" #condition ")", false, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-#define TEMPER_CHECK_FALSE_M( condition, message ) \
-	TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE_M(" #condition ", ...)", false, message, __FILE__, __LINE__ )
+#define TEMPER_CHECK_FALSE_M( condition, message, ... ) \
+	TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE_M(" #condition ", ...)", false, __FILE__, __LINE__, message, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
 #define TEMPER_CHECK_FALSE_A( condition ) \
-	TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE_A(" #condition ")", true, NULL, __FILE__, __LINE__ )
+	TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE_A(" #condition ")", true, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-#define TEMPER_CHECK_FALSE_AM( condition, message ) \
-	TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE_AM(" #condition ", ...)", true, message, __FILE__, __LINE__ )
+#define TEMPER_CHECK_FALSE_AM( condition, message, ... ) \
+	TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE_AM(" #condition ", ...)", true, __FILE__, __LINE__, message, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
 #define TEMPER_CHECK_EQUAL( conditionA, conditionB ) \
-	TemperTestTrueInternal( conditionA == conditionB, "TEMPER_CHECK_EQUAL(" #conditionA ", " #conditionB ")", false, NULL, __FILE__, __LINE__ )
+	TemperTestTrueInternal( conditionA == conditionB, "TEMPER_CHECK_EQUAL(" #conditionA ", " #conditionB ")", false, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-#define TEMPER_CHECK_EQUAL_M( conditionA, conditionB, message ) \
-	TemperTestTrueInternal( conditionA == conditionB, "TEMPER_CHECK_EQUAL_M(" #conditionA ", " #conditionB ", ...)", false, message, __FILE__, __LINE__ )
+#define TEMPER_CHECK_EQUAL_M( conditionA, conditionB, message, ... ) \
+	TemperTestTrueInternal( conditionA == conditionB, "TEMPER_CHECK_EQUAL_M(" #conditionA ", " #conditionB ", ...)", false, __FILE__, __LINE__, message, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
 #define TEMPER_CHECK_EQUAL_A( conditionA, conditionB ) \
-	TemperTestTrueInternal( conditionA == conditionB, "TEMPER_CHECK_EQUAL_A(" #conditionA ", " #conditionB ")", true, NULL, __FILE__, __LINE__ )
+	TemperTestTrueInternal( conditionA == conditionB, "TEMPER_CHECK_EQUAL_A(" #conditionA ", " #conditionB ")", true, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-#define TEMPER_CHECK_EQUAL_AM( conditionA, conditionB, message ) \
-	TemperTestTrueInternal( conditionA == conditionB, "TEMPER_CHECK_EQUAL_AM(" #conditionA ", " #conditionB ", ...)", true, message, __FILE__, __LINE__ )
+#define TEMPER_CHECK_EQUAL_AM( conditionA, conditionB, message, ... ) \
+	TemperTestTrueInternal( conditionA == conditionB, "TEMPER_CHECK_EQUAL_AM(" #conditionA ", " #conditionB ", ...)", true, __FILE__, __LINE__, message, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
 #define TEMPER_CHECK_NOT_EQUAL( conditionA, conditionB ) \
-	TemperTestTrueInternal( conditionA != conditionB, "TEMPER_CHECK_NOT_EQUAL(" #conditionA ", " #conditionB ")", false, NULL, __FILE__, __LINE__ )
+	TemperTestTrueInternal( conditionA != conditionB, "TEMPER_CHECK_NOT_EQUAL(" #conditionA ", " #conditionB ")", false, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-#define TEMPER_CHECK_NOT_EQUAL_M( conditionA, conditionB, message ) \
-	TemperTestTrueInternal( conditionA != conditionB, "TEMPER_CHECK_NOT_EQUAL_M(" #conditionA ", " #conditionB ", ...)", false, message, __FILE__, __LINE__ )
+#define TEMPER_CHECK_NOT_EQUAL_M( conditionA, conditionB, message, ... ) \
+	TemperTestTrueInternal( conditionA != conditionB, "TEMPER_CHECK_NOT_EQUAL_M(" #conditionA ", " #conditionB ", ...)", false, __FILE__, __LINE__, message, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
 #define TEMPER_CHECK_NOT_EQUAL_A( conditionA, conditionB ) \
-	TemperTestTrueInternal( conditionA != conditionB, "TEMPER_CHECK_NOT_EQUAL_A(" #conditionA ", " #conditionB ")", true, NULL, __FILE__, __LINE__ )
+	TemperTestTrueInternal( conditionA != conditionB, "TEMPER_CHECK_NOT_EQUAL_A(" #conditionA ", " #conditionB ")", true, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-#define TEMPER_CHECK_NOT_EQUAL_AM( conditionA, conditionB, message ) \
-	TemperTestTrueInternal( conditionA != conditionB, "TEMPER_CHECK_NOT_EQUAL_AM(" #conditionA ", " #conditionB ", ...)", true, message, __FILE__, __LINE__ )
+#define TEMPER_CHECK_NOT_EQUAL_AM( conditionA, conditionB, message, ... ) \
+	TemperTestTrueInternal( conditionA != conditionB, "TEMPER_CHECK_NOT_EQUAL_AM(" #conditionA ", " #conditionB ", ...)", true, __FILE__, __LINE__, message, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
 #define TEMPER_CHECK_FLOAT_EQUAL( conditionA, conditionB ) \
-	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, TEMPERDEV__EPSILON ), "TEMPER_CHECK_FLOAT_EQUAL(" #conditionA ", " #conditionB ")", false, NULL, __FILE__, __LINE__ )
+	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, TEMPERDEV__EPSILON ), "TEMPER_CHECK_FLOAT_EQUAL(" #conditionA ", " #conditionB ")", false, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-#define TEMPER_CHECK_FLOAT_EQUAL_M( conditionA, conditionB, message ) \
-	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, TEMPERDEV__EPSILON ), "TEMPER_CHECK_FLOAT_EQUAL_M(" #conditionA ", " #conditionB ", ...)", false, message, __FILE__, __LINE__ )
+#define TEMPER_CHECK_FLOAT_EQUAL_M( conditionA, conditionB, message, ... ) \
+	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, TEMPERDEV__EPSILON ), "TEMPER_CHECK_FLOAT_EQUAL_M(" #conditionA ", " #conditionB ", ...)", false, __FILE__, __LINE__, message, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
 #define TEMPER_CHECK_FLOAT_EQUAL_A( conditionA, conditionB ) \
-	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, TEMPERDEV__EPSILON ), "TEMPER_CHECK_FLOAT_EQUAL_A(" #conditionA ", " #conditionB ")", true, NULL, __FILE__, __LINE__ )
+	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, TEMPERDEV__EPSILON ), "TEMPER_CHECK_FLOAT_EQUAL_A(" #conditionA ", " #conditionB ")", true, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-#define TEMPER_CHECK_FLOAT_EQUAL_AM( conditionA, conditionB, message ) \
-	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, TEMPERDEV__EPSILON ), "TEMPER_CHECK_FLOAT_EQUAL_AM(" #conditionA ", " #conditionB ", ...)", true, message, __FILE__, __LINE__ )
+#define TEMPER_CHECK_FLOAT_EQUAL_AM( conditionA, conditionB, message, ... ) \
+	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, TEMPERDEV__EPSILON ), "TEMPER_CHECK_FLOAT_EQUAL_AM(" #conditionA ", " #conditionB ", ...)", true, __FILE__, __LINE__, message, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
 #define TEMPER_CHECK_ALMOST_EQUAL( conditionA, conditionB, tolerance ) \
-	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_ALMOST_EQUAL(" #conditionA ", " #conditionB ", " #tolerance ")", false, NULL, __FILE__, __LINE__ )
+	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_ALMOST_EQUAL(" #conditionA ", " #conditionB ", " #tolerance ")", false, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-#define TEMPER_CHECK_ALMOST_EQUAL_M( conditionA, conditionB, tolerance, message ) \
-	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_ALMOST_EQUAL_M(" #conditionA ", " #conditionB ", " #tolerance ", ...)", false, message, __FILE__, __LINE__ )
+#define TEMPER_CHECK_ALMOST_EQUAL_M( conditionA, conditionB, tolerance, message, ... ) \
+	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_ALMOST_EQUAL_M(" #conditionA ", " #conditionB ", " #tolerance ", ...)", false, __FILE__, __LINE__, message, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
 #define TEMPER_CHECK_ALMOST_EQUAL_A( conditionA, conditionB, tolerance ) \
-	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_ALMOST_EQUAL_A(" #conditionA ", " #conditionB ", " #tolerance ")", true, NULL, __FILE__, __LINE__ )
+	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_ALMOST_EQUAL_A(" #conditionA ", " #conditionB ", " #tolerance ")", true, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-#define TEMPER_CHECK_ALMOST_EQUAL_AM( conditionA, conditionB, tolerance, message ) \
-	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_ALMOST_EQUAL_AM(" #conditionA ", " #conditionB ", " #tolerance ", ...)", true, message, __FILE__, __LINE__ )
+#define TEMPER_CHECK_ALMOST_EQUAL_AM( conditionA, conditionB, tolerance, message, ... ) \
+	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_ALMOST_EQUAL_AM(" #conditionA ", " #conditionB ", " #tolerance ", ...)", true, __FILE__, __LINE__, message, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
 #define TEMPER_CHECK_NOT_ALMOST_EQUAL( conditionA, conditionB, tolerance ) \
-	TemperTestTrueInternal( !TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_NOT_ALMOST_EQUAL(" #conditionA ", " #conditionB ", " #tolerance ")", false, NULL, __FILE__, __LINE__ )
+	TemperTestTrueInternal( !TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_NOT_ALMOST_EQUAL(" #conditionA ", " #conditionB ", " #tolerance ")", false, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-#define TEMPER_CHECK_NOT_ALMOST_EQUAL_M( conditionA, conditionB, tolerance, message ) \
-	TemperTestTrueInternal( !TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_M(" #conditionA ", " #conditionB ", " #tolerance ", ...)", false, message, __FILE__, __LINE__ )
+#define TEMPER_CHECK_NOT_ALMOST_EQUAL_M( conditionA, conditionB, tolerance, message, ... ) \
+	TemperTestTrueInternal( !TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_M(" #conditionA ", " #conditionB ", " #tolerance ", ...)", false,  __FILE__, __LINE__, message, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
 #define TEMPER_CHECK_NOT_ALMOST_EQUAL_A( conditionA, conditionB, tolerance ) \
-	TemperTestTrueInternal( !TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_A(" #conditionA ", " #conditionB ", " #tolerance ")", true, NULL, __FILE__, __LINE__ )
+	TemperTestTrueInternal( !TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_A(" #conditionA ", " #conditionB ", " #tolerance ")", true, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-#define TEMPER_CHECK_NOT_ALMOST_EQUAL_AM( conditionA, conditionB, tolerance, message ) \
-	TemperTestTrueInternal( !TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_AM(" #conditionA ", " #conditionB ", " #tolerance ", ...)", true, message, __FILE__, __LINE__ )
+#define TEMPER_CHECK_NOT_ALMOST_EQUAL_AM( conditionA, conditionB, tolerance, message, ... ) \
+	TemperTestTrueInternal( !TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_AM(" #conditionA ", " #conditionB ", " #tolerance ", ...)", true, __FILE__, __LINE__, message, __VA_ARGS__ )
 
 //==========================================================
 // User-Overridable Preprocessor defines
@@ -1248,17 +1248,28 @@ static void TemperAbortTestOnFailInternal( const bool abortOnFail ) {
 
 //----------------------------------------------------------
 
-static void TemperTestTrueInternal( const bool condition, const char* conditionStr, const bool abortOnFail, const char* message, const char* file, const uint32_t line ) {
+static void TemperTestTrueInternal( const bool condition, const char* conditionStr, const bool abortOnFail, const char* file, const uint32_t line, const char* fmt, ... ) {
 	if ( !( condition ) ) {
 		g_temperTestContext.currentTestErrorCount += 1;
 
 		// DM: could probably make this user-overridable
 		{
 			const char* newLine = NULL;
-			const char* actualMessage = NULL;
+			char* actualMessage = NULL;
 
-			if ( message ) {
-				actualMessage = message;
+			if ( fmt ) {
+				va_list args;
+				va_start( args, fmt );
+
+				int32_t count = vsnprintf( NULL, 0, fmt, args );
+				++count;
+				unsigned long long longCount = (unsigned long long)count;
+				actualMessage = (char*) malloc( longCount );
+				vsnprintf( actualMessage, longCount, fmt, args );
+				actualMessage[ count - 1 ] = '\0';
+
+				va_end( args );
+
 				newLine = "\n";
 			} else {
 				actualMessage = "";
@@ -1269,6 +1280,7 @@ static void TemperTestTrueInternal( const bool condition, const char* conditionS
 			TEMPERDEV__LOG( "FAILED: " );
 			TemperSetTextColorInternal( TEMPERDEV__COLOR_YELLOW );
 			TEMPERDEV__LOG( "%s at %s line %d.\n%s%s", conditionStr, file, line, actualMessage, newLine );
+			free( actualMessage );
 			TemperSetTextColorInternal( TEMPERDEV__COLOR_DEFAULT );
 		}
 

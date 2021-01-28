@@ -1,6 +1,7 @@
 #include "../../temper.h"
 #include "vector2d.h"
 #include "vector2d.c"
+#pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
 
 TEMPER_SUITE_TEST( VectorOperators, GivenTwoVectors_WhenAddedTogether_ThenAddedCorrectly, TEMPER_FLAG_SHOULD_RUN ){
 	vector2d A = { 2.f,4.f };

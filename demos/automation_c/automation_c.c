@@ -1,4 +1,5 @@
 #include "../../temper.h"
+#pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
 
 //----------------------------------------------------------
 
@@ -52,14 +53,10 @@ static void RestoreCapturedTestCounts( void ) {
 
 static bool AssertResults( uint32_t passDiff, uint32_t failDiff, uint32_t abortDiff, uint32_t skipDiff ) {
 	// BUG - CONDITIONS SHOULD TAKE "const char* fmt, ..." - this is embarising.
-	TEMPER_CHECK_EQUAL( g_temperTestContext.testsPassed, ( capturedPassCount + passDiff ) );
-	printf( "The passed test counter is not as expected: %d, %d\n", g_temperTestContext.testsPassed, capturedPassCount + passDiff );
-	TEMPER_CHECK_EQUAL( g_temperTestContext.testsFailed, ( capturedFailCount + failDiff ) );
-	printf( "The failed test counter is not as expected: %d, %d\n", g_temperTestContext.testsFailed, capturedFailCount + failDiff );
-	TEMPER_CHECK_EQUAL( g_temperTestContext.testsAborted, ( capturedAbortCount + abortDiff ) );
-	printf( "The aborted test counter is not as expected: %d, %d\n", g_temperTestContext.testsAborted, capturedAbortCount + abortDiff );
-	TEMPER_CHECK_EQUAL( g_temperTestContext.testsSkipped, ( capturedSkipCount + skipDiff ) );
-	printf( "The skipped test counter is not as expected: %d, %d\n", g_temperTestContext.testsSkipped, capturedSkipCount + skipDiff );
+	TEMPER_CHECK_EQUAL_M( g_temperTestContext.testsPassed, ( capturedPassCount + passDiff ), "The passed test counter is not as expected: %d, %d\n", g_temperTestContext.testsPassed, capturedPassCount + passDiff );
+	TEMPER_CHECK_EQUAL_M( g_temperTestContext.testsFailed, ( capturedFailCount + failDiff ), "The failed test counter is not as expected: %d, %d\n", g_temperTestContext.testsFailed, capturedFailCount + failDiff );
+	TEMPER_CHECK_EQUAL_M( g_temperTestContext.testsAborted, ( capturedAbortCount + abortDiff ), "The aborted test counter is not as expected: %d, %d\n", g_temperTestContext.testsAborted, capturedAbortCount + abortDiff );
+	TEMPER_CHECK_EQUAL_M( g_temperTestContext.testsSkipped, ( capturedSkipCount + skipDiff ), "The skipped test counter is not as expected: %d, %d\n", g_temperTestContext.testsSkipped, capturedSkipCount + skipDiff );
 
 	return g_temperTestContext.currentTestErrorCount == 0;
 }
