@@ -1,4 +1,5 @@
 #include "../../temper.h"
+#pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
 
 //----------------------------------------------------------
 
@@ -32,16 +33,30 @@ static void CaptureTestCounts( void ) {
 
 //----------------------------------------------------------
 
+static void ClearTestCounts( void ) {
+	g_temperTestContext.testsPassed = 0;
+	g_temperTestContext.testsFailed = 0;
+	g_temperTestContext.testsAborted = 0;
+	g_temperTestContext.testsSkipped = 0;
+}
+
+//----------------------------------------------------------
+
+static void RestoreCapturedTestCounts( void ) {
+	g_temperTestContext.testsPassed = capturedPassCount;
+	g_temperTestContext.testsFailed = capturedFailCount;
+	g_temperTestContext.testsAborted = capturedAbortCount;
+	g_temperTestContext.testsSkipped = capturedSkipCount;
+}
+
+//----------------------------------------------------------
+
 static bool AssertResults( uint32_t passDiff, uint32_t failDiff, uint32_t abortDiff, uint32_t skipDiff ) {
 	// BUG - CONDITIONS SHOULD TAKE "const char* fmt, ..." - this is embarising.
-	TEMPER_CHECK_EQUAL( g_temperTestContext.testsPassed, ( capturedPassCount + passDiff ) );
-	printf( "The passed test counter is not as expected: %d, %d\n", g_temperTestContext.testsPassed, capturedPassCount + passDiff );
-	TEMPER_CHECK_EQUAL( g_temperTestContext.testsFailed, ( capturedFailCount + failDiff ) );
-	printf( "The failed test counter is not as expected: %d, %d\n", g_temperTestContext.testsFailed, capturedFailCount + failDiff );
-	TEMPER_CHECK_EQUAL( g_temperTestContext.testsAborted, ( capturedAbortCount + abortDiff ) );
-	printf( "The aborted test counter is not as expected: %d, %d\n", g_temperTestContext.testsAborted, capturedAbortCount + abortDiff );
-	TEMPER_CHECK_EQUAL( g_temperTestContext.testsSkipped, ( capturedSkipCount + skipDiff ) );
-	printf( "The skipped test counter is not as expected: %d, %d\n", g_temperTestContext.testsSkipped, capturedSkipCount + skipDiff );
+	TEMPER_CHECK_EQUAL_M( g_temperTestContext.testsPassed, ( capturedPassCount + passDiff ), "The passed test counter is not as expected: %d, %d\n", g_temperTestContext.testsPassed, capturedPassCount + passDiff );
+	TEMPER_CHECK_EQUAL_M( g_temperTestContext.testsFailed, ( capturedFailCount + failDiff ), "The failed test counter is not as expected: %d, %d\n", g_temperTestContext.testsFailed, capturedFailCount + failDiff );
+	TEMPER_CHECK_EQUAL_M( g_temperTestContext.testsAborted, ( capturedAbortCount + abortDiff ), "The aborted test counter is not as expected: %d, %d\n", g_temperTestContext.testsAborted, capturedAbortCount + abortDiff );
+	TEMPER_CHECK_EQUAL_M( g_temperTestContext.testsSkipped, ( capturedSkipCount + skipDiff ), "The skipped test counter is not as expected: %d, %d\n", g_temperTestContext.testsSkipped, capturedSkipCount + skipDiff );
 
 	return g_temperTestContext.currentTestErrorCount == 0;
 }
@@ -159,7 +174,7 @@ TEMPER_TEST( GivenCheckTrue_WhenFails_ErrorCountIncrements, TEMPER_FLAG_SHOULD_R
 // EXCEL_TestName - If a test triggered any errors, total tests failed increments
 //----------------------------------------------------------
 
-RESULT_DEPENDANT_TEST( GivenIsolatedTest_WhenDeclaredButHasError_IsExecutedAndFails, TEMPER_FLAG_SHOULD_RUN ) {
+RESULT_DEPENDANT_TEST( GivenCheck_WhenErrorTriggered_FailsTest, TEMPER_FLAG_SHOULD_RUN ) {
 	TEMPER_CHECK_TRUE_M( false, "We expect this test to fail." );
 }
 
@@ -173,14 +188,50 @@ TEMPER_TEST( CheckAndCleanResults_3, TEMPER_FLAG_SHOULD_RUN ) {
 // EXCEL_TestName - If a test triggered an aborts, total tests aborted increments
 //----------------------------------------------------------
 
-RESULT_DEPENDANT_TEST( GivenIsolatedTest_WhenDeclaredButWillAbort_IsExecutedAndAborts, TEMPER_FLAG_SHOULD_RUN ) {
+RESULT_DEPENDANT_TEST( GivenICheck_WhenAbortTriggered_AbortsTest, TEMPER_FLAG_SHOULD_RUN ) {
 	TEMPER_CHECK_TRUE_AM( false, "We expect this test to abort." );
+	TEMPER_CHECK_TRUE_M( false, "We shouldn't hit this. Asserted in the CheckAndClean." );
 }
 
 TEMPER_TEST( CheckAndCleanResults_4, TEMPER_FLAG_SHOULD_RUN ) {
 	if ( AssertResults( 0, 1, 1, 0 ) ) {
 		AbsolvePreviousTest( ACCOUNT_FOR_ONE_ABORT );
 	}
+}
+
+//----------------------------------------------------------
+// EXCEL_TestName - When Temper has NO errors or aborts, the proposed error code is SUCCESS
+//----------------------------------------------------------
+
+TEMPER_TEST( GivenNoFailuresOrAborts_WhenExitCodeCalculated_ProvidesSuccessCode, TEMPER_FLAG_SHOULD_RUN ) {
+	CaptureTestCounts();
+	ClearTestCounts();
+	TEMPER_CHECK_EQUAL_M( TEMPERDEV__EXIT_SUCCESS, TemperCalculateExitCode(), "Expected the success code to be returned for no errors & no aborts" );
+	RestoreCapturedTestCounts();
+}
+
+//----------------------------------------------------------
+// EXCEL_TestName - When temper has one or more errors and no aborts, the proposed error code is FAIL
+//----------------------------------------------------------
+
+TEMPER_TEST( GivenFailures_WhenExitCodeCalculated_ProvidesFailureCode, TEMPER_FLAG_SHOULD_RUN ) {
+	CaptureTestCounts();
+	ClearTestCounts();
+	g_temperTestContext.testsFailed = 1;
+	TEMPER_CHECK_EQUAL_M( TEMPERDEV__EXIT_FAILURE, TemperCalculateExitCode(), "Expected the failure code to be returned for there being errors" );
+	RestoreCapturedTestCounts();
+}
+
+//----------------------------------------------------------
+// EXCEL_TestName - When temper has one or more aborts and no errors, the proposed error code is FAIL
+//----------------------------------------------------------
+
+TEMPER_TEST( GivenAborts_WhenExitCodeCalculated_ProvidesFailureCode, TEMPER_FLAG_SHOULD_RUN ) {
+	CaptureTestCounts();
+	ClearTestCounts();
+	g_temperTestContext.testsAborted = 1;
+	TEMPER_CHECK_EQUAL_M( TEMPERDEV__EXIT_FAILURE, TemperCalculateExitCode(), "Expected the failure code to be returned for there being aborts" );
+	RestoreCapturedTestCounts();
 }
 
 //----------------------------------------------------------

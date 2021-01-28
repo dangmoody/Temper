@@ -184,147 +184,149 @@ do { \
 
 //----------------------------------------------------------
 
-#define TEMPER_GET_TIMESTAMP_SECONDS( timeUnit )	TemperGetTimestampInternal( timeUnit )
+#ifndef TEMPER_GET_TIMESTAMP
+#define TEMPER_GET_TIMESTAMP( timeUnit )	TemperGetTimestampInternal( timeUnit )
+#endif
 
 //----------------------------------------------------------
 
 #define TEMPER_CHECK_TRUE( condition ) \
-	TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE(" #condition ")", false, NULL, __FILE__, __LINE__ )
+	TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE(" #condition ")", false, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-#define TEMPER_CHECK_TRUE_M( condition, message ) \
-	TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE_M(" #condition ", ...)", false, message, __FILE__, __LINE__ )
+#define TEMPER_CHECK_TRUE_M( condition, message, ... ) \
+	TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE_M(" #condition ", ...)", false, __FILE__, __LINE__, message, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
 #define TEMPER_CHECK_TRUE_A( condition ) \
-	TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE_A(" #condition ")", true, NULL, __FILE__, __LINE__ )
+	TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE_A(" #condition ")", true, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-#define TEMPER_CHECK_TRUE_AM( condition, message ) \
-	TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE_AM(" #condition ", ...)", true, message, __FILE__, __LINE__ )
+#define TEMPER_CHECK_TRUE_AM( condition, message, ... ) \
+	TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE_AM(" #condition ", ...)", true, __FILE__, __LINE__, message, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
 #define TEMPER_CHECK_FALSE( condition ) \
-	TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE(" #condition ")", false, NULL, __FILE__, __LINE__ )
+	TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE(" #condition ")", false, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-#define TEMPER_CHECK_FALSE_M( condition, message ) \
-	TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE_M(" #condition ", ...)", false, message, __FILE__, __LINE__ )
+#define TEMPER_CHECK_FALSE_M( condition, message, ... ) \
+	TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE_M(" #condition ", ...)", false, __FILE__, __LINE__, message, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
 #define TEMPER_CHECK_FALSE_A( condition ) \
-	TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE_A(" #condition ")", true, NULL, __FILE__, __LINE__ )
+	TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE_A(" #condition ")", true, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-#define TEMPER_CHECK_FALSE_AM( condition, message ) \
-	TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE_AM(" #condition ", ...)", true, message, __FILE__, __LINE__ )
+#define TEMPER_CHECK_FALSE_AM( condition, message, ... ) \
+	TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE_AM(" #condition ", ...)", true, __FILE__, __LINE__, message, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
 #define TEMPER_CHECK_EQUAL( conditionA, conditionB ) \
-	TemperTestTrueInternal( conditionA == conditionB, "TEMPER_CHECK_EQUAL(" #conditionA ", " #conditionB ")", false, NULL, __FILE__, __LINE__ )
+	TemperTestTrueInternal( conditionA == conditionB, "TEMPER_CHECK_EQUAL(" #conditionA ", " #conditionB ")", false, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-#define TEMPER_CHECK_EQUAL_M( conditionA, conditionB, message ) \
-	TemperTestTrueInternal( conditionA == conditionB, "TEMPER_CHECK_EQUAL_M(" #conditionA ", " #conditionB ", ...)", false, message, __FILE__, __LINE__ )
+#define TEMPER_CHECK_EQUAL_M( conditionA, conditionB, message, ... ) \
+	TemperTestTrueInternal( conditionA == conditionB, "TEMPER_CHECK_EQUAL_M(" #conditionA ", " #conditionB ", ...)", false, __FILE__, __LINE__, message, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
 #define TEMPER_CHECK_EQUAL_A( conditionA, conditionB ) \
-	TemperTestTrueInternal( conditionA == conditionB, "TEMPER_CHECK_EQUAL_A(" #conditionA ", " #conditionB ")", true, NULL, __FILE__, __LINE__ )
+	TemperTestTrueInternal( conditionA == conditionB, "TEMPER_CHECK_EQUAL_A(" #conditionA ", " #conditionB ")", true, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-#define TEMPER_CHECK_EQUAL_AM( conditionA, conditionB, message ) \
-	TemperTestTrueInternal( conditionA == conditionB, "TEMPER_CHECK_EQUAL_AM(" #conditionA ", " #conditionB ", ...)", true, message, __FILE__, __LINE__ )
+#define TEMPER_CHECK_EQUAL_AM( conditionA, conditionB, message, ... ) \
+	TemperTestTrueInternal( conditionA == conditionB, "TEMPER_CHECK_EQUAL_AM(" #conditionA ", " #conditionB ", ...)", true, __FILE__, __LINE__, message, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
 #define TEMPER_CHECK_NOT_EQUAL( conditionA, conditionB ) \
-	TemperTestTrueInternal( conditionA != conditionB, "TEMPER_CHECK_NOT_EQUAL(" #conditionA ", " #conditionB ")", false, NULL, __FILE__, __LINE__ )
+	TemperTestTrueInternal( conditionA != conditionB, "TEMPER_CHECK_NOT_EQUAL(" #conditionA ", " #conditionB ")", false, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-#define TEMPER_CHECK_NOT_EQUAL_M( conditionA, conditionB, message ) \
-	TemperTestTrueInternal( conditionA != conditionB, "TEMPER_CHECK_NOT_EQUAL_M(" #conditionA ", " #conditionB ", ...)", false, message, __FILE__, __LINE__ )
+#define TEMPER_CHECK_NOT_EQUAL_M( conditionA, conditionB, message, ... ) \
+	TemperTestTrueInternal( conditionA != conditionB, "TEMPER_CHECK_NOT_EQUAL_M(" #conditionA ", " #conditionB ", ...)", false, __FILE__, __LINE__, message, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
 #define TEMPER_CHECK_NOT_EQUAL_A( conditionA, conditionB ) \
-	TemperTestTrueInternal( conditionA != conditionB, "TEMPER_CHECK_NOT_EQUAL_A(" #conditionA ", " #conditionB ")", true, NULL, __FILE__, __LINE__ )
+	TemperTestTrueInternal( conditionA != conditionB, "TEMPER_CHECK_NOT_EQUAL_A(" #conditionA ", " #conditionB ")", true, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-#define TEMPER_CHECK_NOT_EQUAL_AM( conditionA, conditionB, message ) \
-	TemperTestTrueInternal( conditionA != conditionB, "TEMPER_CHECK_NOT_EQUAL_AM(" #conditionA ", " #conditionB ", ...)", true, message, __FILE__, __LINE__ )
+#define TEMPER_CHECK_NOT_EQUAL_AM( conditionA, conditionB, message, ... ) \
+	TemperTestTrueInternal( conditionA != conditionB, "TEMPER_CHECK_NOT_EQUAL_AM(" #conditionA ", " #conditionB ", ...)", true, __FILE__, __LINE__, message, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
 #define TEMPER_CHECK_FLOAT_EQUAL( conditionA, conditionB ) \
-	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, TEMPERDEV__EPSILON ), "TEMPER_CHECK_FLOAT_EQUAL(" #conditionA ", " #conditionB ")", false, NULL, __FILE__, __LINE__ )
+	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, TEMPERDEV__EPSILON ), "TEMPER_CHECK_FLOAT_EQUAL(" #conditionA ", " #conditionB ")", false, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-#define TEMPER_CHECK_FLOAT_EQUAL_M( conditionA, conditionB, message ) \
-	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, TEMPERDEV__EPSILON ), "TEMPER_CHECK_FLOAT_EQUAL_M(" #conditionA ", " #conditionB ", ...)", false, message, __FILE__, __LINE__ )
+#define TEMPER_CHECK_FLOAT_EQUAL_M( conditionA, conditionB, message, ... ) \
+	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, TEMPERDEV__EPSILON ), "TEMPER_CHECK_FLOAT_EQUAL_M(" #conditionA ", " #conditionB ", ...)", false, __FILE__, __LINE__, message, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
 #define TEMPER_CHECK_FLOAT_EQUAL_A( conditionA, conditionB ) \
-	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, TEMPERDEV__EPSILON ), "TEMPER_CHECK_FLOAT_EQUAL_A(" #conditionA ", " #conditionB ")", true, NULL, __FILE__, __LINE__ )
+	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, TEMPERDEV__EPSILON ), "TEMPER_CHECK_FLOAT_EQUAL_A(" #conditionA ", " #conditionB ")", true, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-#define TEMPER_CHECK_FLOAT_EQUAL_AM( conditionA, conditionB, message ) \
-	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, TEMPERDEV__EPSILON ), "TEMPER_CHECK_FLOAT_EQUAL_AM(" #conditionA ", " #conditionB ", ...)", true, message, __FILE__, __LINE__ )
+#define TEMPER_CHECK_FLOAT_EQUAL_AM( conditionA, conditionB, message, ... ) \
+	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, TEMPERDEV__EPSILON ), "TEMPER_CHECK_FLOAT_EQUAL_AM(" #conditionA ", " #conditionB ", ...)", true, __FILE__, __LINE__, message, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
 #define TEMPER_CHECK_ALMOST_EQUAL( conditionA, conditionB, tolerance ) \
-	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_ALMOST_EQUAL(" #conditionA ", " #conditionB ", " #tolerance ")", false, NULL, __FILE__, __LINE__ )
+	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_ALMOST_EQUAL(" #conditionA ", " #conditionB ", " #tolerance ")", false, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-#define TEMPER_CHECK_ALMOST_EQUAL_M( conditionA, conditionB, tolerance, message ) \
-	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_ALMOST_EQUAL_M(" #conditionA ", " #conditionB ", " #tolerance ", ...)", false, message, __FILE__, __LINE__ )
+#define TEMPER_CHECK_ALMOST_EQUAL_M( conditionA, conditionB, tolerance, message, ... ) \
+	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_ALMOST_EQUAL_M(" #conditionA ", " #conditionB ", " #tolerance ", ...)", false, __FILE__, __LINE__, message, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
 #define TEMPER_CHECK_ALMOST_EQUAL_A( conditionA, conditionB, tolerance ) \
-	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_ALMOST_EQUAL_A(" #conditionA ", " #conditionB ", " #tolerance ")", true, NULL, __FILE__, __LINE__ )
+	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_ALMOST_EQUAL_A(" #conditionA ", " #conditionB ", " #tolerance ")", true, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-#define TEMPER_CHECK_ALMOST_EQUAL_AM( conditionA, conditionB, tolerance, message ) \
-	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_ALMOST_EQUAL_AM(" #conditionA ", " #conditionB ", " #tolerance ", ...)", true, message, __FILE__, __LINE__ )
+#define TEMPER_CHECK_ALMOST_EQUAL_AM( conditionA, conditionB, tolerance, message, ... ) \
+	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_ALMOST_EQUAL_AM(" #conditionA ", " #conditionB ", " #tolerance ", ...)", true, __FILE__, __LINE__, message, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
 #define TEMPER_CHECK_NOT_ALMOST_EQUAL( conditionA, conditionB, tolerance ) \
-	TemperTestTrueInternal( !TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_NOT_ALMOST_EQUAL(" #conditionA ", " #conditionB ", " #tolerance ")", false, NULL, __FILE__, __LINE__ )
+	TemperTestTrueInternal( !TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_NOT_ALMOST_EQUAL(" #conditionA ", " #conditionB ", " #tolerance ")", false, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-#define TEMPER_CHECK_NOT_ALMOST_EQUAL_M( conditionA, conditionB, tolerance, message ) \
-	TemperTestTrueInternal( !TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_M(" #conditionA ", " #conditionB ", " #tolerance ", ...)", false, message, __FILE__, __LINE__ )
+#define TEMPER_CHECK_NOT_ALMOST_EQUAL_M( conditionA, conditionB, tolerance, message, ... ) \
+	TemperTestTrueInternal( !TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_M(" #conditionA ", " #conditionB ", " #tolerance ", ...)", false,  __FILE__, __LINE__, message, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
 #define TEMPER_CHECK_NOT_ALMOST_EQUAL_A( conditionA, conditionB, tolerance ) \
-	TemperTestTrueInternal( !TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_A(" #conditionA ", " #conditionB ", " #tolerance ")", true, NULL, __FILE__, __LINE__ )
+	TemperTestTrueInternal( !TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_A(" #conditionA ", " #conditionB ", " #tolerance ")", true, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-#define TEMPER_CHECK_NOT_ALMOST_EQUAL_AM( conditionA, conditionB, tolerance, message ) \
-	TemperTestTrueInternal( !TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_AM(" #conditionA ", " #conditionB ", " #tolerance ", ...)", true, message, __FILE__, __LINE__ )
+#define TEMPER_CHECK_NOT_ALMOST_EQUAL_AM( conditionA, conditionB, tolerance, message, ... ) \
+	TemperTestTrueInternal( !TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_AM(" #conditionA ", " #conditionB ", " #tolerance ", ...)", true, __FILE__, __LINE__, message, __VA_ARGS__ )
 
 //==========================================================
 // User-Overridable Preprocessor defines
@@ -340,6 +342,10 @@ do { \
 
 #ifndef TEMPERDEV__EXIT_FAILURE
 #define TEMPERDEV__EXIT_FAILURE				EXIT_FAILURE
+#endif
+
+#ifndef TEMPERDEV__UNUSED
+#define TEMPERDEV__UNUSED( x )				( (void) x )
 #endif
 
 #ifndef TEMPERDEV__ASSERT
@@ -427,21 +433,12 @@ typedef enum temperTestFlag_t {
 //----------------------------------------------------------
 
 typedef enum temperTimeUnit_t {
-	TEMPER_TIME_UNIT_CLOCKS	= 0,
+	TEMPER_TIME_UNIT_CLOCKS	= 1,
 	TEMPER_TIME_UNIT_NS,
 	TEMPER_TIME_UNIT_US,
 	TEMPER_TIME_UNIT_MS,
 	TEMPER_TIME_UNIT_SECONDS
 } temperTimeUnit_t;
-
-//----------------------------------------------------------
-
-typedef enum temperTestExpectFlagBits_t {
-	TEMPERDEV__TEST_EXPECT_FLAG_SUCCESS	= 0,
-	TEMPERDEV__TEST_EXPECT_FLAG_FAIL	= TEMPERDEV__BIT( 0 ),
-	TEMPERDEV__TEST_EXPECT_FLAG_ABORT	= TEMPERDEV__BIT( 1 )
-} temperTestExpectFlagBits_t;
-typedef uint32_t temperTestExpectFlags_t;
 
 //----------------------------------------------------------
 
@@ -462,7 +459,6 @@ typedef struct temperTestInfo_t {
 	temperTestCallbackOnAfterTest_t		OnAfterTest;
 	double								testTimeTaken;
 	temperTestFlag_t					testingFlag;
-	temperTestExpectFlags_t				expectationFlags;
 	const char*							testNameStr;
 	const char*							suiteNameStr;
 } temperTestInfo_t;
@@ -528,7 +524,7 @@ static temperTestContext_t		g_temperTestContext;
 
 //----------------------------------------------------------
 
-#define TEMPERDEV__DEFINE_TEST( counter, suiteNameString, onBeforeName, testName, onAfterName, testExpectationFlags, runFlag ) \
+#define TEMPERDEV__DEFINE_TEST( counter, suiteNameString, onBeforeName, testName, onAfterName, runFlag ) \
 \
 	/*1. Create a function with a name matching the test.*/ \
 	void ( testName )( void ); \
@@ -549,10 +545,9 @@ static temperTestContext_t		g_temperTestContext;
 		TEMPERDEV__CONCAT( testName, _GlobalInfo ).testInformation.OnBeforeTest		= onBeforeName; \
 		TEMPERDEV__CONCAT( testName, _GlobalInfo ).testInformation.TestFuncCallback	= testName; \
 		TEMPERDEV__CONCAT( testName, _GlobalInfo ).testInformation.OnAfterTest		= onAfterName; \
-		TEMPERDEV__CONCAT( testName, _GlobalInfo ).testInformation.suiteNameStr		= suiteNameString; \
-		TEMPERDEV__CONCAT( testName, _GlobalInfo ).testInformation.expectationFlags	= testExpectationFlags; \
-		TEMPERDEV__CONCAT( testName, _GlobalInfo ).testInformation.testNameStr		= #testName; \
 		TEMPERDEV__CONCAT( testName, _GlobalInfo ).testInformation.testingFlag		= runFlag; \
+		TEMPERDEV__CONCAT( testName, _GlobalInfo ).testInformation.testNameStr		= #testName; \
+		TEMPERDEV__CONCAT( testName, _GlobalInfo ).testInformation.suiteNameStr		= suiteNameString; \
 		return TEMPERDEV__CONCAT( testName, _GlobalInfo ).testInformation; \
 	} \
 \
@@ -562,22 +557,22 @@ static temperTestContext_t		g_temperTestContext;
 //----------------------------------------------------------
 
 #define TEMPER_TEST( testName, runFlag ) \
-	TEMPERDEV__DEFINE_TEST( __COUNTER__, NULL, NULL, testName, NULL, TEMPERDEV__TEST_EXPECT_FLAG_SUCCESS, runFlag )
+	TEMPERDEV__DEFINE_TEST( __COUNTER__, NULL, NULL, testName, NULL, runFlag )
 
 #define TEMPER_TEST_C( testName, onBefore, onAfter, runFlag ) \
-	TEMPERDEV__DEFINE_TEST( __COUNTER__, NULL, onBefore, testName, onAfter, TEMPERDEV__TEST_EXPECT_FLAG_SUCCESS, runFlag )
+	TEMPERDEV__DEFINE_TEST( __COUNTER__, NULL, onBefore, testName, onAfter, runFlag )
 
 //----------------------------------------------------------
 
 #define TEMPER_SUITE_TEST( suiteName, testName, runFlag ) \
-	TEMPERDEV__DEFINE_TEST( __COUNTER__, #suiteName, NULL, testName, NULL, TEMPERDEV__TEST_EXPECT_FLAG_SUCCESS, runFlag )
+	TEMPERDEV__DEFINE_TEST( __COUNTER__, #suiteName, NULL, testName, NULL, runFlag )
 
 #define TEMPER_SUITE_TEST_C( suiteName,  testName, onBefore, onAfter, runFlag ) \
-	TEMPERDEV__DEFINE_TEST( __COUNTER__, #suiteName, onBefore, testName, onAfter, TEMPERDEV__TEST_EXPECT_FLAG_SUCCESS, runFlag )
+	TEMPERDEV__DEFINE_TEST( __COUNTER__, #suiteName, onBefore, testName, onAfter, runFlag )
 
 //----------------------------------------------------------
 
-#define TEMPERDEV__DEFINE_PARAMETRIC( suiteName, onBeforeName, testName, onAfterName, testExpectationFlags, runFlag, ... ) \
+#define TEMPERDEV__DEFINE_PARAMETRIC( suiteName, onBeforeName, testName, onAfterName, runFlag, ... )\
 \
 	/*1. Create a function with a name matching the test with the provided parameters.*/ \
 	void ( testName )( __VA_ARGS__ ); \
@@ -591,7 +586,6 @@ static temperTestContext_t		g_temperTestContext;
 		TEMPERDEV__CONCAT( testName, _FuncType )	TestFuncCallback; \
 		temperTestCallbackOnAfterTest_t				OnAfterTest; \
 		temperTestFlag_t							testingFlag; \
-		temperTestExpectFlags_t						expectationFlags; \
 		const char*									testNameStr; \
 		const char*									suiteNameStr; \
 	} TEMPERDEV__CONCAT( testName, _ParametricTestInfo ); \
@@ -608,7 +602,6 @@ static temperTestContext_t		g_temperTestContext;
 		TEMPERDEV__CONCAT( testName, _GlobalParametricInfo ).TestFuncCallback	= testName; \
 		TEMPERDEV__CONCAT( testName, _GlobalParametricInfo ).OnAfterTest		= onAfterName; \
 		TEMPERDEV__CONCAT( testName, _GlobalParametricInfo ).testingFlag		= runFlag; \
-		TEMPERDEV__CONCAT( testName, _GlobalParametricInfo ).expectationFlags	= testExpectationFlags; \
 		TEMPERDEV__CONCAT( testName, _GlobalParametricInfo ).testNameStr		= #testName; \
 		TEMPERDEV__CONCAT( testName, _GlobalParametricInfo ).suiteNameStr		= suiteName; \
 	}\
@@ -619,22 +612,22 @@ static temperTestContext_t		g_temperTestContext;
 //----------------------------------------------------------
 
 #define TEMPER_PARAMETRIC( testName, runFlag, ... )\
-	TEMPERDEV__DEFINE_PARAMETRIC( NULL, NULL, testName, NULL, TEMPERDEV__TEST_EXPECT_FLAG_SUCCESS, runFlag, __VA_ARGS__ )
+	TEMPERDEV__DEFINE_PARAMETRIC( NULL, NULL, testName, NULL, runFlag, __VA_ARGS__ )
 
 #define TEMPER_PARAMETRIC_C( testName, onBefore, onAfter, runFlag, ... )\
-	TEMPERDEV__DEFINE_PARAMETRIC( NULL, onBefore, testName, onAfter, TEMPERDEV__TEST_EXPECT_FLAG_SUCCESS, runFlag, __VA_ARGS__ )
+	TEMPERDEV__DEFINE_PARAMETRIC( NULL, onBefore, testName, onAfter, runFlag, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
 #define TEMPER_PARAMETRIC_SUITE( suiteName, testName, runFlag, ... )\
-	TEMPERDEV__DEFINE_PARAMETRIC( #suiteName, NULL, testName, NULL, TEMPERDEV__TEST_EXPECT_FLAG_SUCCESS, runFlag, __VA_ARGS__ )
+	TEMPERDEV__DEFINE_PARAMETRIC( #suiteName, NULL, testName, NULL, runFlag, __VA_ARGS__ )
 
 #define TEMPER_PARAMETRIC_SUITE_C( suiteName, testName, onBefore, onAfter, runFlag, ... )\
-	TEMPERDEV__DEFINE_PARAMETRIC( #suiteName, onBefore, testName, onAfter, TEMPERDEV__TEST_EXPECT_FLAG_SUCCESS, runFlag, __VA_ARGS__ )
+	TEMPERDEV__DEFINE_PARAMETRIC( #suiteName, onBefore, testName, onAfter, runFlag, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
-#define TEMPERDEV__INVOKE_PARAMETRIC_TEST( counter, nameOfTestToCall, testExpectationFlags, ... ) \
+#define TEMPERDEV__INVOKE_PARAMETRIC_TEST( counter, nameOfTestToCall, ... ) \
 \
 	/*1. Create a function with a name matching the test.*/ \
 	void ( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ) )( void ); \
@@ -660,7 +653,6 @@ static temperTestContext_t		g_temperTestContext;
 		TEMPERDEV__CONCAT( nameOfTestToCall, _ParametricTestInfoBinder )();/*Make it so we can grab the needed information out of the test function's global info*/\
 		TEMPERDEV__CONCAT( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.TestFuncCallback = TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ); \
 		TEMPERDEV__CONCAT( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.suiteNameStr = TEMPERDEV__CONCAT( nameOfTestToCall, _GlobalParametricInfo ).suiteNameStr; \
-		TEMPERDEV__CONCAT( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.expectationFlags = testExpectationFlags; \
 		TEMPERDEV__CONCAT( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.testNameStr = #nameOfTestToCall; \
 		TEMPERDEV__CONCAT( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.testingFlag = TEMPERDEV__CONCAT( nameOfTestToCall, _GlobalParametricInfo ).testingFlag; \
 		return TEMPERDEV__CONCAT( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation; \
@@ -672,7 +664,7 @@ static temperTestContext_t		g_temperTestContext;
 //----------------------------------------------------------
 
 #define TEMPER_INVOKE_PARAMETRIC_TEST( nameOfTestToCall, ... ) \
-	TEMPERDEV__INVOKE_PARAMETRIC_TEST( __COUNTER__, nameOfTestToCall, TEMPERDEV__TEST_EXPECT_FLAG_SUCCESS, __VA_ARGS__ )
+	TEMPERDEV__INVOKE_PARAMETRIC_TEST( __COUNTER__, nameOfTestToCall, __VA_ARGS__ )
 
 //==========================================================
 // Internal Functions
@@ -797,6 +789,9 @@ static const char* TemperGetNextArgInternal( const int argIndex, const int argc,
 //----------------------------------------------------------
 
 static double TemperGetTimestampInternal( const temperTimeUnit_t timeUnit ) {
+	// should never get here
+	TEMPERDEV__ASSERT( ( timeUnit > TEMPER_TIME_UNIT_CLOCKS && timeUnit <= TEMPER_TIME_UNIT_SECONDS ) && "Unrecognised time unit passed into TemperGetTimestampInternal().\n" );
+
 #if defined( _WIN32 )
 	LARGE_INTEGER now;
 	QueryPerformanceCounter( &now );
@@ -824,9 +819,6 @@ static double TemperGetTimestampInternal( const temperTimeUnit_t timeUnit ) {
 #else	// defined( _WIN32 )
 #error Uncrecognised platform.  It appears Temper does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Temper/issues
 #endif	// defined( _WIN32 )
-
-	// should never get here
-	TEMPERDEV__ASSERT( false && "Unrecognised time unit passed into TemperGetTimestampInternal().\n" );
 
 	return 0.0;
 }
@@ -1073,6 +1065,20 @@ static bool TemperGetFullEXEPathInternal( void ) {
 
 //----------------------------------------------------------
 
+static const char* TemperGetTimeUnitStringInternal( const temperTimeUnit_t timeUnit ) {
+	TEMPERDEV__ASSERT( ( timeUnit > TEMPER_TIME_UNIT_CLOCKS && timeUnit <= TEMPER_TIME_UNIT_SECONDS ) && "Time unit enum was invalid somehow!?" );
+
+	switch ( timeUnit ) {
+		case TEMPER_TIME_UNIT_CLOCKS:	return "clocks";
+		case TEMPER_TIME_UNIT_NS:		return "nanoseconds";
+		case TEMPER_TIME_UNIT_US:		return "microseconds";
+		case TEMPER_TIME_UNIT_MS:		return "milliseconds";
+		case TEMPER_TIME_UNIT_SECONDS:	return "seconds";
+	}
+}
+
+//----------------------------------------------------------
+
 #if defined( _WIN32 )
 typedef unsigned long	temperThreadHandle_t;
 #elif defined( __APPLE__ ) || defined( __linux__ )	// defined( _WIN32 )
@@ -1100,6 +1106,8 @@ static temperThreadHandle_t TemperThreadProcInternal( void* data ) {
 	information->TestFuncCallback();
 	g_temperTestContext.currentTestEndTime = TEMPER_GET_TIMESTAMP( g_temperTestContext.timeUnit );
 
+	information->testTimeTaken = g_temperTestContext.currentTestEndTime - g_temperTestContext.currentTestStartTime;
+
 	if ( information->OnAfterTest ) {
 		information->OnAfterTest();
 	}
@@ -1118,10 +1126,12 @@ static void TemperRunTestThreadInternal( temperTestInfo_t* information ) {
 
 	DWORD result = WaitForMultipleObjects( 1, &testThread, TRUE, UINT32_MAX );
 	TEMPERDEV__ASSERT( result == WAIT_OBJECT_0 );
+	TEMPERDEV__UNUSED( result );
 
 	DWORD exitCode = (DWORD) -1;
 	BOOL gotExitCode = GetExitCodeThread( testThread, &exitCode );
 	TEMPERDEV__ASSERT( gotExitCode );
+	TEMPERDEV__UNUSED( gotExitCode );
 
 	CloseHandle( testThread );
 	testThread = NULL;
@@ -1150,22 +1160,6 @@ static void TemperRunTestThreadInternal( temperTestInfo_t* information ) {
 
 //----------------------------------------------------------
 
-static const char* TemperGetTimeUnitStringInternal( void ) {
-	switch ( g_temperTestContext.timeUnit ) {
-		case TEMPER_TIME_UNIT_CLOCKS:	return "clocks";
-		case TEMPER_TIME_UNIT_NS:		return "nanoseconds";
-		case TEMPER_TIME_UNIT_US:		return "microseconds";
-		case TEMPER_TIME_UNIT_MS:		return "milliseconds";
-		case TEMPER_TIME_UNIT_SECONDS:	return "seconds";
-
-		default:
-			TEMPERDEV__ASSERT( false && "Temper test context time unit was invalid somehow!?" );
-			return NULL;
-	}
-}
-
-//----------------------------------------------------------
-
 static void TemperOnBeforeTestInternal( const temperTestInfo_t* information ) {
 	TEMPERDEV__ASSERT( information );
 
@@ -1189,7 +1183,7 @@ static void TemperOnAfterTestInternal( const temperTestInfo_t* information ) {
 	TEMPERDEV__ASSERT( information );
 
 	if ( information->testingFlag == TEMPER_FLAG_SHOULD_RUN ) {
-		const char* timeUnitStr = TemperGetTimeUnitStringInternal();
+		const char* timeUnitStr = TemperGetTimeUnitStringInternal( g_temperTestContext.timeUnit );
 
 		if ( g_temperTestContext.currentTestWasAborted ) {
 			TemperSetTextColorInternal( TEMPERDEV__COLOR_RED );
@@ -1226,17 +1220,28 @@ static void TemperAbortTestOnFailInternal( const bool abortOnFail ) {
 
 //----------------------------------------------------------
 
-static void TemperTestTrueInternal( const bool condition, const char* conditionStr, const bool abortOnFail, const char* message, const char* file, const uint32_t line ) {
+static void TemperTestTrueInternal( const bool condition, const char* conditionStr, const bool abortOnFail, const char* file, const uint32_t line, const char* fmt, ... ) {
 	if ( !( condition ) ) {
 		g_temperTestContext.currentTestErrorCount += 1;
 
 		// DM: could probably make this user-overridable
 		{
 			const char* newLine = NULL;
-			const char* actualMessage = NULL;
+			char* actualMessage = NULL;
 
-			if ( message ) {
-				actualMessage = message;
+			if ( fmt ) {
+				va_list args;
+				va_start( args, fmt );
+
+				int32_t count = vsnprintf( NULL, 0, fmt, args );
+				++count;
+				unsigned long long longCount = (unsigned long long)count;
+				actualMessage = (char*) malloc( longCount );
+				vsnprintf( actualMessage, longCount, fmt, args );
+				actualMessage[ count - 1 ] = '\0';
+
+				va_end( args );
+
 				newLine = "\n";
 			} else {
 				actualMessage = "";
@@ -1247,6 +1252,7 @@ static void TemperTestTrueInternal( const bool condition, const char* conditionS
 			TEMPERDEV__LOG( "FAILED: " );
 			TemperSetTextColorInternal( TEMPERDEV__COLOR_YELLOW );
 			TEMPERDEV__LOG( "%s at %s line %d.\n%s%s", conditionStr, file, line, actualMessage, newLine );
+			free( actualMessage );
 			TemperSetTextColorInternal( TEMPERDEV__COLOR_DEFAULT );
 		}
 
@@ -1263,7 +1269,7 @@ static void TemperOnAllTestsFinishedInternal( void ) {
 		"\n=== ALL TESTS FINISHED ===\n"
 		"Total time taken: %.3f %s\n"
 		"Total tests defined: %d\n"
-		, g_temperTestContext.totalExecutionTime, TemperGetTimeUnitStringInternal()
+		, g_temperTestContext.totalExecutionTime, TemperGetTimeUnitStringInternal( g_temperTestContext.timeUnit )
 		, g_temperTestContext.totalTestsDeclared
 	);
 
@@ -1355,6 +1361,12 @@ static bool TemperIsTestFilteredInternal( const char* testName ) {
 
 //----------------------------------------------------------
 
+static int TemperCalculateExitCode() {
+	return g_temperTestContext.testsFailed == 0 && g_temperTestContext.testsAborted == 0 ? TEMPERDEV__EXIT_SUCCESS : TEMPERDEV__EXIT_FAILURE;
+}
+
+//----------------------------------------------------------
+
 static int TemperExecuteAllTestsInternal() {
 	if ( !TEMPERDEV__GET_FULL_EXE_PATH() ) {
 		return TEMPERDEV__EXIT_FAILURE;
@@ -1397,8 +1409,6 @@ static int TemperExecuteAllTestsInternal() {
 
 					TEMPERDEV__RUN_TEST_THREAD( &information );
 
-					information.testTimeTaken = g_temperTestContext.currentTestEndTime - g_temperTestContext.currentTestStartTime;
-
 					g_temperTestContext.totalTestsExecuted += 1;
 
 					if ( g_temperTestContext.currentTestErrorCount > 0 ) {
@@ -1423,7 +1433,7 @@ static int TemperExecuteAllTestsInternal() {
 	// cleanup
 	TEMPERDEV__UNLOAD_EXE_HANDLE( handle );
 
-	return g_temperTestContext.testsFailed == 0 && g_temperTestContext.testsAborted == 0 ? TEMPERDEV__EXIT_SUCCESS : TEMPERDEV__EXIT_FAILURE;
+	return TemperCalculateExitCode();
 }
 
 //----------------------------------------------------------
