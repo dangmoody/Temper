@@ -436,15 +436,6 @@ typedef enum temperTimeUnit_t {
 
 //----------------------------------------------------------
 
-typedef enum temperTestExpectFlagBits_t {
-	TEMPERDEV__TEST_EXPECT_FLAG_SUCCESS	= 0,
-	TEMPERDEV__TEST_EXPECT_FLAG_FAIL	= TEMPERDEV__BIT( 0 ),
-	TEMPERDEV__TEST_EXPECT_FLAG_ABORT	= TEMPERDEV__BIT( 1 )
-} temperTestExpectFlagBits_t;
-typedef uint32_t temperTestExpectFlags_t;
-
-//----------------------------------------------------------
-
 typedef uint32_t temperBool32;
 
 //----------------------------------------------------------
@@ -461,8 +452,8 @@ typedef struct temperTestInfo_t {
 	temperTestCallback_t				TestFuncCallback;
 	temperTestCallbackOnAfterTest_t		OnAfterTest;
 	double								testTimeTaken;
+	double								maxTestTime;
 	temperTestFlag_t					testingFlag;
-	temperTestExpectFlags_t				expectationFlags;
 	const char*							testNameStr;
 	const char*							suiteNameStr;
 } temperTestInfo_t;
@@ -528,7 +519,7 @@ static temperTestContext_t		g_temperTestContext;
 
 //----------------------------------------------------------
 
-#define TEMPERDEV__DEFINE_TEST( counter, suiteNameString, onBeforeName, testName, onAfterName, testExpectationFlags, runFlag ) \
+#define TEMPERDEV__DEFINE_TEST( counter, suiteNameString, onBeforeName, testName, onAfterName, maxTime, runFlag ) \
 \
 	/*1. Create a function with a name matching the test.*/ \
 	void ( testName )( void ); \
@@ -549,10 +540,10 @@ static temperTestContext_t		g_temperTestContext;
 		TEMPERDEV__CONCAT( testName, _GlobalInfo ).testInformation.OnBeforeTest		= onBeforeName; \
 		TEMPERDEV__CONCAT( testName, _GlobalInfo ).testInformation.TestFuncCallback	= testName; \
 		TEMPERDEV__CONCAT( testName, _GlobalInfo ).testInformation.OnAfterTest		= onAfterName; \
-		TEMPERDEV__CONCAT( testName, _GlobalInfo ).testInformation.suiteNameStr		= suiteNameString; \
-		TEMPERDEV__CONCAT( testName, _GlobalInfo ).testInformation.expectationFlags	= testExpectationFlags; \
-		TEMPERDEV__CONCAT( testName, _GlobalInfo ).testInformation.testNameStr		= #testName; \
+		TEMPERDEV__CONCAT( testName, _GlobalInfo ).testInformation.maxTestTime		= maxTime; \
 		TEMPERDEV__CONCAT( testName, _GlobalInfo ).testInformation.testingFlag		= runFlag; \
+		TEMPERDEV__CONCAT( testName, _GlobalInfo ).testInformation.testNameStr		= #testName; \
+		TEMPERDEV__CONCAT( testName, _GlobalInfo ).testInformation.suiteNameStr		= suiteNameString; \
 		return TEMPERDEV__CONCAT( testName, _GlobalInfo ).testInformation; \
 	} \
 \
@@ -562,22 +553,34 @@ static temperTestContext_t		g_temperTestContext;
 //----------------------------------------------------------
 
 #define TEMPER_TEST( testName, runFlag ) \
-	TEMPERDEV__DEFINE_TEST( __COUNTER__, NULL, NULL, testName, NULL, TEMPERDEV__TEST_EXPECT_FLAG_SUCCESS, runFlag )
+	TEMPERDEV__DEFINE_TEST( __COUNTER__, NULL, NULL, testName, NULL, -1, runFlag )
 
 #define TEMPER_TEST_C( testName, onBefore, onAfter, runFlag ) \
-	TEMPERDEV__DEFINE_TEST( __COUNTER__, NULL, onBefore, testName, onAfter, TEMPERDEV__TEST_EXPECT_FLAG_SUCCESS, runFlag )
+	TEMPERDEV__DEFINE_TEST( __COUNTER__, NULL, onBefore, testName, onAfter, -1, runFlag )
+
+#define TEMPER_TEST_T( testName, maxTime, runFlag ) \
+	TEMPERDEV__DEFINE_TEST( __COUNTER__, NULL, NULL, testName, NULL, maxTime, runFlag )
+
+#define TEMPER_TEST_CT( testName, onBefore, onAfter, maxTime, runFlag ) \
+	TEMPERDEV__DEFINE_TEST( __COUNTER__, NULL, onBefore, testName, onAfter, maxTime, runFlag )
 
 //----------------------------------------------------------
 
 #define TEMPER_SUITE_TEST( suiteName, testName, runFlag ) \
-	TEMPERDEV__DEFINE_TEST( __COUNTER__, #suiteName, NULL, testName, NULL, TEMPERDEV__TEST_EXPECT_FLAG_SUCCESS, runFlag )
+	TEMPERDEV__DEFINE_TEST( __COUNTER__, #suiteName, NULL, testName, NULL, -1, runFlag )
 
 #define TEMPER_SUITE_TEST_C( suiteName,  testName, onBefore, onAfter, runFlag ) \
-	TEMPERDEV__DEFINE_TEST( __COUNTER__, #suiteName, onBefore, testName, onAfter, TEMPERDEV__TEST_EXPECT_FLAG_SUCCESS, runFlag )
+	TEMPERDEV__DEFINE_TEST( __COUNTER__, #suiteName, onBefore, testName, onAfter, -1, runFlag )
+
+#define TEMPER_SUITE_TEST_T( suiteName, testName, maxTime, runFlag ) \
+	TEMPERDEV__DEFINE_TEST( __COUNTER__, #suiteName, NULL, testName, NULL, maxTime, runFlag )
+
+#define TEMPER_SUITE_TEST_CT( suiteName,  testName, onBefore, onAfter, maxTime, runFlag ) \
+	TEMPERDEV__DEFINE_TEST( __COUNTER__, #suiteName, onBefore, testName, onAfter, maxTime, runFlag )
 
 //----------------------------------------------------------
 
-#define TEMPERDEV__DEFINE_PARAMETRIC( suiteName, onBeforeName, testName, onAfterName, testExpectationFlags, runFlag, ... )\
+#define TEMPERDEV__DEFINE_PARAMETRIC( suiteName, onBeforeName, testName, onAfterName, runFlag, ... )\
 \
 	/*1. Create a function with a name matching the test with the provided parameters.*/\
 	void ( testName )( __VA_ARGS__ ); \
@@ -591,7 +594,6 @@ static temperTestContext_t		g_temperTestContext;
 		TEMPERDEV__CONCAT( testName, _FuncType )	TestFuncCallback; \
 		temperTestCallbackOnAfterTest_t				OnAfterTest; \
 		temperTestFlag_t							testingFlag; \
-		temperTestExpectFlags_t						expectationFlags; \
 		const char*									testNameStr; \
 		const char*									suiteNameStr; \
 	} TEMPERDEV__CONCAT( testName, _ParametricTestInfo ); \
@@ -608,7 +610,6 @@ static temperTestContext_t		g_temperTestContext;
 		TEMPERDEV__CONCAT( testName, _GlobalParametricInfo ).TestFuncCallback	= testName; \
 		TEMPERDEV__CONCAT( testName, _GlobalParametricInfo ).OnAfterTest		= onAfterName; \
 		TEMPERDEV__CONCAT( testName, _GlobalParametricInfo ).testingFlag		= runFlag; \
-		TEMPERDEV__CONCAT( testName, _GlobalParametricInfo ).expectationFlags	= testExpectationFlags; \
 		TEMPERDEV__CONCAT( testName, _GlobalParametricInfo ).testNameStr		= #testName; \
 		TEMPERDEV__CONCAT( testName, _GlobalParametricInfo ).suiteNameStr		= suiteName; \
 	}\
@@ -619,22 +620,22 @@ static temperTestContext_t		g_temperTestContext;
 //----------------------------------------------------------
 
 #define TEMPER_PARAMETRIC( testName, runFlag, ... )\
-	TEMPERDEV__DEFINE_PARAMETRIC( NULL, NULL, testName, NULL, TEMPERDEV__TEST_EXPECT_FLAG_SUCCESS, runFlag, __VA_ARGS__ )
+	TEMPERDEV__DEFINE_PARAMETRIC( NULL, NULL, testName, NULL, runFlag, __VA_ARGS__ )
 
 #define TEMPER_PARAMETRIC_C( testName, onBefore, onAfter, runFlag, ... )\
-	TEMPERDEV__DEFINE_PARAMETRIC( NULL, onBefore, testName, onAfter, TEMPERDEV__TEST_EXPECT_FLAG_SUCCESS, runFlag, __VA_ARGS__ )
+	TEMPERDEV__DEFINE_PARAMETRIC( NULL, onBefore, testName, onAfter, runFlag, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
 #define TEMPER_PARAMETRIC_SUITE( suiteName, testName, runFlag, ... )\
-	TEMPERDEV__DEFINE_PARAMETRIC( #suiteName, NULL, testName, NULL, TEMPERDEV__TEST_EXPECT_FLAG_SUCCESS, runFlag, __VA_ARGS__ )
+	TEMPERDEV__DEFINE_PARAMETRIC( #suiteName, NULL, testName, NULL, runFlag, __VA_ARGS__ )
 
 #define TEMPER_PARAMETRIC_SUITE_C( suiteName, testName, onBefore, onAfter, runFlag, ... )\
-	TEMPERDEV__DEFINE_PARAMETRIC( #suiteName, onBefore, testName, onAfter, TEMPERDEV__TEST_EXPECT_FLAG_SUCCESS, runFlag, __VA_ARGS__ )
+	TEMPERDEV__DEFINE_PARAMETRIC( #suiteName, onBefore, testName, onAfter, runFlag, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
-#define TEMPERDEV__INVOKE_PARAMETRIC_TEST( counter, nameOfTestToCall, testExpectationFlags, ... ) \
+#define TEMPERDEV__INVOKE_PARAMETRIC_TEST( counter, nameOfTestToCall, maxTime, ... ) \
 \
 	/*1. Create a function with a name matching the test.*/ \
 	void ( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ) )( void ); \
@@ -659,8 +660,8 @@ static temperTestContext_t		g_temperTestContext;
 	temperTestInfo_t TEMPERDEV__CONCAT( __temper_test_info_fetcher_, counter )( void ) { \
 		TEMPERDEV__CONCAT( nameOfTestToCall, _ParametricTestInfoBinder )();/*Make it so we can grab the needed information out of the test function's global info*/\
 		TEMPERDEV__CONCAT( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.TestFuncCallback = TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ); \
+		TEMPERDEV__CONCAT( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.maxTestTime = maxTime; \
 		TEMPERDEV__CONCAT( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.suiteNameStr = TEMPERDEV__CONCAT( nameOfTestToCall, _GlobalParametricInfo ).suiteNameStr; \
-		TEMPERDEV__CONCAT( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.expectationFlags = testExpectationFlags; \
 		TEMPERDEV__CONCAT( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.testNameStr = #nameOfTestToCall; \
 		TEMPERDEV__CONCAT( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.testingFlag = TEMPERDEV__CONCAT( nameOfTestToCall, _GlobalParametricInfo ).testingFlag; \
 		return TEMPERDEV__CONCAT( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation; \
@@ -672,7 +673,10 @@ static temperTestContext_t		g_temperTestContext;
 //----------------------------------------------------------
 
 #define TEMPER_INVOKE_PARAMETRIC_TEST( nameOfTestToCall, ... ) \
-	TEMPERDEV__INVOKE_PARAMETRIC_TEST( __COUNTER__, nameOfTestToCall, TEMPERDEV__TEST_EXPECT_FLAG_SUCCESS, __VA_ARGS__ )
+	TEMPERDEV__INVOKE_PARAMETRIC_TEST( __COUNTER__, nameOfTestToCall, -1, __VA_ARGS__ )
+
+#define TEMPER_INVOKE_PARAMETRIC_TEST_T( nameOfTestToCall, maxTime, ... ) \
+	TEMPERDEV__INVOKE_PARAMETRIC_TEST( __COUNTER__, nameOfTestToCall, maxTime, __VA_ARGS__ )
 
 //==========================================================
 // Internal Functions
@@ -1073,6 +1077,24 @@ static bool TemperGetFullEXEPathInternal( void ) {
 
 //----------------------------------------------------------
 
+static const char* TemperGetTimeUnitStringInternal( void )
+{
+	switch( g_temperTestContext.timeUnit )
+	{
+		case TEMPERDEV__TIME_UNIT_CLOCKS:	return "clocks";
+		case TEMPERDEV__TIME_UNIT_NS:		return "nanoseconds";
+		case TEMPERDEV__TIME_UNIT_US:		return "microseconds";
+		case TEMPERDEV__TIME_UNIT_MS:		return "milliseconds";
+		case TEMPERDEV__TIME_UNIT_SECONDS:	return "seconds";
+
+		default:
+			TEMPERDEV__ASSERT( false && "Temper test context time unit was invalid somehow!?" );
+			return NULL;
+	}
+}
+
+//----------------------------------------------------------
+
 #if defined( _WIN32 )
 typedef unsigned long	temperThreadHandle_t;
 #elif defined( __APPLE__ ) || defined( __linux__ )	// defined( _WIN32 )
@@ -1100,8 +1122,24 @@ static temperThreadHandle_t TemperThreadProcInternal( void* data ) {
 	information->TestFuncCallback();
 	g_temperTestContext.currentTestEndTime = TEMPERDEV__GET_TIMESTAMP();
 
+	information->testTimeTaken = g_temperTestContext.currentTestEndTime - g_temperTestContext.currentTestStartTime;
+
 	if ( information->OnAfterTest ) {
 		information->OnAfterTest();
+	}
+
+	if ( information->maxTestTime > 0 )
+	{
+		// MY: I feel like it'd be great if all test times were one uniform and unchangable unit,
+		// and then for this check we convert from the constant into whatever format they've selected
+		// for their test output.
+		if ( information->testTimeTaken > information->maxTestTime )
+		{
+			const char* timeUnitStr = TemperGetTimeUnitStringInternal();
+			TEMPERDEV__LOG_ERROR( "The test \"%s\" exceeded it's maximum time allouance - max: %.3f | total: %.3f (%s)",
+								  information->testNameStr, information->maxTestTime, information->testTimeTaken, timeUnitStr );
+			g_temperTestContext.currentTestErrorCount += 1;
+		}
 	}
 
 	return 0;
@@ -1146,22 +1184,6 @@ static void TemperRunTestThreadInternal( temperTestInfo_t* information ) {
 #else	// defined( _WIN32 )
 #error Uncrecognised platform.  It appears Temper does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Temper/issues
 #endif	// defined( _WIN32 )
-}
-
-//----------------------------------------------------------
-
-static const char* TemperGetTimeUnitStringInternal( void ) {
-	switch ( g_temperTestContext.timeUnit ) {
-		case TEMPERDEV__TIME_UNIT_CLOCKS:	return "clocks";
-		case TEMPERDEV__TIME_UNIT_NS:		return "nanoseconds";
-		case TEMPERDEV__TIME_UNIT_US:		return "microseconds";
-		case TEMPERDEV__TIME_UNIT_MS:		return "milliseconds";
-		case TEMPERDEV__TIME_UNIT_SECONDS:	return "seconds";
-
-		default:
-			TEMPERDEV__ASSERT( false && "Temper test context time unit was invalid somehow!?" );
-			return NULL;
-	}
 }
 
 //----------------------------------------------------------
@@ -1396,8 +1418,6 @@ static int TemperExecuteAllTestsInternal() {
 					g_temperTestContext.currentTestWasAborted = false;
 
 					TEMPERDEV__RUN_TEST_THREAD( &information );
-
-					information.testTimeTaken = g_temperTestContext.currentTestEndTime - g_temperTestContext.currentTestStartTime;
 
 					g_temperTestContext.totalTestsExecuted += 1;
 
