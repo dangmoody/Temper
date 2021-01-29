@@ -352,6 +352,10 @@ do { \
 #define TEMPERDEV__ASSERT					assert
 #endif
 
+#ifndef TEMPERDEV__VPRINTF
+#define TEMPERDEV__VPRINTF					vprintf
+#endif
+
 #ifndef TEMPERDEV__SNPRINTF
 #define TEMPERDEV__SNPRINTF					snprintf
 #endif
@@ -707,7 +711,7 @@ static void TemperLogInternal( const char* fmt, ... ) {
 
 	va_list args;
 	va_start( args, fmt );
-	vprintf( fmt, args );
+	TEMPERDEV__VPRINTF( fmt, args );
 	va_end( args );
 }
 
@@ -725,7 +729,7 @@ static void TemperLogWarningInternal( const char* fmt, ... ) {
 
 	TemperSetTextColorInternal( TEMPERDEV__COLOR_YELLOW );
 
-	vprintf( fmt, args );
+	TEMPERDEV__VPRINTF( fmt, args );
 
 	TemperSetTextColorInternal( TEMPERDEV__COLOR_DEFAULT );
 
@@ -746,7 +750,7 @@ static void TemperLogErrorInternal( const char* fmt, ... ) {
 
 	TemperSetTextColorInternal( TEMPERDEV__COLOR_YELLOW );
 
-	vprintf( fmt, args );
+	TEMPERDEV__VPRINTF( fmt, args );
 
 	TemperSetTextColorInternal( TEMPERDEV__COLOR_DEFAULT );
 
@@ -1226,33 +1230,16 @@ static void TemperTestTrueInternal( const bool condition, const char* conditionS
 
 		// DM: could probably make this user-overridable
 		{
-			const char* newLine = NULL;
-			char* actualMessage = NULL;
-
-			if ( fmt ) {
-				va_list args;
-				va_start( args, fmt );
-
-				int32_t count = vsnprintf( NULL, 0, fmt, args );
-				++count;
-				unsigned long long longCount = (unsigned long long)count;
-				actualMessage = (char*) malloc( longCount );
-				vsnprintf( actualMessage, longCount, fmt, args );
-				actualMessage[ count - 1 ] = '\0';
-
-				va_end( args );
-
-				newLine = "\n";
-			} else {
-				actualMessage = "";
-				newLine = "";
-			}
-
 			TemperSetTextColorInternal( TEMPERDEV__COLOR_RED );
 			TEMPERDEV__LOG( "FAILED: " );
 			TemperSetTextColorInternal( TEMPERDEV__COLOR_YELLOW );
-			TEMPERDEV__LOG( "%s at %s line %d.\n%s%s", conditionStr, file, line, actualMessage, newLine );
-			free( actualMessage );
+			TEMPERDEV__LOG( "%s at %s line %d.\n", conditionStr, file, line );
+			if ( fmt ) {
+				va_list args;
+				va_start( args, fmt );
+				TEMPERDEV__VPRINTF( "%s\n", args );
+				va_end( args );
+			}
 			TemperSetTextColorInternal( TEMPERDEV__COLOR_DEFAULT );
 		}
 
