@@ -1172,6 +1172,10 @@ static void TemperOnBeforeTestInternal( const temperTestInfo_t* information ) {
 			TEMPERDEV__LOG( "------------------------------------------------------------\n\n" );
 			g_temperTestContext.suiteFilterPrevious = information->suiteNameStr;
 		}
+	} else if ( ( g_temperTestContext.suiteFilterPrevious && information->suiteNameStr == NULL ) ||
+				( g_temperTestContext.suiteFilterPrevious == NULL && information->suiteNameStr ) ) {
+		TEMPERDEV__LOG( "------------------------------------------------------------\n\n" );
+		g_temperTestContext.suiteFilterPrevious = information->suiteNameStr;
 	}
 
 	if ( information->suiteNameStr ) {
