@@ -1237,7 +1237,7 @@ static void TemperTestTrueInternal( const bool condition, const char* conditionS
 			if ( fmt ) {
 				va_list args;
 				va_start( args, fmt );
-				TEMPERDEV__VPRINTF( "%s\n", args );
+				TEMPERDEV__VPRINTF( fmt, args );
 				va_end( args );
 			}
 			TemperSetTextColorInternal( TEMPERDEV__COLOR_DEFAULT );
