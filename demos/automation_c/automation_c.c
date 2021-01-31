@@ -62,13 +62,6 @@ static bool AssertResults( uint32_t passDiff, uint32_t failDiff, uint32_t abortD
 
 //----------------------------------------------------------
 
-//static bool AssertTestCounts( uint32_t errorCount ) {
-//	TEMPER_CHECK_EQUAL_M( g_temperTestContext.currentTestErrorCount, errorCount, "this test has not produced the expected number of errors." );
-//	return g_temperTestContext.currentTestErrorCount == 0;
-//}
-
-//----------------------------------------------------------
-
 static void AbsolveTest( const bool condition ) {
 	if ( condition ) {
 		g_temperTestContext.currentTestErrorCount = 0;
@@ -257,28 +250,28 @@ TEMPER_TEST( GivenAborts_WhenExitCodeCalculated_ProvidesFailureCode, TEMPER_FLAG
 // > CHECK TRUE
 //----------------------------------------------------------
 
-CONDITION_TEST( CheckTrue_GivenFalse_ErrorCountIncrements ) {
+CONDITION_TEST( CheckTrue_FalseParsed_ErrorCountIncrements ) {
 	bool errorCountCoorect = g_temperTestContext.currentTestErrorCount == 0 ? true : false;
 	TEMPER_CHECK_TRUE( false );
 	errorCountCoorect = g_temperTestContext.currentTestErrorCount == 1 ? errorCountCoorect : false;
 	PassOrFailTest( errorCountCoorect, "Should have incremented the error count to 1.\n" );
 }
 
-CONDITION_TEST( CheckTrue_GivenTrue_ErrorCountStays ) {
+CONDITION_TEST( CheckTrue_TrueParsed_ErrorCountStays ) {
 	bool errorCountCoorect = g_temperTestContext.currentTestErrorCount == 0 ? true : false;
 	TEMPER_CHECK_TRUE( true );
 	errorCountCoorect = g_temperTestContext.currentTestErrorCount == 0 ? errorCountCoorect : false;
 	PassOrFailTest( errorCountCoorect, "Shouldn't have incremented the error count.\n" );
 }
 
-CONDITION_TEST( CheckTrue_GivenLongFalseStatement_ErrorCountIncrements ) {
+CONDITION_TEST( CheckTrue_LongFalseStatementParsed_ErrorCountIncrements ) {
 	bool errorCountCoorect = g_temperTestContext.currentTestErrorCount == 0 ? true : false;
 	TEMPER_CHECK_TRUE( ( ( 2 * 8 ) / 4 ) == 4 && 7 - 7 );
 	errorCountCoorect = g_temperTestContext.currentTestErrorCount == 1 ? errorCountCoorect : false;
 	PassOrFailTest( errorCountCoorect, "Should have incremented the error count to 1.\n" );
 }
 
-CONDITION_TEST( CheckTrue_GivenLongTrueStatement_ErrorCountStays ) {
+CONDITION_TEST( CheckTrue_LongTrueStatementParsed_ErrorCountStays ) {
 	bool errorCountCoorect = g_temperTestContext.currentTestErrorCount == 0 ? true : false;
 	TEMPER_CHECK_TRUE( ( ( 2 * 8 ) / 4 ) == 4 && 7 - 6 );
 	errorCountCoorect = g_temperTestContext.currentTestErrorCount == 0 ? errorCountCoorect : false;
@@ -289,28 +282,28 @@ CONDITION_TEST( CheckTrue_GivenLongTrueStatement_ErrorCountStays ) {
 // > CHECK FALSE
 //----------------------------------------------------------
 
-CONDITION_TEST( CheckFalse_GivenFalse_ErrorCountStays ) {
+CONDITION_TEST( CheckFalse_FalseParsed_ErrorCountStays ) {
 	bool errorCountCoorect = g_temperTestContext.currentTestErrorCount == 0 ? true : false;
 	TEMPER_CHECK_FALSE( false );
 	errorCountCoorect = g_temperTestContext.currentTestErrorCount == 0 ? errorCountCoorect : false;
 	PassOrFailTest( errorCountCoorect, "Shouldn't have incremented the error count.\n" );
 }
 
-CONDITION_TEST( CheckFalse_GivenTrue_ErrorCountIncrements ) {
+CONDITION_TEST( CheckFalse_TrueParsed_ErrorCountIncrements ) {
 	bool errorCountCoorect = g_temperTestContext.currentTestErrorCount == 0 ? true : false;
 	TEMPER_CHECK_FALSE( true );
 	errorCountCoorect = g_temperTestContext.currentTestErrorCount == 1 ? errorCountCoorect : false;
 	PassOrFailTest( errorCountCoorect, "Should have incremented the error count to 1.\n" );
 }
 
-CONDITION_TEST( CheckFalse_GivenLongFalseStatement_ErrorCountStays ) {
+CONDITION_TEST( CheckFalse_LongFalseStatementParsed_ErrorCountStays ) {
 	bool errorCountCoorect = g_temperTestContext.currentTestErrorCount == 0 ? true : false;
 	TEMPER_CHECK_FALSE( ( ( 2 * 8 ) / 4 ) == 4 && 7 - 7 );
 	errorCountCoorect = g_temperTestContext.currentTestErrorCount == 0 ? errorCountCoorect : false;
 	PassOrFailTest( errorCountCoorect, "Shouldn't have incremented the error count.\n" );
 }
 
-CONDITION_TEST( CheckFalse_GivenLongTrueStatement_ErrorCountIncrements ) {
+CONDITION_TEST( CheckFalse_LongTrueStatementParsed_ErrorCountIncrements ) {
 	bool errorCountCoorect = g_temperTestContext.currentTestErrorCount == 0 ? true : false;
 	TEMPER_CHECK_FALSE( ( ( 2 * 8 ) / 4 ) == 4 && 7 - 6 );
 	errorCountCoorect = g_temperTestContext.currentTestErrorCount == 1 ? errorCountCoorect : false;
@@ -321,25 +314,81 @@ CONDITION_TEST( CheckFalse_GivenLongTrueStatement_ErrorCountIncrements ) {
 // > CHECK EQUAL
 //----------------------------------------------------------
 
+CONDITION_TEST( CheckEqual_WhenTwoValuesAreEqual_ErrorCountStays ) {
+	bool errorCountCoorect = g_temperTestContext.currentTestErrorCount == 0 ? true : false;
+	TEMPER_CHECK_EQUAL( 8, 8 );
+	errorCountCoorect = g_temperTestContext.currentTestErrorCount == 0 ? errorCountCoorect : false;
+	PassOrFailTest( errorCountCoorect, "Shouldn't have incremented the error count.\n" );
+}
 
+CONDITION_TEST( CheckFalse_WhenTwoValuesAreNotEqual_ErrorCountIncrements ) {
+	bool errorCountCoorect = g_temperTestContext.currentTestErrorCount == 0 ? true : false;
+	TEMPER_CHECK_EQUAL( 4, 8 );
+	errorCountCoorect = g_temperTestContext.currentTestErrorCount == 1 ? errorCountCoorect : false;
+	PassOrFailTest( errorCountCoorect, "Should have incremented the error count to 1.\n" );
+}
 
 //----------------------------------------------------------
 // > CHECK FLOAT EQUAL
 //----------------------------------------------------------
 
-
+CONDITION_TEST( CheckFloatEqual_ValuesAroundUpperLowerBoundaries_ErrorCountIncrementsWhenExpected ) {
+	const float lhs = 5.0f;
+	bool errorCountCoorect = g_temperTestContext.currentTestErrorCount == 0 ? true : false;
+	TEMPER_CHECK_FLOAT_EQUAL( lhs, 5.0f );
+	errorCountCoorect = g_temperTestContext.currentTestErrorCount == 0 ? errorCountCoorect : false;
+	TEMPER_CHECK_FLOAT_EQUAL( lhs, 5.00001f );
+	errorCountCoorect = g_temperTestContext.currentTestErrorCount == 0 ? errorCountCoorect : false;
+	TEMPER_CHECK_FLOAT_EQUAL( lhs, 5.00002f );		// Above upper threshold
+	errorCountCoorect = g_temperTestContext.currentTestErrorCount == 1 ? errorCountCoorect : false;
+	TEMPER_CHECK_FLOAT_EQUAL( lhs, 4.99999f );
+	errorCountCoorect = g_temperTestContext.currentTestErrorCount == 1 ? errorCountCoorect : false;
+	TEMPER_CHECK_FLOAT_EQUAL( lhs, 4.99992f );		// Below lower threshold
+	errorCountCoorect = g_temperTestContext.currentTestErrorCount == 2 ? errorCountCoorect : false;
+	PassOrFailTest( errorCountCoorect, "Should have incremented the error count to 2.\n" );
+}
 
 //----------------------------------------------------------
 // > CHECK ALMOST EQUAL
 //----------------------------------------------------------
 
-
+CONDITION_TEST( CheckAlmostEqual_ValuesAroundUpperLowerBoundaries_ErrorCountIncrementsWhenExpected ) {
+	const float lhs = 5.0f;
+	const float epsilon = 7.5f;
+	bool errorCountCoorect = g_temperTestContext.currentTestErrorCount == 0 ? true : false;
+	TEMPER_CHECK_ALMOST_EQUAL( lhs, 5.0f, epsilon );
+	errorCountCoorect = g_temperTestContext.currentTestErrorCount == 0 ? errorCountCoorect : false;
+	TEMPER_CHECK_ALMOST_EQUAL( lhs, 12.5f, epsilon );
+	errorCountCoorect = g_temperTestContext.currentTestErrorCount == 0 ? errorCountCoorect : false;
+	TEMPER_CHECK_ALMOST_EQUAL( lhs, 12.6f, epsilon );		// Above upper threshold
+	errorCountCoorect = g_temperTestContext.currentTestErrorCount == 1 ? errorCountCoorect : false;
+	TEMPER_CHECK_ALMOST_EQUAL( lhs, -2.5f, epsilon );
+	errorCountCoorect = g_temperTestContext.currentTestErrorCount == 1 ? errorCountCoorect : false;
+	TEMPER_CHECK_ALMOST_EQUAL( lhs, -2.6f, epsilon );		// Below lower threshold
+	errorCountCoorect = g_temperTestContext.currentTestErrorCount == 2 ? errorCountCoorect : false;
+	PassOrFailTest( errorCountCoorect, "Should have incremented the error count to 2.\n" );
+}
 
 //----------------------------------------------------------
 // > CHECK NOT ALMOST EQUAL
 //----------------------------------------------------------
 
-
+CONDITION_TEST( CheckNotAlmostEqual_ValuesAroundUpperLowerBoundaries_ErrorCountIncrementsWhenExpected ) {
+	const float lhs = 5.0f;
+	const float epsilon = 7.5f;
+	bool errorCountCoorect = g_temperTestContext.currentTestErrorCount == 0 ? true : false;
+	TEMPER_CHECK_NOT_ALMOST_EQUAL( lhs, 5.0f, epsilon );
+	errorCountCoorect = g_temperTestContext.currentTestErrorCount == 1 ? errorCountCoorect : false;
+	TEMPER_CHECK_NOT_ALMOST_EQUAL( lhs, 12.5f, epsilon );
+	errorCountCoorect = g_temperTestContext.currentTestErrorCount == 2 ? errorCountCoorect : false;
+	TEMPER_CHECK_NOT_ALMOST_EQUAL( lhs, 12.6f, epsilon );		// Above upper threshold
+	errorCountCoorect = g_temperTestContext.currentTestErrorCount == 2 ? errorCountCoorect : false;
+	TEMPER_CHECK_NOT_ALMOST_EQUAL( lhs, -2.5f, epsilon );
+	errorCountCoorect = g_temperTestContext.currentTestErrorCount == 3 ? errorCountCoorect : false;
+	TEMPER_CHECK_NOT_ALMOST_EQUAL( lhs, -2.6f, epsilon );		// Below lower threshold
+	errorCountCoorect = g_temperTestContext.currentTestErrorCount == 3 ? errorCountCoorect : false;
+	PassOrFailTest( errorCountCoorect, "Should have incremented the error count to 3.\n" );
+}
 
 //----------------------------------------------------------
 
