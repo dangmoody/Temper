@@ -766,7 +766,7 @@ static uint32_t TemperGetPercentInternal( uint32_t yourValue, uint32_t yourMax )
 //----------------------------------------------------------
 
 static float TemperMaxfInternal( const float a, const float b ) {
-	return ( a <= b ) ? a : b;
+	return ( a >= b ) ? a : b;
 }
 
 //----------------------------------------------------------
