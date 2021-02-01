@@ -712,7 +712,9 @@ static temperTestContext_t		g_temperTestContext;
 	TEMPERDEV__EXTERN_C temperTestInfo_t TEMPERDEV__API TEMPERDEV__CONCAT( __temper_test_info_fetcher_, counter )( void ); \
 	temperTestInfo_t TEMPERDEV__CONCAT( __temper_test_info_fetcher_, counter )( void ) { \
 		TEMPERDEV__CONCAT( nameOfTestToCall, _ParametricTestInfoBinder )();/*Make it so we can grab the needed information out of the test function's global info*/\
+		TEMPERDEV__CONCAT( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.OnBeforeTest = TEMPERDEV__CONCAT( nameOfTestToCall, _GlobalParametricInfo ).OnBeforeTest; \
 		TEMPERDEV__CONCAT( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.TestFuncCallback = TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ); \
+		TEMPERDEV__CONCAT( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.OnAfterTest = TEMPERDEV__CONCAT( nameOfTestToCall, _GlobalParametricInfo ).OnAfterTest; \
 		TEMPERDEV__CONCAT( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.suiteNameStr = TEMPERDEV__CONCAT( nameOfTestToCall, _GlobalParametricInfo ).suiteNameStr; \
 		TEMPERDEV__CONCAT( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.testNameStr = #nameOfTestToCall; \
 		TEMPERDEV__CONCAT( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.testingFlag = TEMPERDEV__CONCAT( nameOfTestToCall, _GlobalParametricInfo ).testingFlag; \

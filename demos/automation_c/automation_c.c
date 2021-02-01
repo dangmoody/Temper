@@ -24,11 +24,23 @@ static uint32_t capturedSkipCount = 0;
 
 //----------------------------------------------------------
 
+//		static void DumpInfo(const char* prefix) {
+//			printf( "MIKE_HACK(%s): pass = %d/%d, fail = %d/%d, abort = %d/%d, skip = %d/%d\n",
+//					prefix,
+//					capturedPassCount, g_temperTestContext.testsPassed,
+//					capturedFailCount, g_temperTestContext.testsFailed,
+//					capturedAbortCount, g_temperTestContext.testsAborted,
+//					capturedSkipCount, g_temperTestContext.testsSkipped );
+//		}
+
+//----------------------------------------------------------
+
 static void CaptureTestCounts( void ) {
 	capturedPassCount = g_temperTestContext.testsPassed;
 	capturedFailCount = g_temperTestContext.testsFailed;
 	capturedAbortCount = g_temperTestContext.testsAborted;
 	capturedSkipCount = g_temperTestContext.testsSkipped;
+	//  DumpInfo( "CaptureCounts" ); // <--- HERE BE EXAMPLE - RUBER DUCK YOU FOOL
 }
 
 //----------------------------------------------------------
@@ -113,13 +125,15 @@ static void PassOrFailTest(const bool AllowPass, const char* message) {
 
 //----------------------------------------------------------
 
-#define RESULT_DEPENDANT_TEST( name, flag ) TEMPER_TEST_C( name, CaptureTestCounts, NULL, flag )
+#define RESULT_DEPENDANT_TEST( name, flag )				TEMPER_TEST_C( name, CaptureTestCounts, NULL, flag )
+#define CONDITION_TEST( testName )						TEMPER_SUITE_TEST( ConditionTests, testName, TEMPER_FLAG_SHOULD_RUN )
+#define RESULT_DEPDENDANT_TEST_PARAMETRIC( name )		TEMPER_PARAMETRIC_C( name, CaptureTestCounts, NULL, TEMPER_FLAG_SHOULD_RUN, void )
 
 //----------------------------------------------------------
 // EXCEL_TestName - When a test is marked as "Should Run" it runs
 //----------------------------------------------------------
 
-RESULT_DEPENDANT_TEST( GivenIsolatedTest_WhenDeclared_IsExecuted, TEMPER_FLAG_SHOULD_RUN ) {
+RESULT_DEPENDANT_TEST( IsolatedTest_WhenDeclared_IsExecuted, TEMPER_FLAG_SHOULD_RUN ) {
 	TEMPER_CHECK_TRUE( true );
 }
 
@@ -133,7 +147,7 @@ TEMPER_TEST( CheckAndCleanResults_0, TEMPER_FLAG_SHOULD_RUN ) {
 // EXCEL_TestName - If a test is flagged with Skip, total tests skipped increments
 //----------------------------------------------------------
 
-TEMPER_TEST( GivenIsolatedTest_WithSkipFlag_TriggersSkipCount, TEMPER_FLAG_SHOULD_SKIP ) {
+TEMPER_TEST( IsolatedTest_WithSkipFlag_TriggersSkipCount, TEMPER_FLAG_SHOULD_SKIP ) {
 	TEMPER_CHECK_TRUE_AM( false, "This test shouldn't have executed, it's flagged with Skip." );
 }
 
@@ -149,7 +163,7 @@ TEMPER_TEST( CheckAndCleanResults_1, TEMPER_FLAG_SHOULD_RUN ) {
 // EXCEL_TestName - If a test is flagged with Deprecated, total tests skipped increments
 //----------------------------------------------------------
 
-TEMPER_TEST( GivenIsolatedTest_WithDeprecatedFlag_TriggersSkipCount, TEMPER_FLAG_DEPRECATED ) {
+TEMPER_TEST( IsolatedTest_WithDeprecatedFlag_TriggersSkipCount, TEMPER_FLAG_DEPRECATED ) {
 	TEMPER_CHECK_TRUE_AM( false, "This test shouldn't have executed, it's flagged as Deprecated." );
 }
 
@@ -163,14 +177,11 @@ TEMPER_TEST( CheckAndCleanResults_2, TEMPER_FLAG_SHOULD_RUN ) {
 // EXCEL_TestName - When a parametric test is marked as "Should Run" then all invokes run
 //----------------------------------------------------------
 
-#define RESULT_DEPDENDANT_TEST_PARAMETRIC	TEMPER_PARAMETRIC
-
-RESULT_DEPDENDANT_TEST_PARAMETRIC( GivenParametricTest_WithRunFlag_IsExecuted, TEMPER_FLAG_SHOULD_RUN, void ) {
-	CaptureTestCounts();
+RESULT_DEPDENDANT_TEST_PARAMETRIC( ParametricTest_WithRunFlag_IsExecuted ) {
 	TEMPER_CHECK_TRUE( true );
 }
 
-TEMPER_INVOKE_PARAMETRIC_TEST( GivenParametricTest_WithRunFlag_IsExecuted );
+TEMPER_INVOKE_PARAMETRIC_TEST( ParametricTest_WithRunFlag_IsExecuted );
 
 TEMPER_TEST( CheckAndCleanResults_3, TEMPER_FLAG_SHOULD_RUN ) {
 	AssertResults( 1, 0, 0, 0 );
@@ -182,11 +193,11 @@ TEMPER_TEST( CheckAndCleanResults_3, TEMPER_FLAG_SHOULD_RUN ) {
 // EXCEL_TestName - When a parametric test is marked as "Should skip" then all invokes are skipped
 //----------------------------------------------------------
 
-TEMPER_PARAMETRIC( GivenParametricTest_WithDeprecatedFlag_TriggersSkipCount, TEMPER_FLAG_DEPRECATED, void ) {
+TEMPER_PARAMETRIC( ParametricTest_WithDeprecatedFlag_TriggersSkipCount, TEMPER_FLAG_DEPRECATED, void ) {
 	TEMPER_CHECK_TRUE_AM( false, "This test shouldn't have executed, it's flagged as Deprecated." );
 }
 
-TEMPER_INVOKE_PARAMETRIC_TEST( GivenParametricTest_WithDeprecatedFlag_TriggersSkipCount );
+TEMPER_INVOKE_PARAMETRIC_TEST( ParametricTest_WithDeprecatedFlag_TriggersSkipCount );
 
 TEMPER_TEST( CheckAndCleanResults_4, TEMPER_FLAG_SHOULD_RUN ) {
 	if ( g_temperTestContext.testsSkipped == 1 ) {
@@ -194,11 +205,11 @@ TEMPER_TEST( CheckAndCleanResults_4, TEMPER_FLAG_SHOULD_RUN ) {
 	}
 }
 
-TEMPER_PARAMETRIC( GivenParametricTest_WithSkipFlag_TriggersSkipCount, TEMPER_FLAG_SHOULD_SKIP, void ) {
+TEMPER_PARAMETRIC( ParametricTest_WithSkipFlag_TriggersSkipCount, TEMPER_FLAG_SHOULD_SKIP, void ) {
 	TEMPER_CHECK_TRUE_AM( false, "This test shouldn't have executed, it's flagged as Skipped." );
 }
 
-TEMPER_INVOKE_PARAMETRIC_TEST( GivenParametricTest_WithSkipFlag_TriggersSkipCount );
+TEMPER_INVOKE_PARAMETRIC_TEST( ParametricTest_WithSkipFlag_TriggersSkipCount );
 
 TEMPER_TEST( CheckAndCleanResults_5, TEMPER_FLAG_SHOULD_RUN ) {
 	if ( g_temperTestContext.testsSkipped == 1 ) {
@@ -216,7 +227,7 @@ typedef struct person_t {
 	uint32_t	age;
 } person_t;
 
-TEMPER_PARAMETRIC( GivenParametricTest_WhenDeclaredWithStructParm_StructParmIsValid, TEMPER_FLAG_SHOULD_RUN, person_t* person, const char* expectedName, const uint32_t expectedAge ) {
+TEMPER_PARAMETRIC( ParametricTest_WhenDeclaredWithStructParm_StructParmIsValid, TEMPER_FLAG_SHOULD_RUN, person_t* person, const char* expectedName, const uint32_t expectedAge ) {
 	// general data validation
 	TEMPER_CHECK_TRUE_AM( person != NULL, "person ptr inside \"%s\" is NULL.\n", __FUNCTION__ );
 	TEMPER_CHECK_TRUE_AM( person->name != NULL, "person->name ptr inside \"%s\" is NULL.\n", __FUNCTION__ );
@@ -226,16 +237,16 @@ TEMPER_PARAMETRIC( GivenParametricTest_WhenDeclaredWithStructParm_StructParmIsVa
 	TEMPER_CHECK_TRUE_AM( person->age == expectedAge, "person->age was expected to be \"%d\" but was actually \"%d\".\n", expectedAge, person->age );
 }
 
-TEMPER_INVOKE_PARAMETRIC_TEST( GivenParametricTest_WhenDeclaredWithStructParm_StructParmIsValid, &(person_t) { "Dan",     25  }, "Dan",     25  );
-TEMPER_INVOKE_PARAMETRIC_TEST( GivenParametricTest_WhenDeclaredWithStructParm_StructParmIsValid, &(person_t) { "Mike",    25  }, "Mike",    25  );
-TEMPER_INVOKE_PARAMETRIC_TEST( GivenParametricTest_WhenDeclaredWithStructParm_StructParmIsValid, &(person_t) { "Bilbo",   111 }, "Bilbo",   111 );
-TEMPER_INVOKE_PARAMETRIC_TEST( GivenParametricTest_WhenDeclaredWithStructParm_StructParmIsValid, &(person_t) { "Aragorn", 87  }, "Aragorn", 87  );
+TEMPER_INVOKE_PARAMETRIC_TEST( ParametricTest_WhenDeclaredWithStructParm_StructParmIsValid, &(person_t) { "Dan",     25  }, "Dan",     25  );
+TEMPER_INVOKE_PARAMETRIC_TEST( ParametricTest_WhenDeclaredWithStructParm_StructParmIsValid, &(person_t) { "Mike",    25  }, "Mike",    25  );
+TEMPER_INVOKE_PARAMETRIC_TEST( ParametricTest_WhenDeclaredWithStructParm_StructParmIsValid, &(person_t) { "Bilbo",   111 }, "Bilbo",   111 );
+TEMPER_INVOKE_PARAMETRIC_TEST( ParametricTest_WhenDeclaredWithStructParm_StructParmIsValid, &(person_t) { "Aragorn", 87  }, "Aragorn", 87  );
 
 //----------------------------------------------------------
 // EXCEL_TestName - When a test triggers any errors it increments the error count for the test correctly
 //----------------------------------------------------------
 
-TEMPER_TEST( GivenCheckTrue_WhenFails_ErrorCountIncrements, TEMPER_FLAG_SHOULD_RUN ) {
+TEMPER_TEST( CheckTrue_WhenFails_ErrorCountIncrements, TEMPER_FLAG_SHOULD_RUN ) {
 	bool countIsCorrect = true;
 	TEMPER_CHECK_TRUE_M( false, "We expect this test to fail.\n" );
 	countIsCorrect = g_temperTestContext.currentTestErrorCount == 1 ? countIsCorrect : false;
@@ -252,7 +263,7 @@ TEMPER_TEST( GivenCheckTrue_WhenFails_ErrorCountIncrements, TEMPER_FLAG_SHOULD_R
 // EXCEL_TestName - If a test triggered any errors, total tests failed increments
 //----------------------------------------------------------
 
-RESULT_DEPENDANT_TEST( GivenCheck_WhenErrorTriggered_FailsTest, TEMPER_FLAG_SHOULD_RUN ) {
+RESULT_DEPENDANT_TEST( TemperCheck_WhenErrorTriggered_FailsTest, TEMPER_FLAG_SHOULD_RUN ) {
 	TEMPER_CHECK_TRUE_M( false, "We expect this test to fail.\n" );
 }
 
@@ -266,7 +277,7 @@ TEMPER_TEST( CheckAndCleanResults_6, TEMPER_FLAG_SHOULD_RUN ) {
 // EXCEL_TestName - If a test triggered an aborts, total tests aborted increments
 //----------------------------------------------------------
 
-RESULT_DEPENDANT_TEST( GivenICheck_WhenAbortTriggered_AbortsTest, TEMPER_FLAG_SHOULD_RUN ) {
+RESULT_DEPENDANT_TEST( TemperCheck_WhenAbortTriggered_AbortsTest, TEMPER_FLAG_SHOULD_RUN ) {
 	TEMPER_CHECK_TRUE_AM( false, "We expect this test to abort.\n" );
 	TEMPER_CHECK_TRUE_M( false, "We shouldn't hit this. Asserted in the CheckAndClean.\n" );
 }
@@ -277,11 +288,24 @@ TEMPER_TEST( CheckAndCleanResults_7, TEMPER_FLAG_SHOULD_RUN ) {
 	}
 }
 
+RESULT_DEPDENDANT_TEST_PARAMETRIC( CheckTrue_WhenAbortTriggered_AbortsParametricTest ) {
+	TEMPER_CHECK_TRUE_AM( false, "We expect this test to abort.\n" );
+	TEMPER_CHECK_TRUE_M( false, "We shouldn't hit this. Asserted in the CheckAndClean.\n" );
+}
+
+TEMPER_INVOKE_PARAMETRIC_TEST( CheckTrue_WhenAbortTriggered_AbortsParametricTest );
+
+TEMPER_TEST( CheckAndCleanResults_8, TEMPER_FLAG_SHOULD_RUN ) {
+	if( AssertResults( 0, 1, 1, 0 ) ) {
+		AbsolvePreviousTest( ACCOUNT_FOR_ONE_ABORT );
+	}
+}
+
 //----------------------------------------------------------
 // EXCEL_TestName - When Temper has NO errors or aborts, the proposed error code is SUCCESS
 //----------------------------------------------------------
 
-TEMPER_TEST( GivenNoFailuresOrAborts_WhenExitCodeCalculated_ProvidesSuccessCode, TEMPER_FLAG_SHOULD_RUN ) {
+TEMPER_TEST( NoFailuresOrAborts_WhenExitCodeCalculated_ProvidesSuccessCode, TEMPER_FLAG_SHOULD_RUN ) {
 	CaptureTestCounts();
 	ClearTestCounts();
 	TEMPER_CHECK_EQUAL_M( TEMPERDEV__EXIT_SUCCESS, TemperCalculateExitCode(), "Expected the success code to be returned for no errors & no aborts" );
@@ -292,7 +316,7 @@ TEMPER_TEST( GivenNoFailuresOrAborts_WhenExitCodeCalculated_ProvidesSuccessCode,
 // EXCEL_TestName - When temper has one or more errors and no aborts, the proposed error code is FAIL
 //----------------------------------------------------------
 
-TEMPER_TEST( GivenFailures_WhenExitCodeCalculated_ProvidesFailureCode, TEMPER_FLAG_SHOULD_RUN ) {
+TEMPER_TEST( Failures_WhenExitCodeCalculated_ProvidesFailureCode, TEMPER_FLAG_SHOULD_RUN ) {
 	CaptureTestCounts();
 	ClearTestCounts();
 	g_temperTestContext.testsFailed = 1;
@@ -304,20 +328,13 @@ TEMPER_TEST( GivenFailures_WhenExitCodeCalculated_ProvidesFailureCode, TEMPER_FL
 // EXCEL_TestName - When temper has one or more aborts and no errors, the proposed error code is FAIL
 //----------------------------------------------------------
 
-TEMPER_TEST( GivenAborts_WhenExitCodeCalculated_ProvidesFailureCode, TEMPER_FLAG_SHOULD_RUN ) {
+TEMPER_TEST( Aborts_WhenExitCodeCalculated_ProvidesFailureCode, TEMPER_FLAG_SHOULD_RUN ) {
 	CaptureTestCounts();
 	ClearTestCounts();
 	g_temperTestContext.testsAborted = 1;
 	TEMPER_CHECK_EQUAL_M( TEMPERDEV__EXIT_FAILURE, TemperCalculateExitCode(), "Expected the failure code to be returned for there being aborts" );
 	RestoreCapturedTestCounts();
 }
-
-
-//----------------------------------------------------------
-// CONDITION TEST TOOLS
-//----------------------------------------------------------
-
-#define CONDITION_TEST( testName ) TEMPER_SUITE_TEST( ConditionTests, testName, TEMPER_FLAG_SHOULD_RUN )
 
 //----------------------------------------------------------
 // > CHECK TRUE
@@ -349,19 +366,6 @@ CONDITION_TEST( CheckTrue_LongTrueStatementParsed_ErrorCountStays ) {
 	TEMPER_CHECK_TRUE( ( ( 2 * 8 ) / 4 ) == 4 && 7 - 6 );
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 0 ? errorCountCorrect : false;
 	PassOrFailTest( errorCountCorrect, "Shouldn't have incremented the error count.\n" );
-}
-
-RESULT_DEPDENDANT_TEST_PARAMETRIC( GivenICheck_WhenAbortTriggered_AbortsParametricTest, TEMPER_FLAG_SHOULD_RUN, void ) {
-	TEMPER_CHECK_TRUE_AM( false, "We expect this test to abort.\n" );
-	TEMPER_CHECK_TRUE_M( false, "We shouldn't hit this. Asserted in the CheckAndClean.\n" );
-}
-
-TEMPER_INVOKE_PARAMETRIC_TEST( GivenICheck_WhenAbortTriggered_AbortsParametricTest );
-
-TEMPER_TEST( CheckAndCleanResults_8, TEMPER_FLAG_SHOULD_RUN ) {
-	if ( AssertResults( 0, 1, 1, 0 ) ) {
-		AbsolvePreviousTest( ACCOUNT_FOR_ONE_ABORT );
-	}
 }
 
 //----------------------------------------------------------
