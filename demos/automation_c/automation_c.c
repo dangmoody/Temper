@@ -24,14 +24,14 @@ static uint32_t capturedSkipCount = 0;
 
 //----------------------------------------------------------
 
-//		static void DumpInfo(const char* prefix) {
-//			printf( "MIKE_HACK(%s): pass = %d/%d, fail = %d/%d, abort = %d/%d, skip = %d/%d\n",
-//					prefix,
-//					capturedPassCount, g_temperTestContext.testsPassed,
-//					capturedFailCount, g_temperTestContext.testsFailed,
-//					capturedAbortCount, g_temperTestContext.testsAborted,
-//					capturedSkipCount, g_temperTestContext.testsSkipped );
-//		}
+static void DumpInfo(const char* prefix) {
+	printf( "INFO_DUMP(%s): pass = %d/%d, fail = %d/%d, abort = %d/%d, skip = %d/%d\n",
+			prefix,
+			capturedPassCount, g_temperTestContext.testsPassed,
+			capturedFailCount, g_temperTestContext.testsFailed,
+			capturedAbortCount, g_temperTestContext.testsAborted,
+			capturedSkipCount, g_temperTestContext.testsSkipped );
+}
 
 //----------------------------------------------------------
 
@@ -40,7 +40,7 @@ static void CaptureTestCounts( void ) {
 	capturedFailCount = g_temperTestContext.testsFailed;
 	capturedAbortCount = g_temperTestContext.testsAborted;
 	capturedSkipCount = g_temperTestContext.testsSkipped;
-	//  DumpInfo( "CaptureCounts" ); // <--- HERE BE EXAMPLE - RUBER DUCK YOU FOOL
+	DumpInfo( "CaptureCounts" );
 }
 
 //----------------------------------------------------------
