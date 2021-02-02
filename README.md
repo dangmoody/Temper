@@ -113,15 +113,15 @@ It's worth pointing out that all of these conditions have optional suffixes whic
 #### Examples of Suffixes:
 
 ```c
-TEMPER_CHECK_TRUE( 5 == 6 ); // Will just log a standard error when it fails
-TEMPER_CHECK_TRUE_M( 5 == 6, "Maths is broken." ); // Will print your message as well when it fails.
-TEMPER_CHECK_TRUE_A( 5 == 6 ); // Will just log a standard error and make the test exit early when it fails.
-TEMPER_CHECK_TRUE_AM( 5 == 6, "Maths is broken." ); // Will make your test exit early and print your messsage.
+TEMPER_CHECK_TRUE( 5 == 6 ); // When this fails will log an error showing the condition on the file and line where if failed.
+TEMPER_CHECK_TRUE_M( 5 == 6, "Maths is broken." ); // When this fails will log an error showing the condition on the file and line where it failed, along with the error message "Maths is broken".
+TEMPER_CHECK_TRUE_A( 5 == 6 ); // Same as the TEMPER_CHECK_TRUE example, except it will also abort the test on failure.
+TEMPER_CHECK_TRUE_AM( 5 == 6, "Maths is broken." ); // Same as the example above, except it will log the error message "Maths is broken" along with the condition on the file and line where it failed.
 ```
 
 ## Overriding internal functions
 
-The `g_temperTestContext` contains a member called `callbacks` which, in turn, contains a set of functions that you can use to override Temper's default functionality.  This can be used to help hook Temper into your codebase.
+Temper has a number of user-overridable macros (E.G.: `TEMPERDEV__GET_PROC_ADDRESS`) which you can use to help hook Temper into your own codebase.
 
 If you are running on a platform that **ISN'T** Windows, Mac OS, or Linux then you will definitely want to override these functions as some of Temper's internal functions make calls to their respective OS-level API.
 
