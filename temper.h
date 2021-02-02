@@ -29,10 +29,95 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
-TODO: documentation here
+CONTENTS:
+	1. INTRO
+	2. INSTALLATION
+	3. QUICK START GUIDE
+	4. COMMAND LINE ARGS
+	5. CONTRIBUTING
+	6. CREDITS
+	7. CHANGELOG
 
 
-Changelog:
+1. INTRO
+The new and improved C99, single-header-only, unit testing framework.
+
+Distributed under the MIT license.  See LICENSE file for details.
+
+Features:
+	- Automatic test registration at compile time, simply write your test and it will get called for you.
+	- Parametric tests.
+	- Early exits for tests and a bunch of new condition macros.
+	- Handling errors from your program's log output (requires a bit of extra work on your part). `// DM: I'm thinking about this`
+	- Low friction, easily overridable functions to help hook Temper into your codebase.
+	- Support for Clang, GCC, and MSVC across Windows, Mac OS, and Linux on x64 ISAs (support for ARM in progress).
+
+It's not a new feature but worth stressing. It's still just the one header file.  Drop it into your project, tell it to run all tests somewhere in code and you're good to go! And once again; it's all written in C99 compliant code.
+
+
+2. INSTALLATION
+Download the latest release from the GitHub repository's release tab (https://github.com/dangmoody/Tantrum/releases/latest) and include `temper.h`.
+
+
+3. QUICK START GUIDE
+	#include <temper.h>
+
+	// write some tests
+
+	int main( int argc, char** argv )
+	{
+		TEMPER_RUN( argc, argv ); // Runs all your tests - parse 0 and NULL as parameters if you don't use start Args
+		return TEMPER_GET_EXIT_CODE(); // Fetches your return code
+	}
+
+On Windows and Mac OS you shouldn't need to do anything extra on your part to get Temper to compile correctly.  There should be no other dependencies that are required.  If you find that there are, please submit a bug report (https://github.com/dangmoody/Tantrum/issues).
+
+If you are compiling Temper on Linux and you are NOT overriding the default internal functions then you will need to make sure you pass the following arguments to your compiler/linker:
+* `-ldl` - required if you're not overriding the `LoadEXEHandle()` and `UnloadEXEHandle()` functions.
+* `-lpthread` - required if you're not overriding the `RunTestThread()` function.
+* `--export-dynamic` - or some other equivalent, required to allow the compiler to export the test functions so they can be called dynamically by Temper at runtime.
+
+When compiled, this will then produce an executable that will run all tests you have defined and return `TEMPDERDEV__EXIT_SUCCESS` (overridable) if there were no errors.  If there were errors then the program will return `TEMPDERDEV__EXIT_FAILURE` (overridable).
+
+
+4. COMMAND LINE ARGS
+Temper supports the following command line arguments:
+
+	[-h|--help]
+		Shows this help and then exits.
+
+	-t <test>
+		Only run the test with the given name.
+
+	-s <suite>
+		Only run tests in the suite with the given name.
+
+	-p
+		Enable partial filtering, which will only run tests and suites that contain the text specified in the filters.
+
+	--time-unit [seconds|ms|us|ns|clocks]
+		Set the units to measure test times in.
+		The default is microseconds.
+
+
+5. CONTRIBUTING
+Yes!
+
+If you want to submit an idea/bug then use the GitHub issue tracker (https://github.com/dangmoody/Tantrum/issues).
+
+If you want to submit code then we are open to pull requests.  See contributing.md for details.
+
+
+6. CREDITS
+Programming:
+	Dan Moody
+	Mike Young
+
+Special Thanks:
+	Zack Dutton - bug reports and testing
+
+
+7. CHANGELOG
 v2.0.0, <RELEASE DATE HERE>:
 	* Nearly everything has been completely re-written from scratch.
 	* Tests are now self-registering.  All you need to do now is write the test code and the tests will get called automatically for you (unless the test is marked as skipped).
@@ -45,6 +130,7 @@ v2.0.0, <RELEASE DATE HERE>:
 		* When enabled, will search for suites/tests that only contain the filter given instead of searching for an exact match.
 		* Disabled by default.  Use `-p` command line argument to enable.
 	* Added self-testing functionality (TO BE USED ONLY FOR TEMPER DEVELOPERS).
+	* Removed `TEMPER_DEFS` in favour of `TEMPER_RUN( argc, argv ) which you call inside main()`.
 	* Tests now run in their own thread.
 		* This allows tests to always exit even if a test is aborted when running code not directly inside the test function.
 	* Made various parts of the internal API extendable/overridable to help hook Temper into your codebase.
@@ -54,7 +140,7 @@ v2.0.0, <RELEASE DATE HERE>:
 		* If you want a test to exit if it fails use the `_A` suffix on your test function.
 	* Colored text console output is now always on.
 		* Therefore the command line argument `-c` has been removed.
-	* Much better internal API.
+	* Removed `TEMPER_SUITE_EXTERN` and `TEMPER_TEST_EXTERN` since there is now no need for them.
 
 v1.1.1, 1st October 2019:
 	* Fix bug when parsing the --time-unit command line argument.
@@ -390,14 +476,17 @@ do { \
 #define TEMPER_GET_TIMESTAMP				TemperGetTimestampInternal
 #endif
 
+// The code that gets returned if all tests passed.
 #ifndef TEMPERDEV__EXIT_SUCCESS
 #define TEMPERDEV__EXIT_SUCCESS				EXIT_SUCCESS
 #endif
 
+// The code that gets returned if at least one test failed.
 #ifndef TEMPERDEV__EXIT_FAILURE
 #define TEMPERDEV__EXIT_FAILURE				EXIT_FAILURE
 #endif
 
+// Mainly used to avoid 'unused variable' warnings generated by compilers.
 #ifndef TEMPERDEV__UNUSED
 #define TEMPERDEV__UNUSED( x )				( (void) x )
 #endif

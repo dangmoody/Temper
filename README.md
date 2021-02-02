@@ -46,7 +46,7 @@ If you are compiling Temper on Linux and you are NOT overriding the default inte
 - `-lpthread` - required if you're not overriding the `RunTestThread()` function.
 - `--export-dynamic` - or some other equivalent, required to allow the compiler to export the test functions so they can be called dynamically by Temper at runtime.
 
-When compiled, this will then produce an executable that will run all tests you have defined and return `EXIT_SUCCESS` (by default) if there were no errors.  If there were errors then the program will return `EXIT_FAILURE` (by default).
+When compiled, this will then produce an executable that will run all tests you have defined and return `TEMPDERDEV__EXIT_SUCCESS` (overridable) if there were no errors.  If there were errors then the program will return `TEMPDERDEV__EXIT_FAILURE` (overridable).
 
 #### Writing tests
 
@@ -127,6 +127,8 @@ If you are running on a platform that **ISN'T** Windows, Mac OS, or Linux then y
 
 ## Command line arguments
 
+Temper supports the following command line arguments:
+
 ```
 [-h|--help]
 	Shows this help and then exits.
@@ -153,6 +155,11 @@ If you want to submit an idea/bug then use the [GitHub issue tracker](https://gi
 
 If you want to submit code then we are open to pull requests.  See [contributing.md](https://github.com/dangmoody/Tantrum/blob/master/doc/how_to_contribute.md) for details.
 
-## Special thanks to:
+## Credits
+
+* Dan Moody
+* Mike Young
+
+#### Special thanks to:
 
 * Zack Dutton - Bug reports and testing.
