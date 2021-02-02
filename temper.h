@@ -375,14 +375,6 @@ do { \
 #define TEMPER_CHECK_NOT_ALMOST_EQUAL_AM( conditionA, conditionB, tolerance, message, ... ) \
 	TemperTestTrueInternal( !TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_AM(" #conditionA ", " #conditionB ", " #tolerance ", ...)", true, __FILE__, __LINE__, message, __VA_ARGS__ )
 
-//----------------------------------------------------------
-
-// Returns a timestamp from the CPU in the 'timeUnit' format.
-// See temperTimeUnit_t for time units.
-#ifndef TEMPER_GET_TIMESTAMP
-#define TEMPER_GET_TIMESTAMP( timeUnit )	TemperGetTimestampInternal( timeUnit )
-#endif
-
 
 //==========================================================
 // User-Overridable Preprocessor defines
@@ -391,6 +383,12 @@ do { \
 // But you can override them to help hook Temper into your codebase.
 // This must be done before including temper.h
 //==========================================================
+
+// Returns a timestamp from the CPU in the 'timeUnit' format.
+// See temperTimeUnit_t for time units.
+#ifndef TEMPER_GET_TIMESTAMP
+#define TEMPER_GET_TIMESTAMP				TemperGetTimestampInternal
+#endif
 
 #ifndef TEMPERDEV__EXIT_SUCCESS
 #define TEMPERDEV__EXIT_SUCCESS				EXIT_SUCCESS
