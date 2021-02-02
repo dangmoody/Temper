@@ -12,6 +12,9 @@
 # ignore bin folder
 bin/
 
+# ignore releases folder
+releases/
+
 # ignore most .exes
 *.exe
 
