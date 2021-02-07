@@ -488,7 +488,6 @@ int main( int argc, char** argv ) {
 	TEMPER_RUN( argc, argv );
 	int exitCode = TEMPER_GET_EXIT_CODE();
 	printf( "\nAutomation returned: %d.\n", exitCode );
-	getchar();
 	return exitCode;
 }
 

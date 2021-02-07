@@ -39,7 +39,7 @@ workspace( "Temper" )
 88888888Y"'     `"Ybbd8"'  88      88      88   `"YbbdP"'   `"YbbdP"'  
 ]]
 
-function set_binaries_and_build_commands( demo_name, compiler, compiler_define )
+function set_binaries_and_build_commands( demo_name, language_file_ext, compiler, compiler_define )
 	if ( compiler ~= "clang" ) and ( compiler ~= "clang++" ) and ( compiler ~= "gcc" ) and ( compiler ~= "g++" ) and ( compiler ~= "msvc" ) then
 		print( "ERROR: Compiler \"" .. compiler .. "\" is not a valid compiler name to generate a project for.  Please use one of the correct ones.\n" )
 		return
@@ -50,11 +50,11 @@ function set_binaries_and_build_commands( demo_name, compiler, compiler_define )
 	if ( compiler == "msvc" ) then
 		filter ( "platforms:win64-msvc" )
 			buildcommands (
-				"..\\" .. g_folder_scripts .. "build_msvc.bat --output " .. demo_name .. ".exe" .. " --config %{cfg.buildcfg} --source " .. g_folder_demos .. demo_name .. "\\" .. demo_name .. ".c"
+				"..\\" .. g_folder_scripts .. "build_msvc.bat --output " .. demo_name .. ".exe" .. " --config %{cfg.buildcfg} --source " .. g_folder_demos .. demo_name .. "\\" .. demo_name .. "." .. language_file_ext
 			)
 
 			rebuildcommands (
-				"..\\" .. g_folder_scripts .. "build_msvc.bat --output " .. demo_name .. ".exe" .. " --config %{cfg.buildcfg} --source " .. g_folder_demos .. demo_name .. "\\" .. demo_name .. ".c"
+				"..\\" .. g_folder_scripts .. "build_msvc.bat --output " .. demo_name .. ".exe" .. " --config %{cfg.buildcfg} --source " .. g_folder_demos .. demo_name .. "\\" .. demo_name .. "." .. language_file_ext
 			)
 
 			cleancommands (
@@ -73,11 +73,11 @@ function set_binaries_and_build_commands( demo_name, compiler, compiler_define )
 	else
 		filter ( "platforms:win64-" .. compiler )
 			buildcommands (
-				"..\\" .. g_folder_scripts .. "build_clang_gcc.bat --output " .. demo_name .. ".exe" .. " --compiler " .. compiler .. " --config %{cfg.buildcfg} --source " .. g_folder_demos .. demo_name .. "\\" .. demo_name .. ".c"
+				"..\\" .. g_folder_scripts .. "build_clang_gcc.bat --output " .. demo_name .. ".exe" .. " --compiler " .. compiler .. " --config %{cfg.buildcfg} --source " .. g_folder_demos .. demo_name .. "\\" .. demo_name .. "." .. language_file_ext
 			)
 
 			rebuildcommands (
-				"..\\" .. g_folder_scripts .. "build_clang_gcc.bat --output " .. demo_name .. ".exe" .. " --compiler " .. compiler .. " --config %{cfg.buildcfg} --source " .. g_folder_demos .. demo_name .. "\\" .. demo_name .. ".c"
+				"..\\" .. g_folder_scripts .. "build_clang_gcc.bat --output " .. demo_name .. ".exe" .. " --compiler " .. compiler .. " --config %{cfg.buildcfg} --source " .. g_folder_demos .. demo_name .. "\\" .. demo_name .. "." .. language_file_ext
 			)
 
 			cleancommands (
@@ -119,11 +119,14 @@ function make_demo_project( demo_name )
 
 	debugdir( "$(SolutionDir)..\\" )
 
-	set_binaries_and_build_commands( demo_name, "clang", "__clang__" )
-	set_binaries_and_build_commands( demo_name, "clang++", "__clang__" )
-	set_binaries_and_build_commands( demo_name, "gcc", "__GNUC__" )
-	set_binaries_and_build_commands( demo_name, "g++", "__GNUC__" )
-	set_binaries_and_build_commands( demo_name, "msvc", "" )
+	set_binaries_and_build_commands( demo_name, "c",   "clang",   "__clang__" )
+    set_binaries_and_build_commands( demo_name, "cpp", "clang++", "__clang__" )
+
+    set_binaries_and_build_commands( demo_name, "c",   "gcc",     "__GNUC__" )
+    set_binaries_and_build_commands( demo_name, "cpp", "g++",     "__GNUC__" )
+
+    set_binaries_and_build_commands( demo_name, "c",   "msvc",    "" )
+    set_binaries_and_build_commands( demo_name, "cpp", "msvc",    "" )
 
 	filter "configurations:debug"
 		defines {
