@@ -652,6 +652,7 @@ typedef struct temperTestInfo_t {
 	temperTestCallbackOnAfterTest_t		OnAfterTest;
 	double								testTimeTaken;
 	temperTestFlag_t					testingFlag;
+	uint32_t							pad0;
 	const char*							testNameStr;
 	const char*							suiteNameStr;
 } temperTestInfo_t;
