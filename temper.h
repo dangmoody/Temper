@@ -201,8 +201,7 @@ extern "C" {
 #define _POSIX_C_SOURCE 200112L
 #endif
 
-#if defined( _WIN32 )
-#elif defined( __APPLE__ ) || defined( __linux__ )
+#if defined( __APPLE__ ) || defined( __linux__ )
 #include <unistd.h>
 #include <dlfcn.h>			// dlopen, dlsym, dlclose
 #include <errno.h>
@@ -843,7 +842,9 @@ int		TemperExecuteAllTestsWithArgumentsInternal( int argc, char** argv );
 //----------------------------------------------------------
 
 #ifdef TEMPER_IMPLEMENTATION
+#ifdef _WIN32
 #include <Windows.h>
+#endif
 
 static void TemperSetTextColorInternal( const temperTextColor_t color ) {
 #if defined( _WIN32 )
