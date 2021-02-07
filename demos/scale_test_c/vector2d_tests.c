@@ -1,4 +1,6 @@
+#define TEMPER_IMPLEMENTATION
 #include "../../temper.h"
+
 #include "vector2d.h"
 #include "vector2d.c"
 #pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"

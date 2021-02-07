@@ -21,11 +21,14 @@ It's not a new feature but worth stressing. It's still just the one header file.
 
 ## Installation
 
-Download the latest release from the [releases](https://github.com/dangmoody/Tantrum/releases/latest) tab and include `temper.h`.
+Download the latest release from the [releases](https://github.com/dangmoody/Tantrum/releases/latest) tab.
+
+Include `temper.h` and define `TEMPER_IMPLEMENTATION` in one source file (just like the [stb libraries](https://github.com/nothings/stb)).
 
 ## Quick start guide:
 
 ```c
+#define TEMPER_IMPLEMENTATION
 #include <temper.h>
 
 // write some tests

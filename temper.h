@@ -202,7 +202,6 @@ extern "C" {
 #endif
 
 #if defined( _WIN32 )
-#include <Windows.h>
 #elif defined( __APPLE__ ) || defined( __linux__ )
 #include <unistd.h>
 #include <dlfcn.h>			// dlopen, dlsym, dlclose
@@ -569,10 +568,67 @@ do { \
 
 
 //==========================================================
-// INTERNAL TYPES
+// Internal API
+//
+// You as the user probably don't want to be directly touching any of this.
 //==========================================================
 
+#if defined( _WIN32 )
+#define TEMPERDEV__MAX_PATH		4096	// DM!!! NO! probably malloc this!
+#elif defined( __APPLE__ ) || defined( __linux__ )	// _WIN32
+#define TEMPERDEV__MAX_PATH		PATH_MAX
+#else	// _WIN32
+#error Uncrecognised platform.  It appears Temper does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Temper/issues
+#endif	// _WIN32
+
+//----------------------------------------------------------
+
 typedef uint32_t temperBool32;
+
+//----------------------------------------------------------
+
+typedef enum temperTimeUnit_t {
+	TEMPER_TIME_UNIT_CLOCKS	= 1,
+	TEMPER_TIME_UNIT_NS,
+	TEMPER_TIME_UNIT_US,
+	TEMPER_TIME_UNIT_MS,
+	TEMPER_TIME_UNIT_SECONDS
+} temperTimeUnit_t;
+
+//----------------------------------------------------------
+
+typedef struct temperTestContext_t {
+#ifdef _WIN32
+	int64_t				timestampFrequency;
+#endif
+	double				currentTestStartTime;
+	double				currentTestEndTime;
+	double				totalExecutionTime;
+	uint32_t			testsPassed;
+	uint32_t			testsFailed;
+	uint32_t			testsAborted;
+	uint32_t			testsSkipped;
+	uint32_t			totalTestsDeclared; // Gets set in the main function with a preprocessor
+	uint32_t			totalTestsFoundWithFilters;
+	uint32_t			totalTestsExecuted;
+	uint32_t			currentTestErrorCount;
+	int32_t				exitCode;
+	temperBool32		currentTestWasAborted;
+	temperBool32		partialFilter;
+	temperTimeUnit_t	timeUnit;
+#ifdef UNICODE
+	wchar_t				programName[TEMPERDEV__MAX_PATH];
+#else
+	char				programName[TEMPERDEV__MAX_PATH];
+#endif
+	const char*			suiteFilterPrevious;
+	const char*			suiteFilter;
+	const char*			testFilter;
+} temperTestContext_t;
+
+//----------------------------------------------------------
+
+static temperTestContext_t		g_temperTestContext;
 
 //----------------------------------------------------------
 
@@ -606,61 +662,6 @@ typedef struct temperTestInfo_t {
 typedef temperTestInfo_t( *temperTestInfoFetcherFunc_t )( void );
 
 //----------------------------------------------------------
-
-typedef enum temperTimeUnit_t {
-	TEMPER_TIME_UNIT_CLOCKS	= 1,
-	TEMPER_TIME_UNIT_NS,
-	TEMPER_TIME_UNIT_US,
-	TEMPER_TIME_UNIT_MS,
-	TEMPER_TIME_UNIT_SECONDS
-} temperTimeUnit_t;
-
-//----------------------------------------------------------
-
-#if defined( _WIN32 )
-#define TEMPERDEV__MAX_PATH		MAX_PATH
-#elif defined( __APPLE__ ) || defined( __linux__ )	// _WIN32
-#define TEMPERDEV__MAX_PATH		PATH_MAX
-#else	// _WIN32
-#error Uncrecognised platform.  It appears Temper does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Temper/issues
-#endif	// _WIN32
-
-//----------------------------------------------------------
-
-typedef struct temperTestContext_t {
-#ifdef _WIN32
-	LARGE_INTEGER		timestampFrequency;
-#endif
-	double				currentTestStartTime;
-	double				currentTestEndTime;
-	double				totalExecutionTime;
-	uint32_t			testsPassed;
-	uint32_t			testsFailed;
-	uint32_t			testsAborted;
-	uint32_t			testsSkipped;
-	uint32_t			totalTestsDeclared; // Gets set in the main function with a preprocessor
-	uint32_t			totalTestsFoundWithFilters;
-	uint32_t			totalTestsExecuted;
-	uint32_t			currentTestErrorCount;
-	int32_t				exitCode;
-	temperBool32		currentTestWasAborted;
-	temperBool32		partialFilter;
-	temperTimeUnit_t	timeUnit;
-	char				programName[TEMPERDEV__MAX_PATH];
-	const char*			suiteFilterPrevious;
-	const char*			suiteFilter;
-	const char*			testFilter;
-} temperTestContext_t;
-
-//==========================================================
-// GLOBALS
-//==========================================================
-
-static temperTestContext_t		g_temperTestContext;
-
-//==========================================================
-// PREPROCESSORS - TEMPER INTERNAL
-//==========================================================
 
 #define TEMPERDEV__BIT( x )		( 1 << ( x ) )
 
@@ -811,11 +812,7 @@ static temperTestContext_t		g_temperTestContext;
 	/* leave this at the end so the macro can end with a semicolon */ \
 	temperTestInfo_t TEMPERDEV__API TEMPERDEV__CONCAT( __temper_test_info_fetcher_, counter )( void )
 
-//==========================================================
-// Internal Functions
-//
-// You as the user probably don't want to be directly touching these.
-//==========================================================
+//----------------------------------------------------------------
 
 #if defined( _WIN32 )
 #define TEMPERDEV__COLOR_DEFAULT	0x07
@@ -834,6 +831,19 @@ typedef const char*					temperTextColor_t;
 #endif // defined( _WIN32 )
 
 //----------------------------------------------------------
+
+void	TemperTestTrueInternal( const bool condition, const char* conditionStr, const bool abortOnFail, const char* file, const uint32_t line, const char* fmt, ... );
+
+void	TemperSetupInternal( void );
+
+int		TemperExecuteAllTestsInternal( void );
+
+int		TemperExecuteAllTestsWithArgumentsInternal( int argc, char** argv );
+
+//----------------------------------------------------------
+
+#ifdef TEMPER_IMPLEMENTATION
+#include <Windows.h>
 
 static void TemperSetTextColorInternal( const temperTextColor_t color ) {
 #if defined( _WIN32 )
@@ -943,10 +953,10 @@ static double TemperGetTimestampInternal( const temperTimeUnit_t timeUnit ) {
 
 	switch ( timeUnit ) {
 		case TEMPER_TIME_UNIT_CLOCKS:	return ( (double) now.QuadPart );
-		case TEMPER_TIME_UNIT_NS:		return ( (double) ( now.QuadPart * 1000000000 ) / (double) g_temperTestContext.timestampFrequency.QuadPart );
-		case TEMPER_TIME_UNIT_US:		return ( (double) ( now.QuadPart * 1000000 ) / (double) g_temperTestContext.timestampFrequency.QuadPart );
-		case TEMPER_TIME_UNIT_MS:		return ( (double) ( now.QuadPart * 1000 ) / (double) g_temperTestContext.timestampFrequency.QuadPart );
-		case TEMPER_TIME_UNIT_SECONDS:	return ( (double) ( now.QuadPart ) / (double) g_temperTestContext.timestampFrequency.QuadPart );
+		case TEMPER_TIME_UNIT_NS:		return ( (double) ( now.QuadPart * 1000000000 ) / (double) g_temperTestContext.timestampFrequency );
+		case TEMPER_TIME_UNIT_US:		return ( (double) ( now.QuadPart * 1000000 ) / (double) g_temperTestContext.timestampFrequency );
+		case TEMPER_TIME_UNIT_MS:		return ( (double) ( now.QuadPart * 1000 ) / (double) g_temperTestContext.timestampFrequency );
+		case TEMPER_TIME_UNIT_SECONDS:	return ( (double) ( now.QuadPart ) / (double) g_temperTestContext.timestampFrequency );
 	}
 #elif defined( __APPLE__ ) || defined( __linux__ )	// defined( _WIN32 )
 	struct timespec now;
@@ -965,6 +975,7 @@ static double TemperGetTimestampInternal( const temperTimeUnit_t timeUnit ) {
 #error Uncrecognised platform.  It appears Temper does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Temper/issues
 #endif	// defined( _WIN32 )
 
+	// never gets here
 	return 0.0;
 }
 
@@ -1162,7 +1173,7 @@ static void TemperUnloadEXEHandleInternal( void* handle ) {
 
 static bool TemperGetFullEXEPathInternal( void ) {
 #if defined( _WIN32 )
-	DWORD fullExePathLength = GetModuleFileName( NULL, g_temperTestContext.programName, MAX_PATH );
+	DWORD fullExePathLength = GetModuleFileName( NULL, g_temperTestContext.programName, TEMPERDEV__MAX_PATH );
 	if ( fullExePathLength == 0 ) {
 		TEMPERDEV__LOG_ERROR( "WinAPI call GetModuleFileName() failed: 0x%lX\n", GetLastError() );
 		return false;
@@ -1220,6 +1231,9 @@ static const char* TemperGetTimeUnitStringInternal( const temperTimeUnit_t timeU
 		case TEMPER_TIME_UNIT_MS:		return "milliseconds";
 		case TEMPER_TIME_UNIT_SECONDS:	return "seconds";
 	}
+
+	// never gets here
+	return NULL;
 }
 
 //----------------------------------------------------------
@@ -1369,7 +1383,7 @@ static void TemperAbortTestOnFailInternal( const bool abortOnFail ) {
 
 //----------------------------------------------------------
 
-static void TemperTestTrueInternal( const bool condition, const char* conditionStr, const bool abortOnFail, const char* file, const uint32_t line, const char* fmt, ... ) {
+void TemperTestTrueInternal( const bool condition, const char* conditionStr, const bool abortOnFail, const char* file, const uint32_t line, const char* fmt, ... ) {
 	if ( !( condition ) ) {
 		g_temperTestContext.currentTestErrorCount += 1;
 
@@ -1432,9 +1446,12 @@ static void TemperOnAllTestsFinishedInternal( void ) {
 // such as ensuring it's only ever called/used once and thowing
 // an error if it isn't. Maybe also (SOMEHOW) ensuring no test
 // ever has a higher count.
-static void TemperSetupInternal( void ) {
+void TemperSetupInternal( void ) {
 #ifdef _WIN32
-	QueryPerformanceFrequency( &g_temperTestContext.timestampFrequency );
+	LARGE_INTEGER frequency;
+	QueryPerformanceFrequency( &frequency );
+
+	g_temperTestContext.timestampFrequency = frequency.QuadPart;
 #endif
 
 	g_temperTestContext.currentTestStartTime = 0.0;
@@ -1493,13 +1510,13 @@ static bool TemperIsTestFilteredInternal( const char* testName ) {
 
 //----------------------------------------------------------
 
-static int TemperCalculateExitCode() {
+static int TemperCalculateExitCode( void ) {
 	return g_temperTestContext.testsFailed == 0 && g_temperTestContext.testsAborted == 0 ? TEMPERDEV__EXIT_SUCCESS : TEMPERDEV__EXIT_FAILURE;
 }
 
 //----------------------------------------------------------
 
-static int TemperExecuteAllTestsInternal() {
+int TemperExecuteAllTestsInternal( void ) {
 	if ( !TEMPERDEV__GET_FULL_EXE_PATH() ) {
 		return TEMPERDEV__EXIT_FAILURE;
 	}
@@ -1570,7 +1587,7 @@ static int TemperExecuteAllTestsInternal() {
 
 //----------------------------------------------------------
 
-static int TemperExecuteAllTestsWithArgumentsInternal( int argc, char** argv ) {
+int TemperExecuteAllTestsWithArgumentsInternal( int argc, char** argv ) {
 	if ( !TemperHandleCommandLineArgumentsInternal( argc, argv ) ) {
 		return TEMPERDEV__EXIT_FAILURE;
 	}
@@ -1579,6 +1596,8 @@ static int TemperExecuteAllTestsWithArgumentsInternal( int argc, char** argv ) {
 }
 
 //----------------------------------------------------------
+
+#endif // TEMPER_IMPLEMENTATION
 
 #if defined( __linux__ ) || defined( __APPLE__ )
 #pragma pop_macro( "_POSIX_C_SOURCE" )
