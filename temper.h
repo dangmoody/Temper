@@ -751,6 +751,7 @@ typedef temperTestInfo_t( *temperTestInfoFetcherFunc_t )( void );
 		TEMPERDEV__CONCAT( testName, _FuncType )	TestFuncCallback; \
 		temperTestCallbackOnAfterTest_t				OnAfterTest; \
 		temperTestFlag_t							testingFlag; \
+		uint32_t									pad0; \
 		const char*									testNameStr; \
 		const char*									suiteNameStr; \
 	} TEMPERDEV__CONCAT( testName, _ParametricTestInfo ); \
