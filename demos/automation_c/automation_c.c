@@ -2,7 +2,9 @@
 #include "../../temper.h"
 
 #ifdef __clang__
+#pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
+#pragma clang diagnostic ignored "-Wpadded"
 #endif
 
 //----------------------------------------------------------
@@ -13,11 +15,11 @@
 
 //----------------------------------------------------------
 
-typedef enum AutomationAccountFor_t {
+typedef enum automationAccountFor_t {
 	ACCOUNT_FOR_ONE_FAILURE = 0,
 	ACCOUNT_FOR_ONE_ABORT,
 	ACCOUNT_FOR_ONE_SKIP
-} AutomationAccountFor_t;
+} automationAccountFor_t;
 
 //----------------------------------------------------------
 
@@ -90,7 +92,7 @@ static void AbsolveTest( const bool condition ) {
 
 //----------------------------------------------------------
 
-static void AbsolvePreviousTest( const AutomationAccountFor_t claim ) {
+static void AbsolvePreviousTest( const automationAccountFor_t claim ) {
 	TemperSetTextColorInternal( TEMPERDEV__COLOR_GREEN );
 
 	if ( claim == ACCOUNT_FOR_ONE_FAILURE ) {
@@ -494,3 +496,7 @@ int main( int argc, char** argv ) {
 }
 
 //----------------------------------------------------------
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
