@@ -1,7 +1,9 @@
 #define TEMPER_IMPLEMENTATION
 #include "../../temper.h"
 
+#ifdef __clang__
 #pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
+#endif
 
 //----------------------------------------------------------
 
@@ -129,7 +131,7 @@ static void PassOrFailTest(const bool AllowPass, const char* message) {
 
 #define RESULT_DEPENDANT_TEST( name, flag )				TEMPER_TEST_C( name, CaptureTestCounts, NULL, flag )
 #define CONDITION_TEST( testName )						TEMPER_SUITE_TEST( ConditionTests, testName, TEMPER_FLAG_SHOULD_RUN )
-#define RESULT_DEPDENDANT_TEST_PARAMETRIC( name )		TEMPER_PARAMETRIC_C( name, CaptureTestCounts, NULL, TEMPER_FLAG_SHOULD_RUN, void )
+#define RESULT_DEPDENDANT_TEST_PARAMETRIC( name, ... )	TEMPER_PARAMETRIC_C( name, CaptureTestCounts, NULL, TEMPER_FLAG_SHOULD_RUN, __VA_ARGS__ )
 
 //----------------------------------------------------------
 // EXCEL_TestName - When a test is marked as "Should Run" it runs
@@ -179,11 +181,11 @@ TEMPER_TEST( CheckAndCleanResults_2, TEMPER_FLAG_SHOULD_RUN ) {
 // EXCEL_TestName - When a parametric test is marked as "Should Run" then all invokes run
 //----------------------------------------------------------
 
-RESULT_DEPDENDANT_TEST_PARAMETRIC( ParametricTest_WithRunFlag_IsExecuted ) {
-	TEMPER_CHECK_TRUE( true );
+RESULT_DEPDENDANT_TEST_PARAMETRIC( ParametricTest_WithRunFlag_IsExecuted, const bool check ) {
+	TEMPER_CHECK_TRUE( check );
 }
 
-TEMPER_INVOKE_PARAMETRIC_TEST( ParametricTest_WithRunFlag_IsExecuted );
+TEMPER_INVOKE_PARAMETRIC_TEST( ParametricTest_WithRunFlag_IsExecuted, true );
 
 TEMPER_TEST( CheckAndCleanResults_3, TEMPER_FLAG_SHOULD_RUN ) {
 	AssertResults( 1, 0, 0, 0 );
@@ -195,11 +197,11 @@ TEMPER_TEST( CheckAndCleanResults_3, TEMPER_FLAG_SHOULD_RUN ) {
 // EXCEL_TestName - When a parametric test is marked as "Should skip" then all invokes are skipped
 //----------------------------------------------------------
 
-TEMPER_PARAMETRIC( ParametricTest_WithDeprecatedFlag_TriggersSkipCount, TEMPER_FLAG_DEPRECATED, void ) {
-	TEMPER_CHECK_TRUE_AM( false, "This test shouldn't have executed, it's flagged as Deprecated." );
+TEMPER_PARAMETRIC( ParametricTest_WithDeprecatedFlag_TriggersSkipCount, TEMPER_FLAG_DEPRECATED, const bool check ) {
+	TEMPER_CHECK_TRUE_AM( check, "This test shouldn't have executed, it's flagged as Deprecated." );
 }
 
-TEMPER_INVOKE_PARAMETRIC_TEST( ParametricTest_WithDeprecatedFlag_TriggersSkipCount );
+TEMPER_INVOKE_PARAMETRIC_TEST( ParametricTest_WithDeprecatedFlag_TriggersSkipCount, false );
 
 TEMPER_TEST( CheckAndCleanResults_4, TEMPER_FLAG_SHOULD_RUN ) {
 	if ( g_temperTestContext.testsSkipped == 1 ) {
@@ -207,11 +209,11 @@ TEMPER_TEST( CheckAndCleanResults_4, TEMPER_FLAG_SHOULD_RUN ) {
 	}
 }
 
-TEMPER_PARAMETRIC( ParametricTest_WithSkipFlag_TriggersSkipCount, TEMPER_FLAG_SHOULD_SKIP, void ) {
-	TEMPER_CHECK_TRUE_AM( false, "This test shouldn't have executed, it's flagged as Skipped." );
+TEMPER_PARAMETRIC( ParametricTest_WithSkipFlag_TriggersSkipCount, TEMPER_FLAG_SHOULD_SKIP, const bool check ) {
+	TEMPER_CHECK_TRUE_AM( check, "This test shouldn't have executed, it's flagged as Skipped." );
 }
 
-TEMPER_INVOKE_PARAMETRIC_TEST( ParametricTest_WithSkipFlag_TriggersSkipCount );
+TEMPER_INVOKE_PARAMETRIC_TEST( ParametricTest_WithSkipFlag_TriggersSkipCount, false );
 
 TEMPER_TEST( CheckAndCleanResults_5, TEMPER_FLAG_SHOULD_RUN ) {
 	if ( g_temperTestContext.testsSkipped == 1 ) {
@@ -231,8 +233,8 @@ typedef struct person_t {
 
 TEMPER_PARAMETRIC( ParametricTest_WhenDeclaredWithStructParm_StructParmIsValid, TEMPER_FLAG_SHOULD_RUN, person_t* person, const char* expectedName, const uint32_t expectedAge ) {
 	// general data validation
-	TEMPER_CHECK_TRUE_AM( person != NULL, "person ptr inside \"%s\" is NULL.\n", __FUNCTION__ );
-	TEMPER_CHECK_TRUE_AM( person->name != NULL, "person->name ptr inside \"%s\" is NULL.\n", __FUNCTION__ );
+	TEMPER_CHECK_TRUE_AM( person != NULL, "person ptr is NULL.\n" );
+	TEMPER_CHECK_TRUE_AM( person->name != NULL, "person->name ptr inside \"%s\" is NULL.\n" );
 
 	// actual comapring what was passed in vs what was expected
 	TEMPER_CHECK_TRUE_AM( strcmp( person->name, expectedName ) == 0, "person->name was expected to be \"%s\" but was actually \"%s\".\n", expectedName, person->name );
@@ -290,12 +292,12 @@ TEMPER_TEST( CheckAndCleanResults_7, TEMPER_FLAG_SHOULD_RUN ) {
 	}
 }
 
-RESULT_DEPDENDANT_TEST_PARAMETRIC( CheckTrue_WhenAbortTriggered_AbortsParametricTest ) {
-	TEMPER_CHECK_TRUE_AM( false, "We expect this test to abort.\n" );
-	TEMPER_CHECK_TRUE_M( false, "We shouldn't hit this. Asserted in the CheckAndClean.\n" );
+RESULT_DEPDENDANT_TEST_PARAMETRIC( CheckTrue_WhenAbortTriggered_AbortsParametricTest, const bool check ) {
+	TEMPER_CHECK_TRUE_AM( check, "We expect this test to abort.\n" );
+	TEMPER_CHECK_TRUE_M( check, "We shouldn't hit this. Asserted in the CheckAndClean.\n" );
 }
 
-TEMPER_INVOKE_PARAMETRIC_TEST( CheckTrue_WhenAbortTriggered_AbortsParametricTest );
+TEMPER_INVOKE_PARAMETRIC_TEST( CheckTrue_WhenAbortTriggered_AbortsParametricTest, false );
 
 TEMPER_TEST( CheckAndCleanResults_8, TEMPER_FLAG_SHOULD_RUN ) {
 	if( AssertResults( 0, 1, 1, 0 ) ) {

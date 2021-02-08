@@ -120,6 +120,7 @@ Special Thanks:
 7. CHANGELOG
 v2.0.0, <RELEASE DATE HERE>:
 	* Nearly everything has been completely re-written from scratch.
+	* Including Temper now requires defining `TEMPER_IMPLEMENTATION` (same as stb).
 	* Tests are now self-registering.  All you need to do now is write the test code and the tests will get called automatically for you (unless the test is marked as skipped).
 		* Because of this, the functions `TEMPER_RUN_TEST` and `TEMPER_SKIP_TEST` have been removed.
 		* If you want to skip a test now you must now do so by setting the test flag.
@@ -300,8 +301,8 @@ do { \
 //----------------------------------------------------------
 
 // If 'condition' is NOT true then marks the test as failed and logs the specified printf-formatted error message.
-#define TEMPER_CHECK_TRUE_M( condition, message, ... ) \
-	TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE_M(" #condition ", ...)", false, __FILE__, __LINE__, message, __VA_ARGS__ )
+#define TEMPER_CHECK_TRUE_M( condition, ... ) \
+	TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE_M(" #condition ", ...)", false, __FILE__, __LINE__, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
@@ -312,8 +313,8 @@ do { \
 //----------------------------------------------------------
 
 // If 'condition' is NOT true then marks the test as failed, logs the specified printf-formatted error message and aborts the test.
-#define TEMPER_CHECK_TRUE_AM( condition, message, ... ) \
-	TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE_AM(" #condition ", ...)", true, __FILE__, __LINE__, message, __VA_ARGS__ )
+#define TEMPER_CHECK_TRUE_AM( condition, ... ) \
+	TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE_AM(" #condition ", ...)", true, __FILE__, __LINE__, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
@@ -324,8 +325,8 @@ do { \
 //----------------------------------------------------------
 
 // If 'condition' is NOT false then marks the test as failed and logs the specified printf-formatted error message.
-#define TEMPER_CHECK_FALSE_M( condition, message, ... ) \
-	TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE_M(" #condition ", ...)", false, __FILE__, __LINE__, message, __VA_ARGS__ )
+#define TEMPER_CHECK_FALSE_M( condition, ... ) \
+	TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE_M(" #condition ", ...)", false, __FILE__, __LINE__, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
@@ -336,8 +337,8 @@ do { \
 //----------------------------------------------------------
 
 // If 'condition' is NOT false then marks the test as failed, logs the specified printf-formatted error message and aborts the test.
-#define TEMPER_CHECK_FALSE_AM( condition, message, ... ) \
-	TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE_AM(" #condition ", ...)", true, __FILE__, __LINE__, message, __VA_ARGS__ )
+#define TEMPER_CHECK_FALSE_AM( condition, ... ) \
+	TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE_AM(" #condition ", ...)", true, __FILE__, __LINE__, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
@@ -348,8 +349,8 @@ do { \
 //----------------------------------------------------------
 
 // If 'conditionA' is NOT equal to 'conditionB' then marks the test as failed and logs the specified printf-formatted error message.
-#define TEMPER_CHECK_EQUAL_M( conditionA, conditionB, message, ... ) \
-	TemperTestTrueInternal( conditionA == conditionB, "TEMPER_CHECK_EQUAL_M(" #conditionA ", " #conditionB ", ...)", false, __FILE__, __LINE__, message, __VA_ARGS__ )
+#define TEMPER_CHECK_EQUAL_M( conditionA, conditionB, ... ) \
+	TemperTestTrueInternal( conditionA == conditionB, "TEMPER_CHECK_EQUAL_M(" #conditionA ", " #conditionB ", ...)", false, __FILE__, __LINE__, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
@@ -360,8 +361,8 @@ do { \
 //----------------------------------------------------------
 
 // If 'conditionA' is NOT equal to 'conditionB' then marks the test as failed, logs the specified printf-formatted error message and aborts the test.
-#define TEMPER_CHECK_EQUAL_AM( conditionA, conditionB, message, ... ) \
-	TemperTestTrueInternal( conditionA == conditionB, "TEMPER_CHECK_EQUAL_AM(" #conditionA ", " #conditionB ", ...)", true, __FILE__, __LINE__, message, __VA_ARGS__ )
+#define TEMPER_CHECK_EQUAL_AM( conditionA, conditionB, ... ) \
+	TemperTestTrueInternal( conditionA == conditionB, "TEMPER_CHECK_EQUAL_AM(" #conditionA ", " #conditionB ", ...)", true, __FILE__, __LINE__, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
@@ -372,8 +373,8 @@ do { \
 //----------------------------------------------------------
 
 // If 'conditionA' is equal to 'conditionB' then marks the test as failed and logs the specified printf-formatted error message.
-#define TEMPER_CHECK_NOT_EQUAL_M( conditionA, conditionB, message, ... ) \
-	TemperTestTrueInternal( conditionA != conditionB, "TEMPER_CHECK_NOT_EQUAL_M(" #conditionA ", " #conditionB ", ...)", false, __FILE__, __LINE__, message, __VA_ARGS__ )
+#define TEMPER_CHECK_NOT_EQUAL_M( conditionA, conditionB, ... ) \
+	TemperTestTrueInternal( conditionA != conditionB, "TEMPER_CHECK_NOT_EQUAL_M(" #conditionA ", " #conditionB ", ...)", false, __FILE__, __LINE__, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
@@ -384,8 +385,8 @@ do { \
 //----------------------------------------------------------
 
 // If 'conditionA' is equal to 'conditionB' then marks the test as failed, logs the specified printf-formatted error message and aborts the test.
-#define TEMPER_CHECK_NOT_EQUAL_AM( conditionA, conditionB, message, ... ) \
-	TemperTestTrueInternal( conditionA != conditionB, "TEMPER_CHECK_NOT_EQUAL_AM(" #conditionA ", " #conditionB ", ...)", true, __FILE__, __LINE__, message, __VA_ARGS__ )
+#define TEMPER_CHECK_NOT_EQUAL_AM( conditionA, conditionB, ... ) \
+	TemperTestTrueInternal( conditionA != conditionB, "TEMPER_CHECK_NOT_EQUAL_AM(" #conditionA ", " #conditionB ", ...)", true, __FILE__, __LINE__, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
@@ -396,8 +397,8 @@ do { \
 //----------------------------------------------------------
 
 // If 'floatA' is NOT approximately equal enough to floatB (within the 'TEMPERDEV__EPSILON' margin of error) then marks the test as failed and logs the specified printf-formatted error message.
-#define TEMPER_CHECK_FLOAT_EQUAL_M( floatA, floatB, message, ... ) \
-	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( floatA, floatB, TEMPERDEV__EPSILON ), "TEMPER_CHECK_FLOAT_EQUAL_M(" #floatA ", " #floatB ", ...)", false, __FILE__, __LINE__, message, __VA_ARGS__ )
+#define TEMPER_CHECK_FLOAT_EQUAL_M( floatA, floatB, ... ) \
+	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( floatA, floatB, TEMPERDEV__EPSILON ), "TEMPER_CHECK_FLOAT_EQUAL_M(" #floatA ", " #floatB ", ...)", false, __FILE__, __LINE__, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
@@ -408,8 +409,8 @@ do { \
 //----------------------------------------------------------
 
 // If 'floatA' is NOT approximately equal enough to floatB (within 'TEMPERDEV__EPSILON' margin of error) then marks the test as failed, logs the specified printf-formatted error message, and aborts the test.
-#define TEMPER_CHECK_FLOAT_EQUAL_AM( floatA, floatB, message, ... ) \
-	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( floatA, floatB, TEMPERDEV__EPSILON ), "TEMPER_CHECK_FLOAT_EQUAL_AM(" #floatA ", " #floatB ", ...)", true, __FILE__, __LINE__, message, __VA_ARGS__ )
+#define TEMPER_CHECK_FLOAT_EQUAL_AM( floatA, floatB, ... ) \
+	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( floatA, floatB, TEMPERDEV__EPSILON ), "TEMPER_CHECK_FLOAT_EQUAL_AM(" #floatA ", " #floatB ", ...)", true, __FILE__, __LINE__, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
@@ -420,8 +421,8 @@ do { \
 //----------------------------------------------------------
 
 // If 'conditionA' is NOT approximately equal enough to 'conditionB' (within 'tolerance' margin of error) then marks the test as failed and logs the specified printf-formatted error message.
-#define TEMPER_CHECK_ALMOST_EQUAL_M( conditionA, conditionB, tolerance, message, ... ) \
-	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_ALMOST_EQUAL_M(" #conditionA ", " #conditionB ", " #tolerance ", ...)", false, __FILE__, __LINE__, message, __VA_ARGS__ )
+#define TEMPER_CHECK_ALMOST_EQUAL_M( conditionA, conditionB, tolerance, ... ) \
+	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_ALMOST_EQUAL_M(" #conditionA ", " #conditionB ", " #tolerance ", ...)", false, __FILE__, __LINE__, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
@@ -432,8 +433,8 @@ do { \
 //----------------------------------------------------------
 
 // If 'conditionA' is NOT approximately equal enough to 'conditionB' (within 'tolerance' margin of error) then marks the test as failed, logs the specified printf-formatted error message, and aborts the test.
-#define TEMPER_CHECK_ALMOST_EQUAL_AM( conditionA, conditionB, tolerance, message, ... ) \
-	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_ALMOST_EQUAL_AM(" #conditionA ", " #conditionB ", " #tolerance ", ...)", true, __FILE__, __LINE__, message, __VA_ARGS__ )
+#define TEMPER_CHECK_ALMOST_EQUAL_AM( conditionA, conditionB, tolerance, ... ) \
+	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_ALMOST_EQUAL_AM(" #conditionA ", " #conditionB ", " #tolerance ", ...)", true, __FILE__, __LINE__, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
@@ -444,8 +445,8 @@ do { \
 //----------------------------------------------------------
 
 // If 'conditionA' is approximately equal enough to 'conditionB' (within 'tolerance' margin of error) then marks the test as failed and logs the specified printf-formatted error message.
-#define TEMPER_CHECK_NOT_ALMOST_EQUAL_M( conditionA, conditionB, tolerance, message, ... ) \
-	TemperTestTrueInternal( !TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_M(" #conditionA ", " #conditionB ", " #tolerance ", ...)", false,  __FILE__, __LINE__, message, __VA_ARGS__ )
+#define TEMPER_CHECK_NOT_ALMOST_EQUAL_M( conditionA, conditionB, tolerance, ... ) \
+	TemperTestTrueInternal( !TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_M(" #conditionA ", " #conditionB ", " #tolerance ", ...)", false,  __FILE__, __LINE__, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
@@ -456,8 +457,8 @@ do { \
 //----------------------------------------------------------
 
 // If 'conditionA' is approximately equal enough to 'conditionB' (within 'tolerance' margin of error) then marks the test as failed, logs the specified printf-formatted error message, and aborts the test.
-#define TEMPER_CHECK_NOT_ALMOST_EQUAL_AM( conditionA, conditionB, tolerance, message, ... ) \
-	TemperTestTrueInternal( !TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_AM(" #conditionA ", " #conditionB ", " #tolerance ", ...)", true, __FILE__, __LINE__, message, __VA_ARGS__ )
+#define TEMPER_CHECK_NOT_ALMOST_EQUAL_AM( conditionA, conditionB, tolerance, ... ) \
+	TemperTestTrueInternal( !TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_AM(" #conditionA ", " #conditionB ", " #tolerance ", ...)", true, __FILE__, __LINE__, __VA_ARGS__ )
 
 
 //==========================================================
@@ -1242,18 +1243,18 @@ static const char* TemperGetTimeUnitStringInternal( const temperTimeUnit_t timeU
 //----------------------------------------------------------
 
 #if defined( _WIN32 )
-typedef unsigned long	temperThreadHandle_t;
+#define TEMPERDEV__THREAD_HANDLE	DWORD WINAPI
 #elif defined( __APPLE__ ) || defined( __linux__ )	// defined( _WIN32 )
-typedef void*			temperThreadHandle_t;
+#define TEMPERDEV__THREAD_HANDLE	void*
 #else	// defined( _WIN32 )
 #error Uncrecognised platform.  It appears Temper does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Temper/issues
 #endif	// defined( _WIN32 )
 
-// its ok to write directly to the global because only one test thread runs at a time
+// its ok to write directly to the global test context because only one test thread runs at a time
 // if multiple test threads were running asynchronously then probably want to atomic increment at the very end of the test thread
 // we don't factor OnBefore and OnAfter calls into the time as they're just for setting up the testing enviornment
 // OnBefore and OnAfter should still permit all errors and aborts be heard by the Temper system at large incase any setup or shutdown fails.
-static temperThreadHandle_t TemperThreadProcInternal( void* data ) {
+static TEMPERDEV__THREAD_HANDLE TemperThreadProcInternal( void* data ) {
 	TEMPERDEV__ASSERT( data );
 
 	temperTestInfo_t* information = (temperTestInfo_t*) data;

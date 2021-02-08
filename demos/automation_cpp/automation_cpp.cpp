@@ -1,7 +1,9 @@
 #define TEMPER_IMPLEMENTATION
 #include "../../temper.h"
 
+#ifdef __clang__
 #pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
+#endif
 
 //----------------------------------------------------------
 
