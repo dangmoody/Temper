@@ -676,7 +676,8 @@ typedef temperTestInfo_t( *temperTestInfoFetcherFunc_t )( void );
 
 //----------------------------------------------------------
 
-#define TEMPERDEV__EPSILON				0.0001f
+//#define TEMPERDEV__EPSILON				0.00001f
+#define TEMPERDEV__EPSILON					0.000001f
 
 //----------------------------------------------------------
 
@@ -921,19 +922,24 @@ static uint32_t TemperGetPercentInternal( uint32_t yourValue, uint32_t yourMax )
 //----------------------------------------------------------
 
 static float TemperMaxfInternal( const float a, const float b ) {
-	return ( a >= b ) ? a : b;
+	return ( a > b ) ? a : b;
 }
 
 //----------------------------------------------------------
 
 static float TemperAbsfInternal( const float x ) {
-	return TemperMaxfInternal( -x, x );
+	return TEMPERDEV__MAXF( -x, x );
 }
 
 //----------------------------------------------------------
 
-static bool TemperFloatEqualsInternal( const float a, const float b, const float epsilon ) {
-	return TemperAbsfInternal( a - b ) <= epsilon;
+// DM: note that this is not final
+// I'm stashing this for now because it works for our use cases and I'm coming back to it to fully tidy it up later
+static bool TemperFloatEqualsInternal( const float a, const float b, const float absoluteTolerance ) {
+	float relativeTolerance = 1e-9f;
+	bool isInRange = TEMPERDEV__ABSF( a - b ) <= TEMPERDEV__MAXF( absoluteTolerance, relativeTolerance * TEMPERDEV__MAXF( TEMPERDEV__ABSF( a ), TEMPERDEV__ABSF( b ) ) );
+
+	return isInRange;
 }
 
 //----------------------------------------------------------

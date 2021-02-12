@@ -433,13 +433,13 @@ CONDITION_TEST( CheckFloatEqual_ValuesAroundUpperLowerBoundaries_ErrorCountIncre
 	bool errorCountCorrect = g_temperTestContext.currentTestErrorCount == 0 ? true : false;
 	TEMPER_CHECK_FLOAT_EQUAL( lhs, 5.0f );
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 0 ? errorCountCorrect : false;
-	TEMPER_CHECK_FLOAT_EQUAL( lhs, 5.00001f );
+	TEMPER_CHECK_FLOAT_EQUAL( lhs, 5.000001f );
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 0 ? errorCountCorrect : false;
-	TEMPER_CHECK_FLOAT_EQUAL( lhs, 5.00002f );		// Above upper threshold
+	TEMPER_CHECK_FLOAT_EQUAL( lhs, 5.000002f );		// Above upper threshold
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 1 ? errorCountCorrect : false;
-	TEMPER_CHECK_FLOAT_EQUAL( lhs, 4.99999f );
+	TEMPER_CHECK_FLOAT_EQUAL( lhs, 4.999999f );
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 1 ? errorCountCorrect : false;
-	TEMPER_CHECK_FLOAT_EQUAL( lhs, 4.99992f );		// Below lower threshold
+	TEMPER_CHECK_FLOAT_EQUAL( lhs, 4.999992f );		// Below lower threshold
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 2 ? errorCountCorrect : false;
 	PassOrFailTest( errorCountCorrect, "Should have incremented the error count to 2.\n" );
 }
