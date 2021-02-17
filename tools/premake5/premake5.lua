@@ -144,7 +144,8 @@ end
 g_demos_names = {
 	"automation_c",
 	"automation_cpp",
-	"scale_test_c"
+	"scale_test_c",
+	"no_counter"
 }
 
 group( "demos" )
