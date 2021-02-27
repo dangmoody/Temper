@@ -1,6 +1,10 @@
-#ifdef _WIN32
+#pragma clang diagnostic ignored "-Wreserved-id-macro"
+
+#if defined( _WIN32 )
 #include <Windows.h>
-//#include <winnt.h>
+#elif defined( __APPLE__ ) || defined( __linux__ )
+//#define _POSIX_C_SOURCE 200112L
+#include <link.h>
 #endif
 
 #include <stdio.h>
@@ -15,6 +19,12 @@
 #error Uncrecognised platform.  It appears Temper does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Temper/issues
 #endif
 
+#ifdef __cplusplus
+#define NC_EXTERN_C		extern "C"
+#else
+#define NC_EXTERN_C
+#endif
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wcast-align"
 #pragma clang diagnostic ignored "-Wpointer-to-int-cast"
@@ -23,15 +33,70 @@
 #pragma clang diagnostic ignored "-Wsign-conversion"
 #pragma clang diagnostic ignored "-Wsign-compare"
 
-void NC_API DoSomething( void );
+NC_EXTERN_C void NC_API DoSomething( void );
 void DoSomething( void ) {
 	printf( "hi" );
 }
+
+#if defined( __APPLE__ ) || defined( __linux__ )
+static int IterateSymbolsInternal( struct dl_phdr_info* info, size_t size, void* data ) {
+	( (void) size );
+	( (void) data );
+
+	ElfW( Dyn* ) dyn;
+	ElfW( Sym* ) symbol;
+	ElfW( Word* ) hash;
+
+	char* stringTable = NULL;
+	ElfW( Word ) numSymbols = 0;
+
+	printf( "Found: \"%s\" (%d segments).\n", info->dlpi_name, info->dlpi_phnum );
+
+	for ( int i = 0; i < info->dlpi_phnum; i++ ) {
+		if ( info->dlpi_phdr[i].p_type == PT_DYNAMIC ) {
+			dyn = (ElfW( Dyn* )) ( info->dlpi_addr + info->dlpi_phdr[i].p_vaddr );
+
+			while ( dyn ) {
+				switch ( dyn->d_tag ) {
+					case DT_HASH:
+						hash = (ElfW( Word* )) dyn->d_un.d_ptr;
+
+						numSymbols = hash[1];
+						break;
+
+					case DT_STRTAB:
+						stringTable = (char*) dyn->d_un.d_ptr;
+						break;
+
+					case DT_SYMTAB:
+						symbol = (ElfW( Sym* )) dyn->d_un.d_ptr;
+
+						for ( ElfW( Word ) symbolIndex = 0; symbolIndex < numSymbols; symbolIndex++ ) {
+							char* symbolName = &stringTable[symbol[symbolIndex].st_name];
+
+							printf( "FOUND SYMBOL: %s.\n", symbolName );
+						}
+						break;
+
+					default:
+						// skip
+						break;
+				}
+
+				dyn++;
+			}
+		}
+	}
+
+	return 0;
+}
+#endif
 
 int main( int argc, char** argv ) {
 	( (void) argc );
 	( (void) argv );
 
+#if defined( _WIN32 )
 	char programName[4096];
 
 	DWORD fullExePathLength = GetModuleFileName( NULL, programName, 4096 );
@@ -69,6 +134,9 @@ int main( int argc, char** argv ) {
 
 		printf( "Exported function: %s\n", funcName );
 	}
+#elif defined( __APPLE__ ) || defined( __linux__ )
+	dl_iterate_phdr( IterateSymbolsInternal, NULL );
+#endif
 
 	return 0;
 }
