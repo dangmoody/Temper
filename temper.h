@@ -235,10 +235,7 @@ extern "C" {
 
 // Initialises and runs Temper.
 #define TEMPER_RUN( argc, argv ) \
-do { \
-	TemperSetupInternal(); \
-	g_temperTestContext.exitCode = TemperExecuteAllTestsWithArgumentsInternal( argc, argv ); \
-} while ( 0 )
+	g_temperTestContext.exitCode = TemperExecuteAllTestsWithArgumentsInternal( argc, argv )
 
 //----------------------------------------------------------
 
@@ -625,15 +622,11 @@ typedef struct temperTestContext_t {
 
 //----------------------------------------------------------
 
-static temperTestContext_t		g_temperTestContext;
+static temperTestContext_t				g_temperTestContext;
 
 //----------------------------------------------------------
 
-typedef temperTestInfo_t( *temperTestInfoFetcherFunc_t )( void );
-
-//----------------------------------------------------------
-
-#define TEMPERDEV__BIT( x )		( 1 << ( x ) )
+#define TEMPERDEV__BIT( x )				( 1 << ( x ) )
 
 //----------------------------------------------------------
 
@@ -645,34 +638,13 @@ typedef temperTestInfo_t( *temperTestInfoFetcherFunc_t )( void );
 
 //----------------------------------------------------------
 
-//#define TEMPERDEV__EPSILON				0.00001f
-#define TEMPERDEV__EPSILON					0.000001f
+//#define TEMPERDEV__EPSILON			0.00001f
+#define TEMPERDEV__EPSILON				0.000001f
 
 //----------------------------------------------------------
 
 #define TEMPERDEV__CONCAT_FINAL( a, b )	a ## b
-
-//----------------------------------------------------------
-
-#define TEMPERDEV__CONCAT( a, b )		TEMPERDEV__CONCAT_FINAL( a, b )
-
-//----------------------------------------------------------
-
-#if defined( _WIN32 )
-#define TEMPERDEV__API			__declspec( dllexport )
-#elif defined( __APPLE__ ) || defined( __linux__ )
-#define TEMPERDEV__API			__attribute__( ( visibility( "default" ) ) )
-#else
-#error Uncrecognised platform.  It appears Temper does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Temper/issues
-#endif
-
-//----------------------------------------------------------
-
-#ifdef __cplusplus
-#define TEMPERDEV__EXTERN_C		extern "C"
-#else
-#define TEMPERDEV__EXTERN_C
-#endif
+#define TEMPERDEV__CONCAT( a, b )		TEMPERDEV__CONCAT_FINAL( a, b )	// use this one
 
 //----------------------------------------------------------
 
