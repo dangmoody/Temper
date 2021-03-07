@@ -648,6 +648,14 @@ static temperTestContext_t				g_temperTestContext;
 
 //----------------------------------------------------------
 
+#ifdef __cplusplus
+#define TEMPERDEV__EXTERN_C				extern "C"
+#else
+#define TEMPERDEV__EXTERN_C
+#endif
+
+//----------------------------------------------------------
+
 #if defined( __GNUC__ ) || defined( __clang__ )
 #define TEMPERDEV__TEST_INFO_FETCHER( testName ) \
 	void __temper_test_info_fetcher_ ## testName ( void ) __attribute( ( constructor ) ); \
@@ -663,7 +671,7 @@ static temperTestContext_t				g_temperTestContext;
 #define TEMPERDEV__TEST_INFO_FETCHER( testName ) \
 	void __temper_test_info_fetcher_ ## testName( void ); \
 \
-	__declspec( allocate( ".CRT$XCU" ) ) void ( *testName ## _ )( void ) = __temper_test_info_fetcher_ ## testName; \
+	TEMPERDEV__EXTERN_C __declspec( allocate( ".CRT$XCU" ) ) void ( *testName ## _ )( void ) = __temper_test_info_fetcher_ ## testName; \
 	__pragma( comment( linker, "/include:" TEMPERDEV__MSVC_PREFIX #testName "_" ) ) \
 \
 	void __temper_test_info_fetcher_ ## testName( void )
