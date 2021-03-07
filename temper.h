@@ -671,7 +671,7 @@ static temperTestContext_t				g_temperTestContext;
 
 //----------------------------------------------------------
 
-#define TEMPERDEV__DEFINE_TEST( suiteName, testName, onBeforeName, onAfterName, runFlag ) \
+#define TEMPERDEV__DEFINE_TEST( suiteNameString, testName, onBeforeName, onAfterName, runFlag ) \
 	/*1. Create a function with a name matching the test.*/ \
 	void ( testName )( void ); \
 \
@@ -686,7 +686,7 @@ static temperTestContext_t				g_temperTestContext;
 		testInfo->TestFuncCallback	= testName; \
 		testInfo->OnAfterTest		= onAfterName; \
 		testInfo->testingFlag		= runFlag; \
-		testInfo->suiteNameStr		= suiteName; \
+		testInfo->suiteNameStr		= suiteNameString; \
 		testInfo->testNameStr		= #testName; \
 	} \
 \
@@ -695,13 +695,13 @@ static temperTestContext_t				g_temperTestContext;
 
 //----------------------------------------------------------
 
-#define TEMPERDEV__DEFINE_PARAMETRIC( suiteName, testName, onBeforeName, onAfterName, runFlag, ... ) \
+#define TEMPERDEV__DEFINE_PARAMETRIC( suiteNameString, testName, onBeforeName, onAfterName, runFlag, ... ) \
 	void TemperGetParametricTestInfo_ ## testName( temperTestInfo_t* outInfo ); \
 	void TemperGetParametricTestInfo_ ## testName( temperTestInfo_t* outInfo ) { \
 		outInfo->OnBeforeTest	= onBeforeName; \
 		outInfo->OnAfterTest	= onAfterName; \
 		outInfo->testingFlag	= runFlag; \
-		outInfo->suiteNameStr	= suiteName; \
+		outInfo->suiteNameStr	= suiteNameString; \
 		outInfo->testNameStr	= #testName; \
 	} \
 \
