@@ -246,41 +246,41 @@ extern "C" {
 
 // Defines a test called 'testName', and will either run, skip, or otherwise depedening on 'runFlag'.
 #define TEMPER_TEST( testName, runFlag ) \
-	TEMPERDEV__DEFINE_TEST( 0, testName, 0, 0, runFlag )
+	TEMPERDEV__DEFINE_TEST( NULL, testName, NULL, NULL, runFlag )
 
 // Defines a test called 'testName', with callbacks 'onBefore' and 'onAfter', and will either run, skip, or otherwise depedening on 'runFlag'.
 #define TEMPER_TEST_C( testName, onBefore, onAfter, runFlag ) \
-	TEMPERDEV__DEFINE_TEST( 0, testName, onBefore, onAfter, runFlag )
+	TEMPERDEV__DEFINE_TEST( NULL, testName, onBefore, onAfter, runFlag )
 
 //----------------------------------------------------------
 
 // Defines a test called 'testName', which is part of suite 'suiteName', and will either run, skip, or otherwise depedening on 'runFlag'.
 #define TEMPER_SUITE_TEST( suiteName, testName, runFlag ) \
-	TEMPERDEV__DEFINE_TEST( suiteName, testName, 0, 0, runFlag )
+	TEMPERDEV__DEFINE_TEST( #suiteName, testName, NULL, NULL, runFlag )
 
 // Defines a test called 'testName', which is part of suite 'suiteName', with callbacks 'onBefore' and 'onAfter', and will either run, skip, or otherwise depedening on 'runFlag'.
 #define TEMPER_SUITE_TEST_C( suiteName,  testName, onBefore, onAfter, runFlag ) \
-	TEMPERDEV__DEFINE_TEST( suiteName, testName, onBefore, onAfter, runFlag )
+	TEMPERDEV__DEFINE_TEST( #suiteName, testName, onBefore, onAfter, runFlag )
 
 //----------------------------------------------------------
 
 // Defines a test called 'testName', that takes any user-defined parameters, and will either run, skip, or otherwise depedening on 'runFlag'.
 #define TEMPER_PARAMETRIC( testName, runFlag, ... ) \
-	TEMPERDEV__DEFINE_PARAMETRIC( 0, testName, 0, 0, runFlag, __VA_ARGS__ )
+	TEMPERDEV__DEFINE_PARAMETRIC( NULL, testName, NULL, NULL, runFlag, __VA_ARGS__ )
 
 // Defines a test called 'testName', that takes any user-defined parameters, with callbacks 'onBefore' and 'onAfter', and will either run, skip, or otherwise depedening on 'runFlag'.
 #define TEMPER_PARAMETRIC_C( testName, onBefore, onAfter, runFlag, ... ) \
-	TEMPERDEV__DEFINE_PARAMETRIC( 0, testName, onBefore, onAfter, runFlag, __VA_ARGS__ )
+	TEMPERDEV__DEFINE_PARAMETRIC( NULL, testName, onBefore, onAfter, runFlag, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
 // Defines a test called 'testName', that takes any user-defined parameters, which is part of suite 'suiteName', and will either run, skip, or otherwise depedening on 'runFlag'.
 #define TEMPER_PARAMETRIC_SUITE( suiteName, testName, runFlag, ... ) \
-	TEMPERDEV__DEFINE_PARAMETRIC( suiteName, testName, 0, 0, runFlag, __VA_ARGS__ )
+	TEMPERDEV__DEFINE_PARAMETRIC( #suiteName, testName, NULL, NULL, runFlag, __VA_ARGS__ )
 
 // Defines a test called 'testName', that takes any user-defined parameters, which is part of suite 'suiteName', with callbacks 'onBefore' and 'onAfter', and will either run, skip, or otherwise depedening on 'runFlag'.
 #define TEMPER_PARAMETRIC_SUITE_C( suiteName, testName, onBefore, onAfter, runFlag, ... ) \
-	TEMPERDEV__DEFINE_PARAMETRIC( suiteName, testName, onBefore, onAfter, runFlag, __VA_ARGS__ )
+	TEMPERDEV__DEFINE_PARAMETRIC( #suiteName, testName, onBefore, onAfter, runFlag, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
@@ -686,7 +686,7 @@ static temperTestContext_t				g_temperTestContext;
 		testInfo->TestFuncCallback	= testName; \
 		testInfo->OnAfterTest		= onAfterName; \
 		testInfo->testingFlag		= runFlag; \
-		testInfo->suiteNameStr		= #suiteName; \
+		testInfo->suiteNameStr		= suiteName; \
 		testInfo->testNameStr		= #testName; \
 	} \
 \
@@ -701,7 +701,7 @@ static temperTestContext_t				g_temperTestContext;
 		outInfo->OnBeforeTest	= onBeforeName; \
 		outInfo->OnAfterTest	= onAfterName; \
 		outInfo->testingFlag	= runFlag; \
-		outInfo->suiteNameStr	= #suiteName; \
+		outInfo->suiteNameStr	= suiteName; \
 		outInfo->testNameStr	= #testName; \
 	} \
 \
