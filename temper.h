@@ -612,6 +612,7 @@ typedef struct temperTestContext_t {
 	uint32_t			totalTestsExecuted;
 	uint32_t			currentTestErrorCount;
 	int32_t				exitCode;
+	uint32_t			pad0;
 	temperBool32		currentTestWasAborted;
 	temperBool32		partialFilter;
 	temperTimeUnit_t	timeUnit;
