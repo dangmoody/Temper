@@ -77,9 +77,9 @@ REM echo SOURCE FILES: !source_files!
 REM echo.
 
 set symbols=
-REM if /I [!config!]==[debug] (
-REM 	set symbols=
-REM )
+if /I [!config!]==[debug] (
+	set symbols=/Zi
+)
 
 set optimisation=/Od
 if /I [!config!]==[release] (
