@@ -615,7 +615,6 @@ typedef struct temperTestContext_t {
 	temperBool32		currentTestWasAborted;
 	temperBool32		partialFilter;
 	temperTimeUnit_t	timeUnit;
-	uint32_t			pad0;
 	const char*			suiteFilterPrevious;
 	const char*			suiteFilter;
 	const char*			testFilter;
@@ -623,7 +622,15 @@ typedef struct temperTestContext_t {
 
 //----------------------------------------------------------
 
-static temperTestContext_t				g_temperTestContext;
+#ifdef __cplusplus
+#define TEMPERDEV__EXTERN_C				extern "C"
+#else
+#define TEMPERDEV__EXTERN_C				extern
+#endif
+
+//----------------------------------------------------------
+
+TEMPERDEV__EXTERN_C temperTestContext_t g_temperTestContext;
 
 //----------------------------------------------------------
 
@@ -649,17 +656,9 @@ static temperTestContext_t				g_temperTestContext;
 
 //----------------------------------------------------------
 
-#ifdef __cplusplus
-#define TEMPERDEV__EXTERN_C				extern "C"
-#else
-#define TEMPERDEV__EXTERN_C
-#endif
-
-//----------------------------------------------------------
-
 #if defined( __GNUC__ ) || defined( __clang__ )
 #define TEMPERDEV__TEST_INFO_FETCHER( testName ) \
-	void __temper_test_info_fetcher_ ## testName ( void ) __attribute( ( constructor ) ); \
+	void __temper_test_info_fetcher_ ## testName ( void ) __attribute__( ( constructor ) ); \
 	void __temper_test_info_fetcher_ ## testName ( void )
 #elif defined( _MSC_VER )	// defined( __GNUC__ ) || defined( __clang__ )
 #ifdef _WIN64
@@ -672,11 +671,11 @@ static temperTestContext_t				g_temperTestContext;
 #define TEMPERDEV__TEST_INFO_FETCHER( testName ) \
 	void __temper_test_info_fetcher_ ## testName( void ); \
 \
-	TEMPERDEV__EXTERN_C __declspec( allocate( ".CRT$XCU" ) ) void ( *testName ## _ )( void ) = __temper_test_info_fetcher_ ## testName; \
-	__pragma( comment( linker, "/include:" TEMPERDEV__MSVC_PREFIX #testName "_" ) ) \
+	TEMPERDEV__EXTERN_C __declspec( allocate( ".CRT$XCU" ) ) void ( *testName ## _FuncPtr )( void ) = __temper_test_info_fetcher_ ## testName; \
+	__pragma( comment( linker, "/include:" TEMPERDEV__MSVC_PREFIX #testName "_FuncPtr" ) ) \
 \
 	void __temper_test_info_fetcher_ ## testName( void )
-#endif	// defined( __GNUC__ ) || defined( __clang__ )
+#endif	// defined( _MSC_VER )
 
 //----------------------------------------------------------
 
@@ -764,6 +763,8 @@ void	TemperSetupInternal( void );
 int		TemperExecuteAllTestsInternal( void );
 
 int		TemperExecuteAllTestsWithArgumentsInternal( int argc, char** argv );
+
+bool	TemperFloatEqualsInternal( const float a, const float b, const float absoluteTolerance );
 
 //----------------------------------------------------------
 
@@ -857,7 +858,7 @@ static float TemperAbsfInternal( const float x ) {
 
 // DM: note that this is not final
 // I'm stashing this for now because it works for our use cases and I'm coming back to it to fully tidy it up later
-static bool TemperFloatEqualsInternal( const float a, const float b, const float absoluteTolerance ) {
+bool TemperFloatEqualsInternal( const float a, const float b, const float absoluteTolerance ) {
 	float relativeTolerance = 1e-9f;
 	bool isInRange = TEMPERDEV__ABSF( a - b ) <= TEMPERDEV__MAXF( absoluteTolerance, relativeTolerance * TEMPERDEV__MAXF( TEMPERDEV__ABSF( a ), TEMPERDEV__ABSF( b ) ) );
 
