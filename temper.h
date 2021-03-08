@@ -235,11 +235,7 @@ extern "C" {
 
 // Initialises and runs Temper.
 #define TEMPER_RUN( argc, argv ) \
-do { \
-	g_temperTestContext.totalTestsDeclared = __COUNTER__; /* MUST NOT be in a function otherwise value of __COUNTER__ is not correct */ \
-	TemperSetupInternal(); \
-	g_temperTestContext.exitCode = TemperExecuteAllTestsWithArgumentsInternal( argc, argv ); \
-} while ( 0 )
+	g_temperTestContext.exitCode = TemperExecuteAllTestsWithArgumentsInternal( argc, argv )
 
 //----------------------------------------------------------
 
@@ -250,47 +246,47 @@ do { \
 
 // Defines a test called 'testName', and will either run, skip, or otherwise depedening on 'runFlag'.
 #define TEMPER_TEST( testName, runFlag ) \
-	TEMPERDEV__DEFINE_TEST( __COUNTER__, NULL, NULL, testName, NULL, runFlag )
+	TEMPERDEV__DEFINE_TEST( NULL, testName, NULL, NULL, runFlag )
 
 // Defines a test called 'testName', with callbacks 'onBefore' and 'onAfter', and will either run, skip, or otherwise depedening on 'runFlag'.
 #define TEMPER_TEST_C( testName, onBefore, onAfter, runFlag ) \
-	TEMPERDEV__DEFINE_TEST( __COUNTER__, NULL, onBefore, testName, onAfter, runFlag )
+	TEMPERDEV__DEFINE_TEST( NULL, testName, onBefore, onAfter, runFlag )
 
 //----------------------------------------------------------
 
 // Defines a test called 'testName', which is part of suite 'suiteName', and will either run, skip, or otherwise depedening on 'runFlag'.
 #define TEMPER_SUITE_TEST( suiteName, testName, runFlag ) \
-	TEMPERDEV__DEFINE_TEST( __COUNTER__, #suiteName, NULL, testName, NULL, runFlag )
+	TEMPERDEV__DEFINE_TEST( #suiteName, testName, NULL, NULL, runFlag )
 
 // Defines a test called 'testName', which is part of suite 'suiteName', with callbacks 'onBefore' and 'onAfter', and will either run, skip, or otherwise depedening on 'runFlag'.
 #define TEMPER_SUITE_TEST_C( suiteName,  testName, onBefore, onAfter, runFlag ) \
-	TEMPERDEV__DEFINE_TEST( __COUNTER__, #suiteName, onBefore, testName, onAfter, runFlag )
+	TEMPERDEV__DEFINE_TEST( #suiteName, testName, onBefore, onAfter, runFlag )
 
 //----------------------------------------------------------
 
 // Defines a test called 'testName', that takes any user-defined parameters, and will either run, skip, or otherwise depedening on 'runFlag'.
 #define TEMPER_PARAMETRIC( testName, runFlag, ... ) \
-	TEMPERDEV__DEFINE_PARAMETRIC( NULL, NULL, testName, NULL, runFlag, __VA_ARGS__ )
+	TEMPERDEV__DEFINE_PARAMETRIC( NULL, testName, NULL, NULL, runFlag, __VA_ARGS__ )
 
 // Defines a test called 'testName', that takes any user-defined parameters, with callbacks 'onBefore' and 'onAfter', and will either run, skip, or otherwise depedening on 'runFlag'.
 #define TEMPER_PARAMETRIC_C( testName, onBefore, onAfter, runFlag, ... ) \
-	TEMPERDEV__DEFINE_PARAMETRIC( NULL, onBefore, testName, onAfter, runFlag, __VA_ARGS__ )
+	TEMPERDEV__DEFINE_PARAMETRIC( NULL, testName, onBefore, onAfter, runFlag, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
 // Defines a test called 'testName', that takes any user-defined parameters, which is part of suite 'suiteName', and will either run, skip, or otherwise depedening on 'runFlag'.
 #define TEMPER_PARAMETRIC_SUITE( suiteName, testName, runFlag, ... ) \
-	TEMPERDEV__DEFINE_PARAMETRIC( #suiteName, NULL, testName, NULL, runFlag, __VA_ARGS__ )
+	TEMPERDEV__DEFINE_PARAMETRIC( #suiteName, testName, NULL, NULL, runFlag, __VA_ARGS__ )
 
 // Defines a test called 'testName', that takes any user-defined parameters, which is part of suite 'suiteName', with callbacks 'onBefore' and 'onAfter', and will either run, skip, or otherwise depedening on 'runFlag'.
 #define TEMPER_PARAMETRIC_SUITE_C( suiteName, testName, onBefore, onAfter, runFlag, ... ) \
-	TEMPERDEV__DEFINE_PARAMETRIC( #suiteName, onBefore, testName, onAfter, runFlag, __VA_ARGS__ )
+	TEMPERDEV__DEFINE_PARAMETRIC( #suiteName, testName, onBefore, onAfter, runFlag, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
 // Runs a parametric test with the specified parameters.
-#define TEMPER_INVOKE_PARAMETRIC_TEST( nameOfTestToCall, ... ) \
-	TEMPERDEV__INVOKE_PARAMETRIC_TEST( __COUNTER__, nameOfTestToCall, __VA_ARGS__ )
+#define TEMPER_INVOKE_PARAMETRIC_TEST( testName, invokationName, ... ) \
+	TEMPERDEV__INVOKE_PARAMETRIC_TEST( testName, invokationName,__VA_ARGS__ )
 
 //----------------------------------------------------------
 
@@ -490,16 +486,16 @@ do { \
 #define TEMPERDEV__UNUSED( x )				( (void) x )
 #endif
 
+#ifndef TEMPERDEV__REALLOC
+#define TEMPERDEV__REALLOC					realloc
+#endif
+
 #ifndef TEMPERDEV__ASSERT
 #define TEMPERDEV__ASSERT					assert
 #endif
 
 #ifndef TEMPERDEV__VPRINTF
 #define TEMPERDEV__VPRINTF					vprintf
-#endif
-
-#ifndef TEMPERDEV__SNPRINTF
-#define TEMPERDEV__SNPRINTF					snprintf
 #endif
 
 #ifndef TEMPERDEV__STRCMP
@@ -534,10 +530,6 @@ do { \
 #define TEMPERDEV__LOG_ERROR				TemperLogErrorInternal
 #endif
 
-#ifndef TEMPERDEV__GET_PROC_ADDRESS
-#define TEMPERDEV__GET_PROC_ADDRESS			TemperGetProcAddressInternal
-#endif
-
 #ifndef TEMPERDEV__ON_BEFORE_TEST
 #define TEMPERDEV__ON_BEFORE_TEST			TemperOnBeforeTestInternal
 #endif
@@ -550,18 +542,6 @@ do { \
 #define TEMPERDEV__RUN_TEST_THREAD			TemperRunTestThreadInternal
 #endif
 
-#ifndef TEMPERDEV__GET_FULL_EXE_PATH
-#define TEMPERDEV__GET_FULL_EXE_PATH		TemperGetFullEXEPathInternal
-#endif
-
-#ifndef TEMPERDEV__LOAD_EXE_HANDLE
-#define TEMPERDEV__LOAD_EXE_HANDLE			TemperLoadEXEHandleInternal
-#endif
-
-#ifndef TEMPERDEV__UNLOAD_EXE_HANDLE
-#define TEMPERDEV__UNLOAD_EXE_HANDLE		TemperUnloadEXEHandleInternal
-#endif
-
 #ifndef TEMPERDEV__ON_ALL_TESTS_FINISHED
 #define TEMPERDEV__ON_ALL_TESTS_FINISHED	TemperOnAllTestsFinishedInternal
 #endif
@@ -572,16 +552,6 @@ do { \
 //
 // You as the user probably don't want to be directly touching any of this.
 //==========================================================
-
-#if defined( _WIN32 )
-#define TEMPERDEV__MAX_PATH		4096	// DM!!! NO! probably malloc this!
-#elif defined( __APPLE__ ) || defined( __linux__ )	// _WIN32
-#define TEMPERDEV__MAX_PATH		PATH_MAX
-#else	// _WIN32
-#error Uncrecognised platform.  It appears Temper does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Temper/issues
-#endif	// _WIN32
-
-//----------------------------------------------------------
 
 typedef uint32_t temperBool32;
 
@@ -597,38 +567,11 @@ typedef enum temperTimeUnit_t {
 
 //----------------------------------------------------------
 
-typedef struct temperTestContext_t {
-#ifdef _WIN32
-	int64_t				timestampFrequency;
-#endif
-	double				currentTestStartTime;
-	double				currentTestEndTime;
-	double				totalExecutionTime;
-	uint32_t			testsPassed;
-	uint32_t			testsFailed;
-	uint32_t			testsAborted;
-	uint32_t			testsSkipped;
-	uint32_t			totalTestsDeclared; // Gets set in the main function with a preprocessor
-	uint32_t			totalTestsFoundWithFilters;
-	uint32_t			totalTestsExecuted;
-	uint32_t			currentTestErrorCount;
-	int32_t				exitCode;
-	temperBool32		currentTestWasAborted;
-	temperBool32		partialFilter;
-	temperTimeUnit_t	timeUnit;
-#ifdef UNICODE
-	wchar_t				programName[TEMPERDEV__MAX_PATH];
-#else
-	char				programName[TEMPERDEV__MAX_PATH];
-#endif
-	const char*			suiteFilterPrevious;
-	const char*			suiteFilter;
-	const char*			testFilter;
-} temperTestContext_t;
-
-//----------------------------------------------------------
-
-static temperTestContext_t		g_temperTestContext;
+typedef enum temperTestFlag_t {
+	TEMPER_FLAG_SHOULD_RUN				= 0,
+	TEMPER_FLAG_SHOULD_SKIP,
+	TEMPER_FLAG_DEPRECATED
+} temperTestFlag_t;
 
 //----------------------------------------------------------
 
@@ -636,14 +579,6 @@ typedef void( *temperTestCallbackOnBeforeTest_t )( void );
 typedef void( *temperTestCallbackOnAfterTest_t )( void );
 
 typedef void( *temperTestCallback_t )( void );
-
-//----------------------------------------------------------
-
-typedef enum temperTestFlag_t {
-	TEMPER_FLAG_SHOULD_RUN				= 0,
-	TEMPER_FLAG_SHOULD_SKIP,
-	TEMPER_FLAG_DEPRECATED
-} temperTestFlag_t;
 
 //----------------------------------------------------------
 
@@ -660,11 +595,46 @@ typedef struct temperTestInfo_t {
 
 //----------------------------------------------------------
 
-typedef temperTestInfo_t( *temperTestInfoFetcherFunc_t )( void );
+typedef struct temperTestContext_t {
+	uint64_t			testInfosCount;
+	temperTestInfo_t*	testInfos;
+#ifdef _WIN32
+	int64_t				timestampFrequency;
+#endif
+	double				currentTestStartTime;
+	double				currentTestEndTime;
+	double				totalExecutionTime;
+	uint32_t			testsPassed;
+	uint32_t			testsFailed;
+	uint32_t			testsAborted;
+	uint32_t			testsSkipped;
+	uint32_t			totalTestsFoundWithFilters;
+	uint32_t			totalTestsExecuted;
+	uint32_t			currentTestErrorCount;
+	int32_t				exitCode;
+	temperBool32		currentTestWasAborted;
+	temperBool32		partialFilter;
+	temperTimeUnit_t	timeUnit;
+	const char*			suiteFilterPrevious;
+	const char*			suiteFilter;
+	const char*			testFilter;
+} temperTestContext_t;
 
 //----------------------------------------------------------
 
-#define TEMPERDEV__BIT( x )		( 1 << ( x ) )
+#ifdef __cplusplus
+#define TEMPERDEV__EXTERN_C				extern "C"
+#else
+#define TEMPERDEV__EXTERN_C				extern
+#endif
+
+//----------------------------------------------------------
+
+TEMPERDEV__EXTERN_C temperTestContext_t g_temperTestContext;
+
+//----------------------------------------------------------
+
+#define TEMPERDEV__BIT( x )				( 1 << ( x ) )
 
 //----------------------------------------------------------
 
@@ -676,144 +646,95 @@ typedef temperTestInfo_t( *temperTestInfoFetcherFunc_t )( void );
 
 //----------------------------------------------------------
 
-//#define TEMPERDEV__EPSILON				0.00001f
-#define TEMPERDEV__EPSILON					0.000001f
+//#define TEMPERDEV__EPSILON			0.00001f
+#define TEMPERDEV__EPSILON				0.000001f
 
 //----------------------------------------------------------
 
 #define TEMPERDEV__CONCAT_FINAL( a, b )	a ## b
+#define TEMPERDEV__CONCAT( a, b )		TEMPERDEV__CONCAT_FINAL( a, b )	// use this one
 
 //----------------------------------------------------------
 
-#define TEMPERDEV__CONCAT( a, b )		TEMPERDEV__CONCAT_FINAL( a, b )
-
-//----------------------------------------------------------
-
-#if defined( _WIN32 )
-#define TEMPERDEV__API			__declspec( dllexport )
-#elif defined( __APPLE__ ) || defined( __linux__ )
-#define TEMPERDEV__API			__attribute__( ( visibility( "default" ) ) )
+#if defined( __GNUC__ ) || defined( __clang__ )
+#define TEMPERDEV__TEST_INFO_FETCHER( testName ) \
+	void __temper_test_info_fetcher_ ## testName ( void ) __attribute__( ( constructor ) ); \
+	void __temper_test_info_fetcher_ ## testName ( void )
+#elif defined( _MSC_VER )	// defined( __GNUC__ ) || defined( __clang__ )
+#ifdef _WIN64
+#define TEMPERDEV__MSVC_PREFIX	""
 #else
-#error Uncrecognised platform.  It appears Temper does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Temper/issues
+#define TEMPERDEV__MSVC_PREFIX	"_"
 #endif
 
-//----------------------------------------------------------
-
-#ifdef __cplusplus
-#define TEMPERDEV__EXTERN_C		extern "C"
-#else
-#define TEMPERDEV__EXTERN_C
-#endif
-
-//----------------------------------------------------------
-
-#define TEMPERDEV__DEFINE_TEST( counter, suiteNameString, onBeforeName, testName, onAfterName, runFlag ) \
+#pragma section( ".CRT$XCU", read )
+#define TEMPERDEV__TEST_INFO_FETCHER( testName ) \
+	void __temper_test_info_fetcher_ ## testName( void ); \
 \
+	TEMPERDEV__EXTERN_C __declspec( allocate( ".CRT$XCU" ) ) void ( *testName ## _FuncPtr )( void ) = __temper_test_info_fetcher_ ## testName; \
+	__pragma( comment( linker, "/include:" TEMPERDEV__MSVC_PREFIX #testName "_FuncPtr" ) ) \
+\
+	void __temper_test_info_fetcher_ ## testName( void )
+#endif	// defined( _MSC_VER )
+
+//----------------------------------------------------------
+
+#define TEMPERDEV__DEFINE_TEST( suiteNameString, testName, onBeforeName, onAfterName, runFlag ) \
 	/*1. Create a function with a name matching the test.*/ \
 	void ( testName )( void ); \
 \
-	/*2. Create a testName_TestInfo_t struct that will just wrap the test information meta data.*/ \
-	typedef struct TEMPERDEV__CONCAT( testName, _TestInfo_t ) { \
-		temperTestInfo_t testInformation; \
-	} TEMPERDEV__CONCAT( testName, _TestInfo_t ); \
+	/*2. This is what the runner will loop over to grab the test function as well as all the information concerning it*/ \
+	TEMPERDEV__TEST_INFO_FETCHER( testName ) { \
+		uint64_t index = g_temperTestContext.testInfosCount++; \
 \
-	/*3. Create a global instance of this new struct for us to access and write data about this test to.*/ \
-	extern TEMPERDEV__CONCAT( testName, _TestInfo_t ) TEMPERDEV__CONCAT( testName, _GlobalInfo ); \
-	TEMPERDEV__CONCAT( testName, _TestInfo_t ) TEMPERDEV__CONCAT( testName, _GlobalInfo ); \
+		g_temperTestContext.testInfos = (temperTestInfo_t*) TEMPERDEV__REALLOC( g_temperTestContext.testInfos, g_temperTestContext.testInfosCount * sizeof( temperTestInfo_t ) ); \
 \
-	/*4. This is what the runner will loop over to grab the test function as well as all the information concerning it*/ \
-	/* HACK(DM): I shouldn't have to add extern "C" before each declaration here to make this work for c++ compiled binaries.  I already did that at the top of the header! How is that NOT a compiler bug!? */ \
-	TEMPERDEV__EXTERN_C temperTestInfo_t TEMPERDEV__API TEMPERDEV__CONCAT( __temper_test_info_fetcher_, counter )( void ); \
-	temperTestInfo_t TEMPERDEV__CONCAT( __temper_test_info_fetcher_, counter )( void ) { \
-		TEMPERDEV__CONCAT( testName, _GlobalInfo ).testInformation.OnBeforeTest		= onBeforeName; \
-		TEMPERDEV__CONCAT( testName, _GlobalInfo ).testInformation.TestFuncCallback	= testName; \
-		TEMPERDEV__CONCAT( testName, _GlobalInfo ).testInformation.OnAfterTest		= onAfterName; \
-		TEMPERDEV__CONCAT( testName, _GlobalInfo ).testInformation.testingFlag		= runFlag; \
-		TEMPERDEV__CONCAT( testName, _GlobalInfo ).testInformation.testNameStr		= #testName; \
-		TEMPERDEV__CONCAT( testName, _GlobalInfo ).testInformation.suiteNameStr		= suiteNameString; \
-		return TEMPERDEV__CONCAT( testName, _GlobalInfo ).testInformation; \
+		temperTestInfo_t* testInfo = &g_temperTestContext.testInfos[index]; \
+		testInfo->OnBeforeTest		= onBeforeName; \
+		testInfo->TestFuncCallback	= testName; \
+		testInfo->OnAfterTest		= onAfterName; \
+		testInfo->testingFlag		= runFlag; \
+		testInfo->suiteNameStr		= suiteNameString; \
+		testInfo->testNameStr		= #testName; \
 	} \
 \
-	/*5. The test function declared at Step1 is now declared here by the user*/ \
+	/*3. The test function declared at Step1 is now declared here by the user*/ \
 	void ( testName )( void )
 
 //----------------------------------------------------------
 
-#define TEMPERDEV__DEFINE_PARAMETRIC( suiteName, onBeforeName, testName, onAfterName, runFlag, ... )\
+#define TEMPERDEV__DEFINE_PARAMETRIC( suiteNameString, testName, onBeforeName, onAfterName, runFlag, ... ) \
+	void TemperGetParametricTestInfo_ ## testName( temperTestInfo_t* outInfo ); \
+	void TemperGetParametricTestInfo_ ## testName( temperTestInfo_t* outInfo ) { \
+		outInfo->OnBeforeTest	= onBeforeName; \
+		outInfo->OnAfterTest	= onAfterName; \
+		outInfo->testingFlag	= runFlag; \
+		outInfo->suiteNameStr	= suiteNameString; \
+		outInfo->testNameStr	= #testName; \
+	} \
 \
-	/*1. Create a function with a name matching the test with the provided parameters.*/ \
 	void ( testName )( __VA_ARGS__ ); \
-\
-	/*2. Typedef this function type.*/ \
-	typedef void ( *TEMPERDEV__CONCAT( testName, _FuncType ) )( __VA_ARGS__ ); \
-\
-	/*3. Stash this function and run info in a struct unique to this.*/ \
-	typedef struct TEMPERDEV__CONCAT( testName, _ParametricTestInfo ) { \
-		temperTestCallbackOnBeforeTest_t			OnBeforeTest; \
-		TEMPERDEV__CONCAT( testName, _FuncType )	TestFuncCallback; \
-		temperTestCallbackOnAfterTest_t				OnAfterTest; \
-		temperTestFlag_t							testingFlag; \
-		uint32_t									pad0; \
-		const char*									testNameStr; \
-		const char*									suiteNameStr; \
-	} TEMPERDEV__CONCAT( testName, _ParametricTestInfo ); \
-\
-	/*4. Create a global instance of this new struct for us to access and write data about this test to.*/ \
-	extern TEMPERDEV__CONCAT( testName, _ParametricTestInfo ) TEMPERDEV__CONCAT( testName, _GlobalParametricInfo ); \
-	TEMPERDEV__CONCAT( testName, _ParametricTestInfo ) TEMPERDEV__CONCAT( testName, _GlobalParametricInfo ); \
-\
-	/*5. Define an info binding function to tie all this information into the struct*/ \
-	/* HACK(DM): I shouldn't have to add extern "C" before each declaration here to make this work for c++ compiled binaries.  I already did that at the top of the header! How is that NOT a compiler bug!? */ \
-	TEMPERDEV__EXTERN_C void TEMPERDEV__API TEMPERDEV__CONCAT( testName, _ParametricTestInfoBinder )( void ); \
-	void TEMPERDEV__CONCAT( testName, _ParametricTestInfoBinder )( void ) { \
-		TEMPERDEV__CONCAT( testName, _GlobalParametricInfo ).OnBeforeTest		= onBeforeName; \
-		TEMPERDEV__CONCAT( testName, _GlobalParametricInfo ).TestFuncCallback	= testName; \
-		TEMPERDEV__CONCAT( testName, _GlobalParametricInfo ).OnAfterTest		= onAfterName; \
-		TEMPERDEV__CONCAT( testName, _GlobalParametricInfo ).testingFlag		= runFlag; \
-		TEMPERDEV__CONCAT( testName, _GlobalParametricInfo ).testNameStr		= #testName; \
-		TEMPERDEV__CONCAT( testName, _GlobalParametricInfo ).suiteNameStr		= suiteName; \
-	}\
-\
-	/*6. The test function declared at Step1 is now declared here by the user*/\
 	void ( testName )( __VA_ARGS__ )
 
-//----------------------------------------------------------
+//----------------------------------------------------------------
 
-#define TEMPERDEV__INVOKE_PARAMETRIC_TEST( counter, nameOfTestToCall, ... ) \
-\
-	/*1. Create a function with a name matching the test.*/ \
-	void ( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ) )( void ); \
-\
-	/*2. Define this test body immediately*/ \
-	void ( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ) )( void ) { \
-		TEMPERDEV__CONCAT( nameOfTestToCall, _GlobalParametricInfo ).TestFuncCallback( __VA_ARGS__ ); \
+#define TEMPERDEV__INVOKE_PARAMETRIC_TEST( testName, invokationName, ... ) \
+	void TemperCallParametricTest_ ## invokationName( void ); \
+	void TemperCallParametricTest_ ## invokationName( void ) { \
+		testName( __VA_ARGS__ ); \
 	} \
 \
-	/*3. Create a testName_TestInfo_t struct that will just wrap the test information meta data.*/ \
-	typedef struct TEMPERDEV__CONCAT( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ), _TestInfo_t ) { \
-		temperTestInfo_t testInformation; \
-	} TEMPERDEV__CONCAT( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ), _TestInfo_t ); \
+	TEMPERDEV__TEST_INFO_FETCHER( invokationName ) { \
+		uint64_t index = g_temperTestContext.testInfosCount++; \
 \
-	/*4. Create a global instance of this new struct for us to access and write data about this test to.*/ \
-	extern TEMPERDEV__CONCAT( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ), _TestInfo_t ) TEMPERDEV__CONCAT( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ); \
-	TEMPERDEV__CONCAT( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ), _TestInfo_t ) TEMPERDEV__CONCAT( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ); \
+		g_temperTestContext.testInfos = (temperTestInfo_t*) TEMPERDEV__REALLOC( g_temperTestContext.testInfos, g_temperTestContext.testInfosCount * sizeof( temperTestInfo_t ) ); \
 \
-	/*5. Create our invoker_n function. This is what the runner will loop over to grab the test function as well as all the information concerning it*/ \
-	/* HACK(DM): I shouldn't have to add extern "C" before each declaration here to make this work for c++ compiled binaries.  I already did that at the top of the header! How is that NOT a compiler bug!? */ \
-	TEMPERDEV__EXTERN_C temperTestInfo_t TEMPERDEV__API TEMPERDEV__CONCAT( __temper_test_info_fetcher_, counter )( void ); \
-	temperTestInfo_t TEMPERDEV__CONCAT( __temper_test_info_fetcher_, counter )( void ) { \
-		TEMPERDEV__CONCAT( nameOfTestToCall, _ParametricTestInfoBinder )();/*Make it so we can grab the needed information out of the test function's global info*/\
-		TEMPERDEV__CONCAT( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.OnBeforeTest = TEMPERDEV__CONCAT( nameOfTestToCall, _GlobalParametricInfo ).OnBeforeTest; \
-		TEMPERDEV__CONCAT( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.TestFuncCallback = TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ); \
-		TEMPERDEV__CONCAT( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.OnAfterTest = TEMPERDEV__CONCAT( nameOfTestToCall, _GlobalParametricInfo ).OnAfterTest; \
-		TEMPERDEV__CONCAT( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.suiteNameStr = TEMPERDEV__CONCAT( nameOfTestToCall, _GlobalParametricInfo ).suiteNameStr; \
-		TEMPERDEV__CONCAT( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.testNameStr = #nameOfTestToCall; \
-		TEMPERDEV__CONCAT( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation.testingFlag = TEMPERDEV__CONCAT( nameOfTestToCall, _GlobalParametricInfo ).testingFlag; \
-		return TEMPERDEV__CONCAT( TEMPERDEV__CONCAT( temper_parametric_wrapper_, counter ), _GlobalInfo ).testInformation; \
+		temperTestInfo_t* testInfo = &g_temperTestContext.testInfos[index]; \
+		TemperGetParametricTestInfo_ ## testName( testInfo ); \
+		testInfo->TestFuncCallback = TemperCallParametricTest_ ## invokationName; \
 	} \
 \
-	/* leave this at the end so the macro can end with a semicolon */ \
-	temperTestInfo_t TEMPERDEV__API TEMPERDEV__CONCAT( __temper_test_info_fetcher_, counter )( void )
+	void __temper_test_info_fetcher_ ## invokationName( void )
 
 //----------------------------------------------------------------
 
@@ -835,13 +756,15 @@ typedef const char*					temperTextColor_t;
 
 //----------------------------------------------------------
 
-void	TemperTestTrueInternal( const bool condition, const char* conditionStr, const bool abortOnFail, const char* file, const uint32_t line, const char* fmt, ... );
+TEMPERDEV__EXTERN_C void	TemperTestTrueInternal( const bool condition, const char* conditionStr, const bool abortOnFail, const char* file, const uint32_t line, const char* fmt, ... );
 
-void	TemperSetupInternal( void );
+TEMPERDEV__EXTERN_C void	TemperSetupInternal( void );
 
-int		TemperExecuteAllTestsInternal( void );
+TEMPERDEV__EXTERN_C int		TemperExecuteAllTestsInternal( void );
 
-int		TemperExecuteAllTestsWithArgumentsInternal( int argc, char** argv );
+TEMPERDEV__EXTERN_C int		TemperExecuteAllTestsWithArgumentsInternal( int argc, char** argv );
+
+TEMPERDEV__EXTERN_C bool	TemperFloatEqualsInternal( const float a, const float b, const float absoluteTolerance );
 
 //----------------------------------------------------------
 
@@ -849,6 +772,7 @@ int		TemperExecuteAllTestsWithArgumentsInternal( int argc, char** argv );
 #ifdef _WIN32
 #include <Windows.h>
 #endif
+temperTestContext_t g_temperTestContext;
 
 static void TemperSetTextColorInternal( const temperTextColor_t color ) {
 #if defined( _WIN32 )
@@ -935,7 +859,7 @@ static float TemperAbsfInternal( const float x ) {
 
 // DM: note that this is not final
 // I'm stashing this for now because it works for our use cases and I'm coming back to it to fully tidy it up later
-static bool TemperFloatEqualsInternal( const float a, const float b, const float absoluteTolerance ) {
+bool TemperFloatEqualsInternal( const float a, const float b, const float absoluteTolerance ) {
 	float relativeTolerance = 1e-9f;
 	bool isInRange = TEMPERDEV__ABSF( a - b ) <= TEMPERDEV__MAXF( absoluteTolerance, relativeTolerance * TEMPERDEV__MAXF( TEMPERDEV__ABSF( a ), TEMPERDEV__ABSF( b ) ) );
 
@@ -1114,123 +1038,6 @@ static bool TemperHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 
 //----------------------------------------------------------
 
-static void* TemperLoadEXEHandleInternal( void ) {
-#if defined( _WIN32 )
-	HMODULE handle = LoadLibrary( g_temperTestContext.programName );
-	TEMPERDEV__ASSERT( handle );
-	return handle;
-#elif defined( __APPLE__ ) || defined( __linux__ )	// defined( _WIN32 )
-	void* handle = dlopen( NULL, RTLD_LAZY );
-	TEMPERDEV__ASSERT( handle );
-	return handle;
-#else	// defined( _WIN32 )
-#error Uncrecognised platform.  It appears Temper does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Temper/issues
-#endif	// defined( _WIN32 )
-}
-
-//----------------------------------------------------------
-
-static void* TemperGetProcAddressInternal( void* handle, const char* funcName ) {
-	TEMPERDEV__ASSERT( handle );
-	TEMPERDEV__ASSERT( funcName );
-
-	void* proc = NULL;
-
-#ifdef _WIN32
-	proc = (void*) GetProcAddress( (HMODULE) handle, funcName );
-#elif defined( __APPLE__ ) || defined( __linux__ )	// defined( _WIN32 )
-	proc = dlsym( handle, funcName );
-#else	// defined( _WIN32 )
-#error Uncrecognised platform.  It appears Temper does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Temper/issues
-#endif	// defined( _WIN32 )
-
-	if ( !proc ) {
-		const char* platformErrorMsg = "";
-#if defined( __APPLE__ ) || defined( __linux__ )
-		platformErrorMsg =
-			"\n"
-			"On MacOS and Linux you need to explicitly allow dynamic symbol exporting via your compiler options.\n"
-			"E.G.: Using \"--export-dynamic\" or some other variant.\n";
-#endif
-
-		TEMPERDEV__LOG_ERROR( "Failed to find function \"%s\".%s\n", funcName, platformErrorMsg );
-	}
-
-	return proc;
-}
-
-//----------------------------------------------------------
-
-static void TemperUnloadEXEHandleInternal( void* handle ) {
-	TEMPERDEV__ASSERT( handle );
-
-#if defined( _WIN32 )
-	FreeLibrary( (HMODULE) handle );
-	handle = NULL;
-#elif defined( __APPLE__ ) || defined( __linux__ )	// _WIN32
-	int closeError = dlclose( handle );
-	if ( closeError ) {
-		TEMPERDEV__LOG_ERROR( "%s.\n", dlerror() );
-	}
-
-	handle = NULL;
-#else	// _WIN32
-#error Uncrecognised platform.  It appears Temper does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Temper/issues
-#endif	// _WIN32
-}
-
-//----------------------------------------------------------
-
-static bool TemperGetFullEXEPathInternal( void ) {
-#if defined( _WIN32 )
-	DWORD fullExePathLength = GetModuleFileName( NULL, g_temperTestContext.programName, TEMPERDEV__MAX_PATH );
-	if ( fullExePathLength == 0 ) {
-		TEMPERDEV__LOG_ERROR( "WinAPI call GetModuleFileName() failed: 0x%lX\n", GetLastError() );
-		return false;
-	}
-
-	g_temperTestContext.programName[fullExePathLength] = 0;
-#elif defined( __linux__ )	// defined( _WIN32 )
-	int err = 0;
-
-	const char* exeFilenameVirtual = "/proc/self/exe";
-
-	struct stat exeFileInfo;
-	if ( lstat( exeFilenameVirtual, &exeFileInfo ) == -1 ) {
-		err = errno;
-		TEMPERDEV__LOG_ERROR( "lstat() failed: %s.\n", strerror( err ) );
-		return false;
-	}
-
-	ssize_t fullExePathLength = readlink( exeFilenameVirtual, g_temperTestContext.programName, (size_t) exeFileInfo.st_size + 1 );
-	err = errno;
-	if ( fullExePathLength == -1 ) {
-		TEMPERDEV__LOG_ERROR( "readlink() failed: %s.\n", strerror( err ) );
-		return false;
-	}
-
-	g_temperTestContext.programName[exeFileInfo.st_size] = 0;
-#elif defined( __APPLE__ )	// defined( _WIN32 )
-	int err = 0;
-
-	uint32_t bufsize = TEMPERDEV__MAX_PATH;
-
-	if ( _NSGetExecutablePath( g_temperTestContext.programName, &bufsize ) != 0 ) {
-		err = errno;
-		TEMPERDEV__LOG_ERROR( "_NSGetExecutablePath() failed: %s.\n", strerror( err ) );
-		return false;
-	}
-
-	g_temperTestContext.programName[bufsize] = 0;
-#else	// defined( _WIN32 )
-#error Uncrecognised platform.  It appears Temper does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Temper/issues
-#endif	// defined( _WIN32 )
-
-	return true;
-}
-
-//----------------------------------------------------------
-
 static const char* TemperGetTimeUnitStringInternal( const temperTimeUnit_t timeUnit ) {
 	TEMPERDEV__ASSERT( ( timeUnit > TEMPER_TIME_UNIT_CLOCKS && timeUnit <= TEMPER_TIME_UNIT_SECONDS ) && "Time unit enum was invalid somehow!?" );
 
@@ -1397,7 +1204,6 @@ void TemperTestTrueInternal( const bool condition, const char* conditionStr, con
 	if ( !( condition ) ) {
 		g_temperTestContext.currentTestErrorCount += 1;
 
-		// DM: could probably make this user-overridable
 		{
 			TemperSetTextColorInternal( TEMPERDEV__COLOR_RED );
 			TEMPERDEV__LOG( "FAILED: " );
@@ -1426,7 +1232,7 @@ static void TemperOnAllTestsFinishedInternal( void ) {
 		"Total time taken: %.3f %s\n"
 		"Total tests defined: %d\n"
 		, g_temperTestContext.totalExecutionTime, TemperGetTimeUnitStringInternal( g_temperTestContext.timeUnit )
-		, g_temperTestContext.totalTestsDeclared
+		, g_temperTestContext.testInfosCount
 	);
 
 	if ( g_temperTestContext.suiteFilter || g_temperTestContext.testFilter ) {
@@ -1527,46 +1333,28 @@ static int TemperCalculateExitCode( void ) {
 //----------------------------------------------------------
 
 int TemperExecuteAllTestsInternal( void ) {
-	if ( !TEMPERDEV__GET_FULL_EXE_PATH() ) {
-		return TEMPERDEV__EXIT_FAILURE;
-	}
-
-	// make the exe load itself
-	void* handle = TEMPERDEV__LOAD_EXE_HANDLE();
-
-	// DM: I have never seen a function name exceed 64 characters, let alone 128
-	// so this shouldn't be a problem
-	char testFuncName[128];
+	TemperSetupInternal();
 
 	double start = TEMPER_GET_TIMESTAMP( g_temperTestContext.timeUnit );
 
-	for ( uint32_t i = 0; i < g_temperTestContext.totalTestsDeclared; i++ ) {
-		TEMPERDEV__SNPRINTF( testFuncName, sizeof( testFuncName ), "__temper_test_info_fetcher_%d", i );
-
-		// get the test grabber function out of the binary
-		temperTestInfoFetcherFunc_t funcInfoGrabber = (temperTestInfoFetcherFunc_t) TEMPERDEV__GET_PROC_ADDRESS( handle, testFuncName );
-
-		if ( !funcInfoGrabber ) {
-			return TEMPERDEV__EXIT_FAILURE;
-		}
-
-		temperTestInfo_t information = funcInfoGrabber();
+	for ( uint64_t i = 0; i < g_temperTestContext.testInfosCount; i++ ) {
+		temperTestInfo_t* testInfo = &g_temperTestContext.testInfos[i];
 
 		// check if whether the suite/test passed the filter first before checking if the run flag was set
 		// otherwise the test could be marked as run/skip but still pass the filter and it would never show in the output
 		// TODO(DM): profile doing a loop like this with branching vs. adding everything that passes the filter first to a list of things to run
 		// we care only about raw execution time in that test and whether or not the initial pass was faster than just running the loop with branching
-		if ( TemperIsSuiteFilteredInternal( information.suiteNameStr ) ) {
-			if ( TemperIsTestFilteredInternal( information.testNameStr ) ) {
+		if ( TemperIsSuiteFilteredInternal( testInfo->suiteNameStr ) ) {
+			if ( TemperIsTestFilteredInternal( testInfo->testNameStr ) ) {
 				g_temperTestContext.totalTestsFoundWithFilters += 1;
 
-				TEMPERDEV__ON_BEFORE_TEST( &information );
+				TEMPERDEV__ON_BEFORE_TEST( testInfo );
 
-				if ( information.testingFlag == TEMPER_FLAG_SHOULD_RUN ) {
+				if ( testInfo->testingFlag == TEMPER_FLAG_SHOULD_RUN ) {
 					g_temperTestContext.currentTestErrorCount = 0;
 					g_temperTestContext.currentTestWasAborted = false;
 
-					TEMPERDEV__RUN_TEST_THREAD( &information );
+					TEMPERDEV__RUN_TEST_THREAD( testInfo );
 
 					g_temperTestContext.totalTestsExecuted += 1;
 
@@ -1579,7 +1367,7 @@ int TemperExecuteAllTestsInternal( void ) {
 					g_temperTestContext.testsSkipped += 1;
 				}
 
-				TEMPERDEV__ON_AFTER_TEST( &information );
+				TEMPERDEV__ON_AFTER_TEST( testInfo );
 			}
 		}
 	}
@@ -1588,9 +1376,6 @@ int TemperExecuteAllTestsInternal( void ) {
 	g_temperTestContext.totalExecutionTime = end - start;
 
 	TEMPERDEV__ON_ALL_TESTS_FINISHED();
-
-	// cleanup
-	TEMPERDEV__UNLOAD_EXE_HANDLE( handle );
 
 	return TemperCalculateExitCode();
 }
