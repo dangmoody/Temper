@@ -1,5 +1,3 @@
-#include "../../temper.h"
-
 #include "vector2d.h"
 #include "vector2d_tests.c"
 

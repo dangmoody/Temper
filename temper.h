@@ -756,15 +756,15 @@ typedef const char*					temperTextColor_t;
 
 //----------------------------------------------------------
 
-void	TemperTestTrueInternal( const bool condition, const char* conditionStr, const bool abortOnFail, const char* file, const uint32_t line, const char* fmt, ... );
+TEMPERDEV__EXTERN_C void	TemperTestTrueInternal( const bool condition, const char* conditionStr, const bool abortOnFail, const char* file, const uint32_t line, const char* fmt, ... );
 
-void	TemperSetupInternal( void );
+TEMPERDEV__EXTERN_C void	TemperSetupInternal( void );
 
-int		TemperExecuteAllTestsInternal( void );
+TEMPERDEV__EXTERN_C int		TemperExecuteAllTestsInternal( void );
 
-int		TemperExecuteAllTestsWithArgumentsInternal( int argc, char** argv );
+TEMPERDEV__EXTERN_C int		TemperExecuteAllTestsWithArgumentsInternal( int argc, char** argv );
 
-bool	TemperFloatEqualsInternal( const float a, const float b, const float absoluteTolerance );
+TEMPERDEV__EXTERN_C bool	TemperFloatEqualsInternal( const float a, const float b, const float absoluteTolerance );
 
 //----------------------------------------------------------
 
@@ -772,6 +772,7 @@ bool	TemperFloatEqualsInternal( const float a, const float b, const float absolu
 #ifdef _WIN32
 #include <Windows.h>
 #endif
+temperTestContext_t g_temperTestContext;
 
 static void TemperSetTextColorInternal( const temperTextColor_t color ) {
 #if defined( _WIN32 )
