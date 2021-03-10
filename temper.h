@@ -776,7 +776,10 @@ TEMPERDEV__EXTERN_C bool	TemperFloatEqualsInternal( const float a, const float b
 #ifdef _WIN32
 #include <Windows.h>
 #endif
+
 temperTestContext_t g_temperTestContext;
+
+//----------------------------------------------------------
 
 static void TemperSetTextColorInternal( const temperTextColor_t color ) {
 #if defined( _WIN32 )
