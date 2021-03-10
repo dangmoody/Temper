@@ -689,6 +689,9 @@ TEMPERDEV__EXTERN_C temperTestContext_t g_temperTestContext;
 	/*1. Create a function with a name matching the test.*/ \
 	void ( testName )( void ); \
 \
+	_Pragma( "clang diagnostic push" ) \
+	_Pragma( "clang diagnostic ignored \"-Wold-style-cast\"" ) \
+\
 	/*2. This is what the runner will loop over to grab the test function as well as all the information concerning it*/ \
 	TEMPERDEV__TEST_INFO_FETCHER( testName ) { \
 		uint64_t index = g_temperTestContext.testInfosCount++; \
@@ -703,6 +706,8 @@ TEMPERDEV__EXTERN_C temperTestContext_t g_temperTestContext;
 		testInfo->suiteNameStr		= suiteNameString; \
 		testInfo->testNameStr		= #testName; \
 	} \
+\
+	_Pragma( "clang diagnostic pop" ) \
 \
 	/*3. The test function declared at Step1 is now declared here by the user*/ \
 	void ( testName )( void )
@@ -730,6 +735,9 @@ TEMPERDEV__EXTERN_C temperTestContext_t g_temperTestContext;
 		testName( __VA_ARGS__ ); \
 	} \
 \
+	_Pragma( "clang diagnostic push" ) \
+	_Pragma( "clang diagnostic ignored \"-Wold-style-cast\"" ) \
+\
 	TEMPERDEV__TEST_INFO_FETCHER( invokationName ) { \
 		uint64_t index = g_temperTestContext.testInfosCount++; \
 \
@@ -739,6 +747,8 @@ TEMPERDEV__EXTERN_C temperTestContext_t g_temperTestContext;
 		TemperGetParametricTestInfo_ ## testName( testInfo ); \
 		testInfo->TestFuncCallback = TemperCallParametricTest_ ## invokationName; \
 	} \
+\
+	_Pragma( "clang diagnostic pop" ) \
 \
 	void __temper_test_info_fetcher_ ## invokationName( void )
 
