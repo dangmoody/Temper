@@ -612,10 +612,10 @@ typedef struct temperTestContext_t {
 	uint32_t			totalTestsExecuted;
 	uint32_t			currentTestErrorCount;
 	int32_t				exitCode;
-	uint32_t			pad0;
 	temperBool32		currentTestWasAborted;
 	temperBool32		partialFilter;
 	temperTimeUnit_t	timeUnit;
+	uint32_t			pad0;
 	const char*			suiteFilterPrevious;
 	const char*			suiteFilter;
 	const char*			testFilter;
@@ -657,9 +657,14 @@ TEMPERDEV__EXTERN_C temperTestContext_t g_temperTestContext;
 
 //----------------------------------------------------------
 
-#if defined( __GNUC__ ) || defined( __clang__ )
+#if defined( __clang__ )
 #define TEMPERDEV__TEST_INFO_FETCHER( testName ) \
 	void __temper_test_info_fetcher_ ## testName ( void ) __attribute__( ( constructor ) ); \
+	void __temper_test_info_fetcher_ ## testName ( void )
+#elif defined( __GNUC__ )
+#define TEMPERDEV__TEST_INFO_FETCHER( testName ) \
+	/* add 101 because gcc reserves constructors with priorities between 0 - 100 and __COUNTER__ starts at 0 */ \
+	void __temper_test_info_fetcher_ ## testName ( void ) __attribute__( ( constructor( __COUNTER__ + 101 ) ) ); \
 	void __temper_test_info_fetcher_ ## testName ( void )
 #elif defined( _MSC_VER )	// defined( __GNUC__ ) || defined( __clang__ )
 #ifdef _WIN64
