@@ -688,7 +688,6 @@ TEMPERDEV__EXTERN_C temperTestContext_t g_temperTestContext;
 static void TemperAddTestInternal( const temperTestInfo_t* newTestInfo ) {
 	TEMPERDEV__ASSERT( newTestInfo );
 	TEMPERDEV__ASSERT( newTestInfo->TestFuncCallback );
-	TEMPERDEV__ASSERT( newTestInfo->suiteNameStr );
 	TEMPERDEV__ASSERT( newTestInfo->testNameStr );
 
 	uint64_t index = g_temperTestContext.testInfosCount++;
