@@ -685,29 +685,43 @@ TEMPERDEV__EXTERN_C temperTestContext_t g_temperTestContext;
 
 //----------------------------------------------------------
 
+static void TemperAddTestInternal( const temperTestInfo_t* newTestInfo ) {
+	TEMPERDEV__ASSERT( newTestInfo );
+	TEMPERDEV__ASSERT( newTestInfo->OnBeforeTest );
+	TEMPERDEV__ASSERT( newTestInfo->TestFuncCallback );
+	TEMPERDEV__ASSERT( newTestInfo->OnAfterTest );
+	TEMPERDEV__ASSERT( newTestInfo->suiteNameStr );
+	TEMPERDEV__ASSERT( newTestInfo->testNameStr );
+
+	uint64_t index = g_temperTestContext.testInfosCount++;
+
+	g_temperTestContext.testInfos = (temperTestInfo_t*) TEMPERDEV__REALLOC( g_temperTestContext.testInfos, g_temperTestContext.testInfosCount * sizeof( temperTestInfo_t ) );
+
+	temperTestInfo_t* testInfo = &g_temperTestContext.testInfos[index];
+	testInfo->OnBeforeTest		= newTestInfo->OnBeforeTest;
+	testInfo->TestFuncCallback	= newTestInfo->TestFuncCallback;
+	testInfo->OnAfterTest		= newTestInfo->OnAfterTest;
+	testInfo->testingFlag		= newTestInfo->testingFlag;
+	testInfo->suiteNameStr		= newTestInfo->suiteNameStr;
+	testInfo->testNameStr		= newTestInfo->testNameStr;
+}
+
 #define TEMPERDEV__DEFINE_TEST( suiteNameString, testName, onBeforeName, onAfterName, runFlag ) \
 	/*1. Create a function with a name matching the test.*/ \
 	void ( testName )( void ); \
 \
-	_Pragma( "clang diagnostic push" ) \
-	_Pragma( "clang diagnostic ignored \"-Wold-style-cast\"" ) \
-\
 	/*2. This is what the runner will loop over to grab the test function as well as all the information concerning it*/ \
 	TEMPERDEV__TEST_INFO_FETCHER( testName ) { \
-		uint64_t index = g_temperTestContext.testInfosCount++; \
+		temperTestInfo_t testInfo; \
+		testInfo.OnBeforeTest		= onBeforeName; \
+		testInfo.TestFuncCallback	= testName; \
+		testInfo.OnAfterTest		= onAfterName; \
+		testInfo.testingFlag		= runFlag; \
+		testInfo.suiteNameStr		= suiteNameString; \
+		testInfo.testNameStr		= #testName; \
 \
-		g_temperTestContext.testInfos = (temperTestInfo_t*) TEMPERDEV__REALLOC( g_temperTestContext.testInfos, g_temperTestContext.testInfosCount * sizeof( temperTestInfo_t ) ); \
-\
-		temperTestInfo_t* testInfo = &g_temperTestContext.testInfos[index]; \
-		testInfo->OnBeforeTest		= onBeforeName; \
-		testInfo->TestFuncCallback	= testName; \
-		testInfo->OnAfterTest		= onAfterName; \
-		testInfo->testingFlag		= runFlag; \
-		testInfo->suiteNameStr		= suiteNameString; \
-		testInfo->testNameStr		= #testName; \
+		TemperAddTestInternal( &testInfo ); \
 	} \
-\
-	_Pragma( "clang diagnostic pop" ) \
 \
 	/*3. The test function declared at Step1 is now declared here by the user*/ \
 	void ( testName )( void )
@@ -735,20 +749,13 @@ TEMPERDEV__EXTERN_C temperTestContext_t g_temperTestContext;
 		testName( __VA_ARGS__ ); \
 	} \
 \
-	_Pragma( "clang diagnostic push" ) \
-	_Pragma( "clang diagnostic ignored \"-Wold-style-cast\"" ) \
-\
 	TEMPERDEV__TEST_INFO_FETCHER( invokationName ) { \
-		uint64_t index = g_temperTestContext.testInfosCount++; \
+		temperTestInfo_t testInfo; \
+		TemperGetParametricTestInfo_ ## testName( &testInfo ); \
+		testInfo.TestFuncCallback = TemperCallParametricTest_ ## invokationName; \
 \
-		g_temperTestContext.testInfos = (temperTestInfo_t*) TEMPERDEV__REALLOC( g_temperTestContext.testInfos, g_temperTestContext.testInfosCount * sizeof( temperTestInfo_t ) ); \
-\
-		temperTestInfo_t* testInfo = &g_temperTestContext.testInfos[index]; \
-		TemperGetParametricTestInfo_ ## testName( testInfo ); \
-		testInfo->TestFuncCallback = TemperCallParametricTest_ ## invokationName; \
+		TemperAddTestInternal( &testInfo ); \
 	} \
-\
-	_Pragma( "clang diagnostic pop" ) \
 \
 	void __temper_test_info_fetcher_ ## invokationName( void )
 
