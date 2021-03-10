@@ -685,24 +685,6 @@ TEMPERDEV__EXTERN_C temperTestContext_t g_temperTestContext;
 
 //----------------------------------------------------------
 
-static void TemperAddTestInternal( const temperTestInfo_t* newTestInfo ) {
-	TEMPERDEV__ASSERT( newTestInfo );
-	TEMPERDEV__ASSERT( newTestInfo->TestFuncCallback );
-	TEMPERDEV__ASSERT( newTestInfo->testNameStr );
-
-	uint64_t index = g_temperTestContext.testInfosCount++;
-
-	g_temperTestContext.testInfos = (temperTestInfo_t*) TEMPERDEV__REALLOC( g_temperTestContext.testInfos, g_temperTestContext.testInfosCount * sizeof( temperTestInfo_t ) );
-
-	temperTestInfo_t* testInfo = &g_temperTestContext.testInfos[index];
-	testInfo->OnBeforeTest		= newTestInfo->OnBeforeTest;
-	testInfo->TestFuncCallback	= newTestInfo->TestFuncCallback;
-	testInfo->OnAfterTest		= newTestInfo->OnAfterTest;
-	testInfo->testingFlag		= newTestInfo->testingFlag;
-	testInfo->suiteNameStr		= newTestInfo->suiteNameStr;
-	testInfo->testNameStr		= newTestInfo->testNameStr;
-}
-
 #define TEMPERDEV__DEFINE_TEST( suiteNameString, testName, onBeforeName, onAfterName, runFlag ) \
 	/*1. Create a function with a name matching the test.*/ \
 	void ( testName )( void ); \
@@ -775,6 +757,8 @@ typedef const char*					temperTextColor_t;
 #endif // defined( _WIN32 )
 
 //----------------------------------------------------------
+
+TEMPERDEV__EXTERN_C void	TemperAddTestInternal( const temperTestInfo_t* newTestInfo );
 
 TEMPERDEV__EXTERN_C void	TemperTestTrueInternal( const bool condition, const char* conditionStr, const bool abortOnFail, const char* file, const uint32_t line, const char* fmt, ... );
 
@@ -884,6 +868,26 @@ bool TemperFloatEqualsInternal( const float a, const float b, const float absolu
 	bool isInRange = TEMPERDEV__ABSF( a - b ) <= TEMPERDEV__MAXF( absoluteTolerance, relativeTolerance * TEMPERDEV__MAXF( TEMPERDEV__ABSF( a ), TEMPERDEV__ABSF( b ) ) );
 
 	return isInRange;
+}
+
+//----------------------------------------------------------
+
+void TemperAddTestInternal( const temperTestInfo_t* newTestInfo ) {
+	TEMPERDEV__ASSERT( newTestInfo );
+	TEMPERDEV__ASSERT( newTestInfo->TestFuncCallback );
+	TEMPERDEV__ASSERT( newTestInfo->testNameStr );
+
+	uint64_t index = g_temperTestContext.testInfosCount++;
+
+	g_temperTestContext.testInfos = (temperTestInfo_t*) TEMPERDEV__REALLOC( g_temperTestContext.testInfos, g_temperTestContext.testInfosCount * sizeof( temperTestInfo_t ) );
+
+	temperTestInfo_t* testInfo = &g_temperTestContext.testInfos[index];
+	testInfo->OnBeforeTest		= newTestInfo->OnBeforeTest;
+	testInfo->TestFuncCallback	= newTestInfo->TestFuncCallback;
+	testInfo->OnAfterTest		= newTestInfo->OnAfterTest;
+	testInfo->testingFlag		= newTestInfo->testingFlag;
+	testInfo->suiteNameStr		= newTestInfo->suiteNameStr;
+	testInfo->testNameStr		= newTestInfo->testNameStr;
 }
 
 //----------------------------------------------------------
