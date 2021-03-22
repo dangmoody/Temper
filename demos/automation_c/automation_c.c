@@ -187,7 +187,7 @@ RESULT_DEPDENDANT_TEST_PARAMETRIC( ParametricTest_WithRunFlag_IsExecuted, const 
 	TEMPER_CHECK_TRUE( check );
 }
 
-TEMPER_INVOKE_PARAMETRIC_TEST( ParametricTest_WithRunFlag_IsExecuted, CheckRun, true );
+TEMPER_INVOKE_PARAMETRIC_TEST( ParametricTest_WithRunFlag_IsExecuted, true );
 
 TEMPER_TEST( CheckAndCleanResults_3, TEMPER_FLAG_SHOULD_RUN ) {
 	AssertResults( 1, 0, 0, 0 );
@@ -203,7 +203,7 @@ TEMPER_PARAMETRIC( ParametricTest_WithDeprecatedFlag_TriggersSkipCount, TEMPER_F
 	TEMPER_CHECK_TRUE_AM( check, "This test shouldn't have executed, it's flagged as Deprecated." );
 }
 
-TEMPER_INVOKE_PARAMETRIC_TEST( ParametricTest_WithDeprecatedFlag_TriggersSkipCount, CheckDeprecated, false );
+TEMPER_INVOKE_PARAMETRIC_TEST( ParametricTest_WithDeprecatedFlag_TriggersSkipCount, false );
 
 TEMPER_TEST( CheckAndCleanResults_4, TEMPER_FLAG_SHOULD_RUN ) {
 	if ( g_temperTestContext.testsSkipped == 1 ) {
@@ -215,7 +215,7 @@ TEMPER_PARAMETRIC( ParametricTest_WithSkipFlag_TriggersSkipCount, TEMPER_FLAG_SH
 	TEMPER_CHECK_TRUE_AM( check, "This test shouldn't have executed, it's flagged as Skipped." );
 }
 
-TEMPER_INVOKE_PARAMETRIC_TEST( ParametricTest_WithSkipFlag_TriggersSkipCount, CheckSkip, false );
+TEMPER_INVOKE_PARAMETRIC_TEST( ParametricTest_WithSkipFlag_TriggersSkipCount, false );
 
 TEMPER_TEST( CheckAndCleanResults_5, TEMPER_FLAG_SHOULD_RUN ) {
 	if ( g_temperTestContext.testsSkipped == 1 ) {
@@ -243,10 +243,10 @@ TEMPER_PARAMETRIC( ParametricTest_WhenDeclaredWithStructParm_StructParmIsValid, 
 	TEMPER_CHECK_TRUE_AM( person->age == expectedAge, "person->age was expected to be \"%d\" but was actually \"%d\".\n", expectedAge, person->age );
 }
 
-TEMPER_INVOKE_PARAMETRIC_TEST( ParametricTest_WhenDeclaredWithStructParm_StructParmIsValid, ParametricStructTestDan,     &(person_t) { "Dan",     25  }, "Dan",     25  );
-TEMPER_INVOKE_PARAMETRIC_TEST( ParametricTest_WhenDeclaredWithStructParm_StructParmIsValid, ParametricStructTestMike,    &(person_t) { "Mike",    25  }, "Mike",    25  );
-TEMPER_INVOKE_PARAMETRIC_TEST( ParametricTest_WhenDeclaredWithStructParm_StructParmIsValid, ParametricStructTestBilbo,   &(person_t) { "Bilbo",   111 }, "Bilbo",   111 );
-TEMPER_INVOKE_PARAMETRIC_TEST( ParametricTest_WhenDeclaredWithStructParm_StructParmIsValid, ParametricStructTestAragorn, &(person_t) { "Aragorn", 87  }, "Aragorn", 87  );
+TEMPER_INVOKE_PARAMETRIC_TEST( ParametricTest_WhenDeclaredWithStructParm_StructParmIsValid, &(person_t) { "Dan",     25  }, "Dan",     25  );
+TEMPER_INVOKE_PARAMETRIC_TEST( ParametricTest_WhenDeclaredWithStructParm_StructParmIsValid, &(person_t) { "Mike",    25  }, "Mike",    25  );
+TEMPER_INVOKE_PARAMETRIC_TEST( ParametricTest_WhenDeclaredWithStructParm_StructParmIsValid, &(person_t) { "Bilbo",   111 }, "Bilbo",   111 );
+TEMPER_INVOKE_PARAMETRIC_TEST( ParametricTest_WhenDeclaredWithStructParm_StructParmIsValid, &(person_t) { "Aragorn", 87  }, "Aragorn", 87  );
 
 //----------------------------------------------------------
 // EXCEL_TestName - When a test triggers any errors it increments the error count for the test correctly
@@ -299,7 +299,7 @@ RESULT_DEPDENDANT_TEST_PARAMETRIC( CheckTrue_WhenAbortTriggered_AbortsParametric
 	TEMPER_CHECK_TRUE_M( check, "We shouldn't hit this. Asserted in the CheckAndClean.\n" );
 }
 
-TEMPER_INVOKE_PARAMETRIC_TEST( CheckTrue_WhenAbortTriggered_AbortsParametricTest, CheckParametricAbort, false );
+TEMPER_INVOKE_PARAMETRIC_TEST( CheckTrue_WhenAbortTriggered_AbortsParametricTest, false );
 
 TEMPER_TEST( CheckAndCleanResults_8, TEMPER_FLAG_SHOULD_RUN ) {
 	if( AssertResults( 0, 1, 1, 0 ) ) {

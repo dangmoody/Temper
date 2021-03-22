@@ -285,8 +285,8 @@ extern "C" {
 //----------------------------------------------------------
 
 // Runs a parametric test with the specified parameters.
-#define TEMPER_INVOKE_PARAMETRIC_TEST( testName, invokationName, ... ) \
-	TEMPERDEV__INVOKE_PARAMETRIC_TEST( testName, invokationName,__VA_ARGS__ )
+#define TEMPER_INVOKE_PARAMETRIC_TEST( testName, ... ) \
+	TEMPERDEV__INVOKE_PARAMETRIC_TEST( __COUNTER__, testName, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
@@ -652,20 +652,25 @@ TEMPERDEV__EXTERN_C temperTestContext_t g_temperTestContext;
 
 //----------------------------------------------------------
 
-#define TEMPERDEV__CONCAT_FINAL( a, b )	a ## b
-#define TEMPERDEV__CONCAT( a, b )		TEMPERDEV__CONCAT_FINAL( a, b )	// use this one
+#define TEMPERDEV__CONCAT_( a, b )		a ## b
+#define TEMPERDEV__CONCAT( a, b )		TEMPERDEV__CONCAT_( a, b )	// use this one
+
+//----------------------------------------------------------
+
+#define TEMPERDEV__STRINGIFY_( x )		#x
+#define TEMPERDEV__STRINGIFY( x )		TEMPERDEV__STRINGIFY_( x )	// use this one
 
 //----------------------------------------------------------
 
 #if defined( __clang__ )
 #define TEMPERDEV__TEST_INFO_FETCHER( testName ) \
-	void __temper_test_info_fetcher_ ## testName ( void ) __attribute__( ( constructor ) ); \
-	void __temper_test_info_fetcher_ ## testName ( void )
+	void TEMPERDEV__CONCAT( __temper_test_info_fetcher_, testName )( void ) __attribute__( ( constructor ) ); \
+	void TEMPERDEV__CONCAT( __temper_test_info_fetcher_, testName )( void )
 #elif defined( __GNUC__ )
 #define TEMPERDEV__TEST_INFO_FETCHER( testName ) \
 	/* add 101 because gcc reserves constructors with priorities between 0 - 100 and __COUNTER__ starts at 0 */ \
-	void __temper_test_info_fetcher_ ## testName ( void ) __attribute__( ( constructor( __COUNTER__ + 101 ) ) ); \
-	void __temper_test_info_fetcher_ ## testName ( void )
+	void TEMPERDEV__CONCAT( __temper_test_info_fetcher_, testName )( void ) __attribute__( ( constructor( __COUNTER__ + 101 ) ) ); \
+	void TEMPERDEV__CONCAT( __temper_test_info_fetcher_, testName )( void )
 #elif defined( _MSC_VER )	// defined( __GNUC__ ) || defined( __clang__ )
 #ifdef _WIN64
 #define TEMPERDEV__MSVC_PREFIX	""
@@ -675,12 +680,12 @@ TEMPERDEV__EXTERN_C temperTestContext_t g_temperTestContext;
 
 #pragma section( ".CRT$XCU", read )
 #define TEMPERDEV__TEST_INFO_FETCHER( testName ) \
-	void __temper_test_info_fetcher_ ## testName( void ); \
+	void TEMPERDEV__CONCAT( __temper_test_info_fetcher_, testName )( void ); \
 \
-	TEMPERDEV__EXTERN_C __declspec( allocate( ".CRT$XCU" ) ) void ( *testName ## _FuncPtr )( void ) = __temper_test_info_fetcher_ ## testName; \
-	__pragma( comment( linker, "/include:" TEMPERDEV__MSVC_PREFIX #testName "_FuncPtr" ) ) \
+	TEMPERDEV__EXTERN_C __declspec( allocate( ".CRT$XCU" ) ) void ( * TEMPERDEV__CONCAT( testName, _FuncPtr ) )( void ) = TEMPERDEV__CONCAT( __temper_test_info_fetcher_, testName ); \
+	__pragma( comment( linker, "/include:" TEMPERDEV__MSVC_PREFIX TEMPERDEV__CONCAT( TEMPERDEV__STRINGIFY( testName ), "_FuncPtr" ) ) ) \
 \
-	void __temper_test_info_fetcher_ ## testName( void )
+	void TEMPERDEV__CONCAT( __temper_test_info_fetcher_, testName )( void )
 #endif	// defined( _MSC_VER )
 
 //----------------------------------------------------------
@@ -722,21 +727,21 @@ TEMPERDEV__EXTERN_C temperTestContext_t g_temperTestContext;
 
 //----------------------------------------------------------------
 
-#define TEMPERDEV__INVOKE_PARAMETRIC_TEST( testName, invokationName, ... ) \
-	void TemperCallParametricTest_ ## invokationName( void ); \
-	void TemperCallParametricTest_ ## invokationName( void ) { \
+#define TEMPERDEV__INVOKE_PARAMETRIC_TEST( counter, testName, ... ) \
+	void TEMPERDEV__CONCAT( TemperCallParametricTest_, TEMPERDEV__CONCAT( testName, counter ) )( void ); \
+	void TEMPERDEV__CONCAT( TemperCallParametricTest_, TEMPERDEV__CONCAT( testName, counter ) )( void ) { \
 		testName( __VA_ARGS__ ); \
 	} \
 \
-	TEMPERDEV__TEST_INFO_FETCHER( invokationName ) { \
+	TEMPERDEV__TEST_INFO_FETCHER( TEMPERDEV__CONCAT( testName, counter ) ) { \
 		temperTestInfo_t testInfo; \
 		TemperGetParametricTestInfo_ ## testName( &testInfo ); \
-		testInfo.TestFuncCallback = TemperCallParametricTest_ ## invokationName; \
+		testInfo.TestFuncCallback = TEMPERDEV__CONCAT( TemperCallParametricTest_, TEMPERDEV__CONCAT( testName, counter ) ); \
 \
 		TemperAddTestInternal( &testInfo ); \
 	} \
 \
-	void __temper_test_info_fetcher_ ## invokationName( void )
+	void TEMPERDEV__CONCAT( __temper_test_info_fetcher_, TEMPERDEV__CONCAT( testName, counter ) )( void )
 
 //----------------------------------------------------------------
 
