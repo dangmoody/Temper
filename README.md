@@ -116,6 +116,7 @@ ___
 
 It's worth pointing out that all of these conditions have optional suffixes which you can apply for more options:
 
+___
 ### __3.3 Suffixes for test macros__
 
 |    Suffix     |                                                        Description                                                         |
@@ -124,7 +125,7 @@ It's worth pointing out that all of these conditions have optional suffixes whic
 | `_A`          | If this condition fails the whole test will exit early                                                                     |
 | `_AM`         | Allows you to append a string parameter that will be output if the condition fails, it will also have the test exit early. |
 
-### __3.4 Examples of Suffixes:__
+#### __Examples of Suffixes:__
 
 ```c
 TEMPER_CHECK_TRUE( 5 == 6 ); // When this fails will log an error showing the condition on the file and line where if failed.
