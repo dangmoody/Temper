@@ -8,32 +8,32 @@ The new and improved C99, single-header-only, unit testing framework.
 
 Distributed under the MIT license.  See [LICENSE](https://github.com/dangmoody/Tantrum/blob/master/LICENSE) file for details.
 
-## Features:
+___
+## 1 - Features:
 
 - Automatic test registration at compile time, simply write your test and it will get called for you.
 - Parametric tests.
-- Early exits for tests and a bunch of new condition macros.
-- Handling errors from your program's log output (requires a bit of extra work on your part). `// DM: I'm thinking about this`
+- Early exits for tests (aborts).
+- A bunch of new condition macros.
+- Works in multi unit compilation.
 - Low friction, easily overridable functions to help hook Temper into your codebase.
+- Unintrusive STB style source to keep operating system includes out of your code base.
 - Support for Clang, GCC, and MSVC across Windows, Mac OS, and Linux on x64 ISAs (support for ARM in progress).
 
-`// DM: rework this maybe?`
-`// DM: I like the marketing - be more human`
-It's not a new feature but worth stressing. It's still just the one header file.  Drop it into your project, tell it to run all tests somewhere in code and you're good to go! And once again; it's all written in C99 compliant code.
-
-## Installation
+___
+## 2 - Installation
 
 Download the latest release from the [releases](https://github.com/dangmoody/Tantrum/releases/latest) tab.
 
 Include `temper.h` and define `TEMPER_IMPLEMENTATION` in one source file (just like the [stb libraries](https://github.com/nothings/stb)).
 
-## Quick start guide:
+### __2.1 Quick start guide:__
 
 ```c
-#define TEMPER_IMPLEMENTATION
+#define TEMPER_IMPLEMENTATION // Creates the source definitions for temper
 #include <temper.h>
 
-// write some tests
+// Write some tests
 
 int main( int argc, char** argv )
 {
@@ -41,8 +41,8 @@ int main( int argc, char** argv )
 	return TEMPER_GET_EXIT_CODE(); // Fetches your return code
 }
 ```
-
-#### Compiling
+___
+### __2.2 Compiling__
 
 On Windows and Mac OS you shouldn't need to do anything extra on your part to get Temper to compile correctly.  There should be no other dependencies that are required.  If you find that there are, please submit a [bug report](https://github.com/dangmoody/Tantrum/issues).
 
@@ -53,9 +53,12 @@ If you are compiling Temper on Linux and you are NOT overriding the default inte
 
 When compiled, this will then produce an executable that will run all tests you have defined and return `TEMPDERDEV__EXIT_SUCCESS` (overridable) if there were no errors.  If there were errors then the program will return `TEMPDERDEV__EXIT_FAILURE` (overridable).
 
-#### Writing tests
+___
+## 3 - Defining tests
 
 A test can be defined either as a part of or not a part of a suite and with or without parameters. You can even mute it so it will be skipped when it comes time for Temper to run it by just changing the `TEMPER_FLAG` parameter.
+
+### __3.1 Writing tests__
 
 ```c
 // Define a simple test with a Name only
@@ -65,13 +68,13 @@ TEMPER_TEST( TestName, TEMPER_FLAG_RUN )
 }
 
 // Define a test as a part of a suite
-TEMPER_SUITE_TEST( SuiteName, TestName2, TEMPER_FLAG_SHOULD_RUN )
+TEMPER_SUITE_TEST( SuiteName, TestName2, TEMPER_FLAG_RUN )
 {
 	TEMPER_CHECK_TRUE( 69 == 420 );
 }
 
 // Define a parametric test (can take whatever parameters you like)
-TEMPER_PARAMETRIC( TestName3, TEMPER_FLAG_SHOULD_RUN, int param1, int param2 )
+TEMPER_PARAMETRIC( TestName3, TEMPER_FLAG_SHOULD_RUN, int param1, int param2, TEMPER_FLAG_RUN )
 {
 	TEMPER_CHECK_EQUAL( param1, param2 );
 }
@@ -82,7 +85,7 @@ TEMPER_INVOKE_PARAMETRIC_TEST( TestName3, 5, 6 ); // will fail
 TEMPER_INVOKE_PARAMETRIC_TEST( TestName3, 7, 7 ); // will work
 
 // Define a parametric test as a part of a suite
-TEMPER_PARAMETRIC_SUITE( SuiteName, TestName4, TEMPER_FLAG_SHOULD_RUN, int param1, int param2 )
+TEMPER_PARAMETRIC_SUITE( SuiteName, TestName4, TEMPER_FLAG_SHOULD_RUN, int param1, int param2, TEMPER_FLAG_RUN )
 {
 	TEMPER_CHECK_EQUAL( param1, param2 );
 }
@@ -91,9 +94,15 @@ TEMPER_PARAMETRIC_SUITE( SuiteName, TestName4, TEMPER_FLAG_SHOULD_RUN, int param
 TEMPER_INVOKE_PARAMETRIC_TEST( TestName4, 5, 5 ); // will work
 TEMPER_INVOKE_PARAMETRIC_TEST( TestName4, 5, 6 ); // will fail
 TEMPER_INVOKE_PARAMETRIC_TEST( TestName4, 7, 7 ); // will work
+
+// If you add _C to the end of any of the test definition macros you
+// can also feed in an optional OnBeforeTest and OnAfterTest callback
+// function - useful for setting up and tearing down a common environment
+// for multiple tests.
 ```
 
-#### Test cases / Conditional macros
+___
+### __3.2 Test cases / Conditional macros__
 
 |                        Name                         |                                               Description                                                |
 | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
@@ -107,7 +116,7 @@ TEMPER_INVOKE_PARAMETRIC_TEST( TestName4, 7, 7 ); // will work
 
 It's worth pointing out that all of these conditions have optional suffixes which you can apply for more options:
 
-#### Suffixes for test macros
+### __3.3 Suffixes for test macros__
 
 |    Suffix     |                                                        Description                                                         |
 | ------------- | -------------------------------------------------------------------------------------------------------------------------- |
@@ -115,7 +124,7 @@ It's worth pointing out that all of these conditions have optional suffixes whic
 | `_A`          | If this condition fails the whole test will exit early                                                                     |
 | `_AM`         | Allows you to append a string parameter that will be output if the condition fails, it will also have the test exit early. |
 
-#### Examples of Suffixes:
+### __3.4 Examples of Suffixes:__
 
 ```c
 TEMPER_CHECK_TRUE( 5 == 6 ); // When this fails will log an error showing the condition on the file and line where if failed.
@@ -124,13 +133,15 @@ TEMPER_CHECK_TRUE_A( 5 == 6 ); // Same as the TEMPER_CHECK_TRUE example, except 
 TEMPER_CHECK_TRUE_AM( 5 == 6, "Maths is broken." ); // Same as the example above, except it will log the error message "Maths is broken" along with the condition on the file and line where it failed.
 ```
 
-## Overriding internal functions
+___
+## 4 - Overriding internal functions
 
 Temper has a number of user-overridable macros (E.G.: `TEMPERDEV__GET_PROC_ADDRESS`) which you can use to help hook Temper into your own codebase.
 
 If you are running on a platform that **ISN'T** Windows, Mac OS, or Linux then you will definitely want to override these functions as some of Temper's internal functions make calls to their respective OS-level API.
 
-## Command line arguments
+___
+## 5 - Command line arguments
 
 Temper supports the following command line arguments:
 
@@ -152,7 +163,8 @@ Temper supports the following command line arguments:
 	The default is microseconds.
 ```
 
-## Contributing
+___
+## 6 - Contributing
 
 Yes!
 
@@ -160,7 +172,8 @@ If you want to submit an idea/bug then use the [GitHub issue tracker](https://gi
 
 If you want to submit code then we are open to pull requests.  See [contributing.md](https://github.com/dangmoody/Tantrum/blob/master/doc/how_to_contribute.md) for details.
 
-## Credits
+___
+## 7 - Credits
 
 * Dan Moody
 * Mike Young
