@@ -1,4 +1,4 @@
-<img align="left" src="https://github.com/dangmoody/Tantrum/blob/master/doc/DarkTheme.png" width=256>
+<img align="left" src="https://github.com/dangmoody/Tantrum/blob/master/doc/DarkTheme.png" width=128>
 
 # Temper
 
