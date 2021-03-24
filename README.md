@@ -1,3 +1,5 @@
+<img align="left" src="https://github.com/dangmoody/Tantrum/blob/master/doc/DarkTheme.png" width=256>
+
 # Temper
 
 ![CI](https://github.com/dangmoody/Tantrum/workflows/CI/badge.svg)
