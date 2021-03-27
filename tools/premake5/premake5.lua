@@ -20,7 +20,7 @@ end
 workspace( "Temper" )
 	location( g_generated_project_files_root )
 
-	platforms { "win64-clang", "win64-clang++", "win64-gcc", "win64-g++", "win64-msvc" }
+	platforms { "win64-clang", "win64-gcc", "win64-msvc" }
 	configurations { "debug", "release" }
 
 	startproject( "demos" )
@@ -39,73 +39,42 @@ workspace( "Temper" )
 88888888Y"'     `"Ybbd8"'  88      88      88   `"YbbdP"'   `"YbbdP"'  
 ]]
 
-function set_binaries_and_build_commands( demo_name, language_file_ext, compiler, compiler_define )
-	if ( compiler ~= "clang" ) and ( compiler ~= "clang++" ) and ( compiler ~= "gcc" ) and ( compiler ~= "g++" ) and ( compiler ~= "msvc" ) then
-		print( "ERROR: Compiler \"" .. compiler .. "\" is not a valid compiler name to generate a project for.  Please use one of the correct ones.\n" )
-		return
-	end
+function set_platform_settings( platform, demo_name, language_file_ext, compiler, compiler_define )
+	build_command = "..\\" .. g_folder_scripts .. "build_" .. compiler .. ".bat --output " .. demo_name .. ".exe" .. " --config %{cfg.buildcfg} --source " .. g_folder_demos .. demo_name .. "\\" .. demo_name .. "." .. language_file_ext
 
-	kind( "MakeFile" )
+	filter ( "platforms:" .. platform )
+		buildcommands (
+			build_command
+		)
 
-	if ( compiler == "msvc" ) then
-		filter ( "platforms:win64-msvc" )
-			buildcommands (
-				"..\\" .. g_folder_scripts .. "build_msvc.bat --output " .. demo_name .. ".exe" .. " --config %{cfg.buildcfg} --source " .. g_folder_demos .. demo_name .. "\\" .. demo_name .. "." .. language_file_ext
-			)
+		rebuildcommands (
+			build_command
+		)
 
-			rebuildcommands (
-				"..\\" .. g_folder_scripts .. "build_msvc.bat --output " .. demo_name .. ".exe" .. " --config %{cfg.buildcfg} --source " .. g_folder_demos .. demo_name .. "\\" .. demo_name .. "." .. language_file_ext
-			)
+		cleancommands (
+			"..\\" .. g_folder_scripts .. "clean.bat"
+		)
 
-			cleancommands (
-				"..\\" .. g_folder_scripts .. "clean.bat"
-			)
+		defines {
+			compiler_define
+		}
 
-			defines {
-			}
+		-- required because VS will create these folders if they don't exist
+		targetdir( "..\\..\\bin\\win64\\" .. compiler .. "\\%{cfg.buildcfg}\\" .. g_folder_demos )
+		objdir( "!..\\..\\bin\\win64\\" .. compiler .. "\\%{cfg.buildcfg}\\" .. g_folder_demos .. "intermediate" )
 
-			-- required because VS will create these folders if they don't exist
-			targetdir( "..\\..\\bin\\win64\\" .. compiler .. "\\%{cfg.buildcfg}\\" .. g_folder_demos )
-			objdir( "!..\\..\\bin\\win64\\" .. compiler .. "\\%{cfg.buildcfg}\\" .. g_folder_demos .. "intermediate" )
-
-			debugcommand( "..\\..\\bin\\win64\\" .. compiler .. "\\%{cfg.buildcfg}\\" .. g_folder_demos .. demo_name .. ".exe" )
-		filter {}
-	else
-		filter ( "platforms:win64-" .. compiler )
-			buildcommands (
-				"..\\" .. g_folder_scripts .. "build_clang_gcc.bat --output " .. demo_name .. ".exe" .. " --compiler " .. compiler .. " --config %{cfg.buildcfg} --source " .. g_folder_demos .. demo_name .. "\\" .. demo_name .. "." .. language_file_ext
-			)
-
-			rebuildcommands (
-				"..\\" .. g_folder_scripts .. "build_clang_gcc.bat --output " .. demo_name .. ".exe" .. " --compiler " .. compiler .. " --config %{cfg.buildcfg} --source " .. g_folder_demos .. demo_name .. "\\" .. demo_name .. "." .. language_file_ext
-			)
-
-			cleancommands (
-				"..\\" .. g_folder_scripts .. "clean.bat"
-			)
-
-			defines {
-				compiler_define
-			}
-
-			-- required because VS will create these folders if they don't exist
-			targetdir( "..\\..\\bin\\win64\\" .. compiler .. "\\%{cfg.buildcfg}\\" .. g_folder_demos )
-			objdir( "!..\\..\\bin\\win64\\" .. compiler .. "\\%{cfg.buildcfg}\\" .. g_folder_demos .. "intermediate" )
-
-			debugcommand( "..\\..\\bin\\win64\\" .. compiler .. "\\%{cfg.buildcfg}\\" .. g_folder_demos .. demo_name .. ".exe" )
-		filter {}
-	end
+		debugcommand( "..\\..\\bin\\win64\\" .. compiler .. "\\%{cfg.buildcfg}\\" .. g_folder_demos .. demo_name .. ".exe" )
+	filter {}
 end
 
-function make_demo_project( demo_name )
-	project( demo_name )
+project( "automation_c" )
 	location( g_generated_project_files_root )
 
 	files {
-		"..\\..\\" .. g_folder_demos .. demo_name .. "\\**.c",
-		"..\\..\\" .. g_folder_demos .. demo_name .. "\\**.h",
-		"..\\..\\" .. g_folder_demos .. demo_name .. "\\**.cpp",
-		"..\\..\\" .. g_folder_demos .. demo_name .. "\\**.inl"
+		"..\\..\\" .. g_folder_demos .. "automation_c\\**.c",
+		"..\\..\\" .. g_folder_demos .. "automation_c\\**.h",
+		"..\\..\\" .. g_folder_demos .. "automation_c\\**.cpp",
+		"..\\..\\" .. g_folder_demos .. "automation_c\\**.inl"
 	}
 
 	defines {
@@ -119,14 +88,11 @@ function make_demo_project( demo_name )
 
 	debugdir( "$(SolutionDir)..\\" )
 
-	set_binaries_and_build_commands( demo_name, "c",   "clang",   "__clang__" )
-    set_binaries_and_build_commands( demo_name, "cpp", "clang++", "__clang__" )
+	kind( "MakeFile" )
 
-    set_binaries_and_build_commands( demo_name, "c",   "gcc",     "__GNUC__" )
-    set_binaries_and_build_commands( demo_name, "cpp", "g++",     "__GNUC__" )
-
-    set_binaries_and_build_commands( demo_name, "c",   "msvc",    "" )
-    set_binaries_and_build_commands( demo_name, "cpp", "msvc",    "" )
+	set_platform_settings( "win64-clang", "automation_c", "c", "clang", "__clang__" )
+	set_platform_settings( "win64-gcc",   "automation_c", "c", "gcc",   "__GNUC__" )
+	set_platform_settings( "win64-msvc",  "automation_c", "c", "msvc",  "" )
 
 	filter "configurations:debug"
 		defines {
@@ -138,18 +104,41 @@ function make_demo_project( demo_name )
 			"NDEBUG"
 		}
 	filter {}
-end
 
+project( "automation_cpp" )
+	location( g_generated_project_files_root )
 
-g_demos_names = {
-	"automation_c",
-	"automation_cpp",
-	"scale_test_c",
-	"no_counter"
-}
+	files {
+		"..\\..\\" .. g_folder_demos .. "automation_cpp\\**.c",
+		"..\\..\\" .. g_folder_demos .. "automation_cpp\\**.h",
+		"..\\..\\" .. g_folder_demos .. "automation_cpp\\**.cpp",
+		"..\\..\\" .. g_folder_demos .. "automation_cpp\\**.inl"
+	}
 
-group( "demos" )
-g_demos_names_length = array_length( g_demos_names )
-for i = 1, g_demos_names_length do
-	make_demo_project( g_demos_names[i] )
-end
+	defines {
+	}
+
+	sysincludedirs {
+	}
+
+	syslibdirs {
+	}
+
+	debugdir( "$(SolutionDir)..\\" )
+
+	kind( "MakeFile" )
+
+	set_platform_settings( "win64-clang", "automation_cpp", "cpp", "clang++", "__clang__" )
+	set_platform_settings( "win64-gcc",   "automation_cpp", "cpp", "g++",   "__GNUC__" )
+	set_platform_settings( "win64-msvc",  "automation_cpp", "cpp", "msvc",  "" )
+
+	filter "configurations:debug"
+		defines {
+			"_DEBUG"
+		}
+
+	filter "configurations:release"
+		defines {
+			"NDEBUG"
+		}
+	filter {}
