@@ -35,3 +35,6 @@ Your PR has a higher chance of being accepted if it fulfills at least one of the
 If your change doesn't do any of these things then it doesn't mean it won't get accepted, it just means your PR stands less of a chance of being accepted.
 
 We don't bite and we're open to ideas.
+
+## Recommended Reading
+For Temper we like to follow the [Handmade Network's excellent written piece](https://handmade.network/wiki/7138-how_to_write_better_game_libraries) on how to write better game libraries for guiding principles.  We don't follow it super strictly, but we do refer to it often.
