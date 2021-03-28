@@ -114,27 +114,34 @@ Programming:
 	Mike Young
 
 Special Thanks:
+	Danny Grezel - logo!
 	Zack Dutton - bug reports and testing
 
 
 7. CHANGELOG
-v2.0.0, <RELEASE DATE HERE>:
+v2.0.0, 28/03/2021:
 	* Nearly everything has been completely re-written from scratch.
 	* Including Temper now requires defining `TEMPER_IMPLEMENTATION` (same as stb).
 	* Tests are now self-registering.  All you need to do now is write the test code and the tests will get called automatically for you (unless the test is marked as skipped).
 		* Because of this, the functions `TEMPER_RUN_TEST` and `TEMPER_SKIP_TEST` have been removed.
 		* If you want to skip a test now you must now do so by setting the test flag.
 		* Due to how tests are now registered, `TEMPER_SUITE` has also been removed.
+			* Suite names are now specified per-test, to allow for being able to specify tests in the same suite across multiple source files.
 	* Added parametric testing.
 	* Added tests that have OnBeforeTest() and OnAfterTest() callbacks.
 	* Added partial filtering for tests and suites.
 		* When enabled, will search for suites/tests that only contain the filter given instead of searching for an exact match.
 		* Disabled by default.  Use `-p` command line argument to enable.
-	* Added self-testing functionality (TO BE USED ONLY FOR TEMPER DEVELOPERS).
+	* Added some more check functions to make it nicer when writing tests:
+		* TEMPER_CHECK_EQUAL
+		* TEMPER_CHECK_FLOAT_EQUAL
+		* TEMPER_CHECK_ALMOST_EQUAL
+		* TEMPER_CHECK_NOT_ALMOST_EQUAL
+	* Added self-testing functionality (useful only for Temper developers).
 	* Removed `TEMPER_DEFS` in favour of `TEMPER_RUN( argc, argv ) which you call inside main()`.
-	* Tests now run in their own thread.
+	* Each test now runs in its own thread.
 		* This allows tests to always exit even if a test is aborted when running code not directly inside the test function.
-	* Made various parts of the internal API extendable/overridable to help hook Temper into your codebase.
+	* Made nearly all of the internal API extendable/overridable to help hook Temper into your codebase.
 	* Removed the `-a` command line argument since this is now configured per check per test.
 	* The default console output is no longer on one line to be more accomodating of test suites that have console output.
 	* Tests that fail will no longer exit on the first failure, they will report all failures before exiting.
@@ -386,75 +393,75 @@ extern "C" {
 
 //----------------------------------------------------------
 
-// If 'floatA' is NOT approximately equal enough to floatB (within the 'TEMPERDEV__EPSILON' margin of error) then marks the test as failed.
+// If 'floatA' is NOT approximately equal enough to floatB (within Temper's default margins of error) then marks the test as failed.
 #define TEMPER_CHECK_FLOAT_EQUAL( floatA, floatB ) \
-	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( floatA, floatB, TEMPERDEV__EPSILON ), "TEMPER_CHECK_FLOAT_EQUAL(" #floatA ", " #floatB ")", false, __FILE__, __LINE__, NULL, NULL )
+	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( floatA, floatB, TEMPERDEV__EPSILON_TOLERANCE_ABSOLUTE, TEMPERDEV__EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_FLOAT_EQUAL(" #floatA ", " #floatB ")", false, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-// If 'floatA' is NOT approximately equal enough to floatB (within the 'TEMPERDEV__EPSILON' margin of error) then marks the test as failed and logs the specified printf-formatted error message.
+// If 'floatA' is NOT approximately equal enough to floatB (within Temper's default margins of error) then marks the test as failed and logs the specified printf-formatted error message.
 #define TEMPER_CHECK_FLOAT_EQUAL_M( floatA, floatB, ... ) \
-	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( floatA, floatB, TEMPERDEV__EPSILON ), "TEMPER_CHECK_FLOAT_EQUAL_M(" #floatA ", " #floatB ", ...)", false, __FILE__, __LINE__, __VA_ARGS__ )
+	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( floatA, floatB, TEMPERDEV__EPSILON_TOLERANCE_ABSOLUTE, TEMPERDEV__EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_FLOAT_EQUAL_M(" #floatA ", " #floatB ", ...)", false, __FILE__, __LINE__, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
-// If 'floatA' is NOT approximately equal enough to floatB (within the 'TEMPERDEV__EPSILON' margin of error) then marks the test as failed and aborts the test.
+// If 'floatA' is NOT approximately equal enough to floatB (within Temper's default margins of error) then marks the test as failed and aborts the test.
 #define TEMPER_CHECK_FLOAT_EQUAL_A( floatA, floatB ) \
-	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( floatA, floatB, TEMPERDEV__EPSILON ), "TEMPER_CHECK_FLOAT_EQUAL_A(" #floatA ", " #floatB ")", true, __FILE__, __LINE__, NULL, NULL )
+	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( floatA, floatB, TEMPERDEV__EPSILON_TOLERANCE_ABSOLUTE, TEMPERDEV__EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_FLOAT_EQUAL_A(" #floatA ", " #floatB ")", true, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-// If 'floatA' is NOT approximately equal enough to floatB (within 'TEMPERDEV__EPSILON' margin of error) then marks the test as failed, logs the specified printf-formatted error message, and aborts the test.
+// If 'floatA' is NOT approximately equal enough to floatB (within Temper's default margins of error) then marks the test as failed, logs the specified printf-formatted error message, and aborts the test.
 #define TEMPER_CHECK_FLOAT_EQUAL_AM( floatA, floatB, ... ) \
-	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( floatA, floatB, TEMPERDEV__EPSILON ), "TEMPER_CHECK_FLOAT_EQUAL_AM(" #floatA ", " #floatB ", ...)", true, __FILE__, __LINE__, __VA_ARGS__ )
+	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( floatA, floatB, TEMPERDEV__EPSILON_TOLERANCE_ABSOLUTE, TEMPERDEV__EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_FLOAT_EQUAL_AM(" #floatA ", " #floatB ", ...)", true, __FILE__, __LINE__, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
 // If 'conditionA' is NOT approximately equal enough to 'conditionB' (within 'tolerance' margin of error) then marks the test as failed.
-#define TEMPER_CHECK_ALMOST_EQUAL( conditionA, conditionB, tolerance ) \
-	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_ALMOST_EQUAL(" #conditionA ", " #conditionB ", " #tolerance ")", false, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_ALMOST_EQUAL( conditionA, conditionB, absoluteTolerance ) \
+	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, absoluteTolerance, TEMPERDEV__EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_ALMOST_EQUAL(" #conditionA ", " #conditionB ", " #absoluteTolerance ")", false, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-// If 'conditionA' is NOT approximately equal enough to 'conditionB' (within 'tolerance' margin of error) then marks the test as failed and logs the specified printf-formatted error message.
-#define TEMPER_CHECK_ALMOST_EQUAL_M( conditionA, conditionB, tolerance, ... ) \
-	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_ALMOST_EQUAL_M(" #conditionA ", " #conditionB ", " #tolerance ", ...)", false, __FILE__, __LINE__, __VA_ARGS__ )
+// If 'conditionA' is NOT approximately equal enough to 'conditionB' (within 'absoluteTolerance' margin of error) then marks the test as failed and logs the specified printf-formatted error message.
+#define TEMPER_CHECK_ALMOST_EQUAL_M( conditionA, conditionB, absoluteTolerance, ... ) \
+	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, absoluteTolerance, TEMPERDEV__EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_ALMOST_EQUAL_M(" #conditionA ", " #conditionB ", " #absoluteTolerance ", ...)", false, __FILE__, __LINE__, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
-// If 'conditionA' is NOT approximately equal enough to 'conditionB' (within 'tolerance' margin of error) then marks the test as failed and aborts the test.
-#define TEMPER_CHECK_ALMOST_EQUAL_A( conditionA, conditionB, tolerance ) \
-	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_ALMOST_EQUAL_A(" #conditionA ", " #conditionB ", " #tolerance ")", true, __FILE__, __LINE__, NULL, NULL )
+// If 'conditionA' is NOT approximately equal enough to 'conditionB' (within 'absoluteTolerance' margin of error) then marks the test as failed and aborts the test.
+#define TEMPER_CHECK_ALMOST_EQUAL_A( conditionA, conditionB, absoluteTolerance ) \
+	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, absoluteTolerance, TEMPERDEV__EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_ALMOST_EQUAL_A(" #conditionA ", " #conditionB ", " #absoluteTolerance ")", true, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-// If 'conditionA' is NOT approximately equal enough to 'conditionB' (within 'tolerance' margin of error) then marks the test as failed, logs the specified printf-formatted error message, and aborts the test.
-#define TEMPER_CHECK_ALMOST_EQUAL_AM( conditionA, conditionB, tolerance, ... ) \
-	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_ALMOST_EQUAL_AM(" #conditionA ", " #conditionB ", " #tolerance ", ...)", true, __FILE__, __LINE__, __VA_ARGS__ )
+// If 'conditionA' is NOT approximately equal enough to 'conditionB' (within 'absoluteTolerance' margin of error) then marks the test as failed, logs the specified printf-formatted error message, and aborts the test.
+#define TEMPER_CHECK_ALMOST_EQUAL_AM( conditionA, conditionB, absoluteTolerance, ... ) \
+	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, absoluteTolerance, TEMPERDEV__EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_ALMOST_EQUAL_AM(" #conditionA ", " #conditionB ", " #absoluteTolerance ", ...)", true, __FILE__, __LINE__, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
-// If 'conditionA' is approximately equal enough to 'conditionB' (within 'tolerance' margin of error) then marks the test as failed.
-#define TEMPER_CHECK_NOT_ALMOST_EQUAL( conditionA, conditionB, tolerance ) \
-	TemperTestTrueInternal( !TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_NOT_ALMOST_EQUAL(" #conditionA ", " #conditionB ", " #tolerance ")", false, __FILE__, __LINE__, NULL, NULL )
+// If 'conditionA' is approximately equal enough to 'conditionB' (within 'absoluteTolerance' margin of error) then marks the test as failed.
+#define TEMPER_CHECK_NOT_ALMOST_EQUAL( conditionA, conditionB, absoluteTolerance ) \
+	TemperTestTrueInternal( !TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, absoluteTolerance, TEMPERDEV__EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_NOT_ALMOST_EQUAL(" #conditionA ", " #conditionB ", " #absoluteTolerance ")", false, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-// If 'conditionA' is approximately equal enough to 'conditionB' (within 'tolerance' margin of error) then marks the test as failed and logs the specified printf-formatted error message.
-#define TEMPER_CHECK_NOT_ALMOST_EQUAL_M( conditionA, conditionB, tolerance, ... ) \
-	TemperTestTrueInternal( !TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_M(" #conditionA ", " #conditionB ", " #tolerance ", ...)", false,  __FILE__, __LINE__, __VA_ARGS__ )
+// If 'conditionA' is approximately equal enough to 'conditionB' (within 'absoluteTolerance' margin of error) then marks the test as failed and logs the specified printf-formatted error message.
+#define TEMPER_CHECK_NOT_ALMOST_EQUAL_M( conditionA, conditionB, absoluteTolerance, ... ) \
+	TemperTestTrueInternal( !TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, absoluteTolerance, TEMPERDEV__EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_M(" #conditionA ", " #conditionB ", " #absoluteTolerance ", ...)", false,  __FILE__, __LINE__, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
-// If 'conditionA' is approximately equal enough to 'conditionB' (within 'tolerance' margin of error) then marks the test as failed and aborts the test.
-#define TEMPER_CHECK_NOT_ALMOST_EQUAL_A( conditionA, conditionB, tolerance ) \
-	TemperTestTrueInternal( !TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_A(" #conditionA ", " #conditionB ", " #tolerance ")", true, __FILE__, __LINE__, NULL, NULL )
+// If 'conditionA' is approximately equal enough to 'conditionB' (within 'absoluteTolerance' margin of error) then marks the test as failed and aborts the test.
+#define TEMPER_CHECK_NOT_ALMOST_EQUAL_A( conditionA, conditionB, absoluteTolerance ) \
+	TemperTestTrueInternal( !TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, absoluteTolerance, TEMPERDEV__EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_A(" #conditionA ", " #conditionB ", " #absoluteTolerance ")", true, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-// If 'conditionA' is approximately equal enough to 'conditionB' (within 'tolerance' margin of error) then marks the test as failed, logs the specified printf-formatted error message, and aborts the test.
-#define TEMPER_CHECK_NOT_ALMOST_EQUAL_AM( conditionA, conditionB, tolerance, ... ) \
-	TemperTestTrueInternal( !TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, tolerance ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_AM(" #conditionA ", " #conditionB ", " #tolerance ", ...)", true, __FILE__, __LINE__, __VA_ARGS__ )
+// If 'conditionA' is approximately equal enough to 'conditionB' (within 'absoluteTolerance' margin of error) then marks the test as failed, logs the specified printf-formatted error message, and aborts the test.
+#define TEMPER_CHECK_NOT_ALMOST_EQUAL_AM( conditionA, conditionB, absoluteTolerance, ... ) \
+	TemperTestTrueInternal( !TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, absoluteTolerance, TEMPERDEV__EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_AM(" #conditionA ", " #conditionB ", " #absoluteTolerance ", ...)", true, __FILE__, __LINE__, __VA_ARGS__ )
 
 
 //==========================================================
@@ -647,8 +654,8 @@ TEMPERDEV__EXTERN_C temperTestContext_t g_temperTestContext;
 
 //----------------------------------------------------------
 
-//#define TEMPERDEV__EPSILON			0.00001f
-#define TEMPERDEV__EPSILON				0.000001f
+#define TEMPERDEV__EPSILON_TOLERANCE_ABSOLUTE	1e-6f
+#define TEMPERDEV__EPSILON_TOLERANCE_RELATIVE	1e-9f
 
 //----------------------------------------------------------
 
@@ -725,7 +732,7 @@ TEMPERDEV__EXTERN_C temperTestContext_t g_temperTestContext;
 	void ( testName )( __VA_ARGS__ ); \
 	void ( testName )( __VA_ARGS__ )
 
-//----------------------------------------------------------
+//----------------------------------------------------------------
 
 #define TEMPERDEV__INVOKE_PARAMETRIC_TEST( counter, testName, ... ) \
 	void TEMPERDEV__CONCAT( TemperCallParametricTest_, TEMPERDEV__CONCAT( testName, counter ) )( void ); \
@@ -743,7 +750,7 @@ TEMPERDEV__EXTERN_C temperTestContext_t g_temperTestContext;
 \
 	void TEMPERDEV__CONCAT( __temper_test_info_fetcher_, TEMPERDEV__CONCAT( testName, counter ) )( void )
 
-//----------------------------------------------------------
+//----------------------------------------------------------------
 
 #if defined( _WIN32 )
 #define TEMPERDEV__COLOR_DEFAULT	0x07
@@ -773,7 +780,7 @@ TEMPERDEV__EXTERN_C int		TemperExecuteAllTestsInternal( void );
 
 TEMPERDEV__EXTERN_C int		TemperExecuteAllTestsWithArgumentsInternal( int argc, char** argv );
 
-TEMPERDEV__EXTERN_C bool	TemperFloatEqualsInternal( const float a, const float b, const float absoluteTolerance );
+TEMPERDEV__EXTERN_C bool	TemperFloatEqualsInternal( const float a, const float b, const float absoluteTolerance, const float relativeTolerance );
 
 //----------------------------------------------------------
 
@@ -869,13 +876,10 @@ static float TemperAbsfInternal( const float x ) {
 
 //----------------------------------------------------------
 
-// DM: note that this is not final
-// I'm stashing this for now because it works for our use cases and I'm coming back to it to fully tidy it up later
-bool TemperFloatEqualsInternal( const float a, const float b, const float absoluteTolerance ) {
-	float relativeTolerance = 1e-9f;
-	bool isInRange = TEMPERDEV__ABSF( a - b ) <= TEMPERDEV__MAXF( absoluteTolerance, relativeTolerance * TEMPERDEV__MAXF( TEMPERDEV__ABSF( a ), TEMPERDEV__ABSF( b ) ) );
-
-	return isInRange;
+// uses Christer Ericson's solution:
+// https://realtimecollisiondetection.net/blog/?p=89
+bool TemperFloatEqualsInternal( const float a, const float b, const float absoluteTolerance, const float relativeTolerance ) {
+	return TEMPERDEV__ABSF( a - b ) <= TEMPERDEV__MAXF( absoluteTolerance, relativeTolerance * TEMPERDEV__MAXF( TEMPERDEV__ABSF( a ), TEMPERDEV__ABSF( b ) ) );
 }
 
 //----------------------------------------------------------
@@ -1168,28 +1172,24 @@ static void TemperRunTestThreadInternal( temperTestInfo_t* information ) {
 
 //----------------------------------------------------------
 
-static void TemperPrintDividerInternal( const char* suiteName ) {
-	TEMPERDEV__LOG( "----------------------------------------------------------\nSUITE: \"%s\"\n\n", suiteName );
-}
-
-//----------------------------------------------------------
-
 static void TemperOnBeforeTestInternal( const temperTestInfo_t* information ) {
 	TEMPERDEV__ASSERT( information );
 
 	if ( g_temperTestContext.suiteFilterPrevious && information->suiteNameStr ) {
 		if ( TEMPERDEV__STRCMP( g_temperTestContext.suiteFilterPrevious, information->suiteNameStr ) != 0 ) {
-			TemperPrintDividerInternal( information->suiteNameStr );
+			TEMPERDEV__LOG( "------------------------------------------------------------\n\n" );
 			g_temperTestContext.suiteFilterPrevious = information->suiteNameStr;
 		}
 	} else if ( ( g_temperTestContext.suiteFilterPrevious && information->suiteNameStr == NULL ) ||
 				( g_temperTestContext.suiteFilterPrevious == NULL && information->suiteNameStr ) ) {
-		TemperPrintDividerInternal( information->suiteNameStr != NULL ? information->suiteNameStr : "No suite name given" );
+		TEMPERDEV__LOG( "------------------------------------------------------------\n\n" );
 		g_temperTestContext.suiteFilterPrevious = information->suiteNameStr;
 	}
 
-	if ( information->testNameStr ) {
-		TEMPERDEV__LOG( "TEST: \"%s\"\n", information->testNameStr );
+	if ( information->suiteNameStr ) {
+		TEMPERDEV__LOG( "TEST \t- \"%s\" : \"%s\"\n", information->suiteNameStr, information->testNameStr );
+	} else {
+		TEMPERDEV__LOG( "TEST \t- \"%s\"\n", information->testNameStr );
 	}
 }
 
