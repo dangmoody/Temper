@@ -148,7 +148,7 @@ fi
 
 if [[ "${g_compiler}" == *++* ]]
 then
-	std=-std=c++11
+	std=-std=c++14
 else
 	std=-std=c99
 fi
