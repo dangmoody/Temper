@@ -128,7 +128,7 @@ if [!compiler!]==[clang] (
 pushd %cwd%
 pushd ..
 
-set build_dir=bin\\win64\\!compiler!\\!config!\\demos
+set build_dir=bin\\win64\\!compiler!\\!config!\\tests
 
 if not exist %build_dir% (
 	mkdir %build_dir%

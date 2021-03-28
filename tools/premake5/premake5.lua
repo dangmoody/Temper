@@ -1,5 +1,5 @@
 g_generated_project_files_root = "..\\..\\vs2019-gen"
-g_folder_demos = "demos\\"
+g_folder_tests = "tests\\"
 g_folder_3rdparty = "3rdparty\\"
 g_folder_tools = "tools\\"
 g_folder_scripts = "scripts\\"
@@ -23,7 +23,7 @@ workspace( "Temper" )
 	platforms { "win64-clang", "win64-gcc", "win64-msvc" }
 	configurations { "debug", "release" }
 
-	startproject( "demos" )
+	startproject( "tests" )
 
 	architecture( "x64" )
 
@@ -39,8 +39,8 @@ workspace( "Temper" )
 88888888Y"'     `"Ybbd8"'  88      88      88   `"YbbdP"'   `"YbbdP"'  
 ]]
 
-function set_platform_settings( platform, demo_name, language_file_ext, compiler, compiler_define )
-	build_command = "..\\" .. g_folder_scripts .. "build_" .. compiler .. ".bat --output " .. demo_name .. ".exe" .. " --config %{cfg.buildcfg} --source " .. g_folder_demos .. demo_name .. "\\" .. demo_name .. "." .. language_file_ext
+function set_platform_settings( platform, test_name, language_file_ext, compiler, compiler_define )
+	build_command = "..\\" .. g_folder_scripts .. "build_" .. compiler .. ".bat --output " .. test_name .. ".exe" .. " --config %{cfg.buildcfg} --source " .. g_folder_tests .. test_name .. "\\" .. test_name .. "." .. language_file_ext
 
 	filter ( "platforms:" .. platform )
 		buildcommands (
@@ -60,10 +60,10 @@ function set_platform_settings( platform, demo_name, language_file_ext, compiler
 		}
 
 		-- required because VS will create these folders if they don't exist
-		targetdir( "..\\..\\bin\\win64\\" .. compiler .. "\\%{cfg.buildcfg}\\" .. g_folder_demos )
-		objdir( "!..\\..\\bin\\win64\\" .. compiler .. "\\%{cfg.buildcfg}\\" .. g_folder_demos .. "intermediate" )
+		targetdir( "..\\..\\bin\\win64\\" .. compiler .. "\\%{cfg.buildcfg}\\" .. g_folder_tests )
+		objdir( "!..\\..\\bin\\win64\\" .. compiler .. "\\%{cfg.buildcfg}\\" .. g_folder_tests .. "intermediate" )
 
-		debugcommand( "..\\..\\bin\\win64\\" .. compiler .. "\\%{cfg.buildcfg}\\" .. g_folder_demos .. demo_name .. ".exe" )
+		debugcommand( "..\\..\\bin\\win64\\" .. compiler .. "\\%{cfg.buildcfg}\\" .. g_folder_tests .. test_name .. ".exe" )
 	filter {}
 end
 
@@ -71,10 +71,10 @@ project( "automation_c" )
 	location( g_generated_project_files_root )
 
 	files {
-		"..\\..\\" .. g_folder_demos .. "automation_c\\**.c",
-		"..\\..\\" .. g_folder_demos .. "automation_c\\**.h",
-		"..\\..\\" .. g_folder_demos .. "automation_c\\**.cpp",
-		"..\\..\\" .. g_folder_demos .. "automation_c\\**.inl"
+		"..\\..\\" .. g_folder_tests .. "automation_c\\**.c",
+		"..\\..\\" .. g_folder_tests .. "automation_c\\**.h",
+		"..\\..\\" .. g_folder_tests .. "automation_c\\**.cpp",
+		"..\\..\\" .. g_folder_tests .. "automation_c\\**.inl"
 	}
 
 	defines {
@@ -109,10 +109,10 @@ project( "automation_cpp" )
 	location( g_generated_project_files_root )
 
 	files {
-		"..\\..\\" .. g_folder_demos .. "automation_cpp\\**.c",
-		"..\\..\\" .. g_folder_demos .. "automation_cpp\\**.h",
-		"..\\..\\" .. g_folder_demos .. "automation_cpp\\**.cpp",
-		"..\\..\\" .. g_folder_demos .. "automation_cpp\\**.inl"
+		"..\\..\\" .. g_folder_tests .. "automation_cpp\\**.c",
+		"..\\..\\" .. g_folder_tests .. "automation_cpp\\**.h",
+		"..\\..\\" .. g_folder_tests .. "automation_cpp\\**.cpp",
+		"..\\..\\" .. g_folder_tests .. "automation_cpp\\**.inl"
 	}
 
 	defines {
@@ -147,10 +147,10 @@ project( "scale_test_c" )
 	location( g_generated_project_files_root )
 
 	files {
-		"..\\..\\" .. g_folder_demos .. "scale_test_c\\**.c",
-		"..\\..\\" .. g_folder_demos .. "scale_test_c\\**.h",
-		"..\\..\\" .. g_folder_demos .. "scale_test_c\\**.cpp",
-		"..\\..\\" .. g_folder_demos .. "scale_test_c\\**.inl"
+		"..\\..\\" .. g_folder_tests .. "scale_test_c\\**.c",
+		"..\\..\\" .. g_folder_tests .. "scale_test_c\\**.h",
+		"..\\..\\" .. g_folder_tests .. "scale_test_c\\**.cpp",
+		"..\\..\\" .. g_folder_tests .. "scale_test_c\\**.inl"
 	}
 
 	defines {

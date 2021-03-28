@@ -121,7 +121,6 @@ Special Thanks:
 7. CHANGELOG
 v2.0.0, 28/03/2021:
 	* Nearly everything has been completely re-written from scratch.
-	* Including Temper now requires defining `TEMPER_IMPLEMENTATION` (same as stb).
 	* Tests are now self-registering.  All you need to do now is write the test code and the tests will get called automatically for you (unless the test is marked as skipped).
 		* Because of this, the functions `TEMPER_RUN_TEST` and `TEMPER_SKIP_TEST` have been removed.
 		* If you want to skip a test now you must now do so by setting the test flag.
@@ -139,6 +138,7 @@ v2.0.0, 28/03/2021:
 		* TEMPER_CHECK_NOT_ALMOST_EQUAL
 	* Added self-testing functionality (useful only for Temper developers).
 	* Removed `TEMPER_DEFS` in favour of `TEMPER_RUN( argc, argv ) which you call inside main()`.
+	* Including Temper now requires defining `TEMPER_IMPLEMENTATION` (same as stb).
 	* Each test now runs in its own thread.
 		* This allows tests to always exit even if a test is aborted when running code not directly inside the test function.
 	* Made nearly all of the internal API extendable/overridable to help hook Temper into your codebase.

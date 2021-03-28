@@ -108,7 +108,7 @@ fi
 # now do the actual building
 #
 
-g_bin_dir=bin/${g_os_name}/${g_compiler}/${g_config}/demos
+g_bin_dir=bin/${g_os_name}/${g_compiler}/${g_config}/tests
 
 # create build folder if it doesnt exist
 mkdir -p ${g_bin_dir}

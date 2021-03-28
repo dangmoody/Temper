@@ -19,12 +19,6 @@ If on Windows and using Clang or GCC then you will need to make sure that the co
 3. If on MacOS/Linux:
 	* Run `.\scripts\build_clang_gcc.sh` to build a demo for Clang/GCC.
 
-## How To Add A Demo
-We use the `automation_c` and `automation_cpp` demos to test all Temper functionality so you shouldn't need to do this, but if you do:
-
-1. Make your demo folder inside `demos/`.
-2. Go to `tools/premake5/premake5.lua` and add the demo name (also the folder name) to the `demos_names` array.
-3. You should now be able to build the demo like you can all the others.
 
 ## Pull Requests
 Your PR has a higher chance of being accepted if it fulfills at least one of the following criteria:
