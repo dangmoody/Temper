@@ -132,6 +132,12 @@ if [[ "${g_os_name}" == "macos" ]]; then
 	ignore_warnings="${ignore_warnings} -Wno-poison-system-directories"
 fi
 
+# ignore some c++ specific warnings
+if [[ "${g_compiler}" == *++* ]]
+then
+	ignore_warnings="${ignore_warnings} -Wc++98-compat"
+fi
+
 if [[ "${g_config}" == debug ]]
 then
 	symbols=-g
@@ -148,7 +154,7 @@ fi
 
 if [[ "${g_compiler}" == *++* ]]
 then
-	std=-std=c++14
+	std=-std=c++11
 else
 	std=-std=c99
 fi
