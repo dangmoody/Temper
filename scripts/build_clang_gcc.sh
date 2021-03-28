@@ -135,7 +135,7 @@ fi
 # ignore some c++ specific warnings
 if [[ "${g_compiler}" == *++* ]]
 then
-	ignore_warnings="${ignore_warnings} -Wc++98-compat"
+	ignore_warnings="${ignore_warnings} -Wno-c++98-compat"
 fi
 
 if [[ "${g_config}" == debug ]]
