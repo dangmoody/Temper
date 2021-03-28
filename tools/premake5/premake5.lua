@@ -142,3 +142,41 @@ project( "automation_cpp" )
 			"NDEBUG"
 		}
 	filter {}
+
+project( "scale_test_c" )
+	location( g_generated_project_files_root )
+
+	files {
+		"..\\..\\" .. g_folder_demos .. "scale_test_c\\**.c",
+		"..\\..\\" .. g_folder_demos .. "scale_test_c\\**.h",
+		"..\\..\\" .. g_folder_demos .. "scale_test_c\\**.cpp",
+		"..\\..\\" .. g_folder_demos .. "scale_test_c\\**.inl"
+	}
+
+	defines {
+	}
+
+	sysincludedirs {
+	}
+
+	syslibdirs {
+	}
+
+	debugdir( "$(SolutionDir)..\\" )
+
+	kind( "MakeFile" )
+
+	set_platform_settings( "win64-clang", "scale_test_c", "c", "clang", "__clang__" )
+	set_platform_settings( "win64-gcc",   "scale_test_c", "c", "gcc",   "__GNUC__" )
+	set_platform_settings( "win64-msvc",  "scale_test_c", "c", "msvc",  "" )
+
+	filter "configurations:debug"
+		defines {
+			"_DEBUG"
+		}
+
+	filter "configurations:release"
+		defines {
+			"NDEBUG"
+		}
+	filter {}
