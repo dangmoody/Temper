@@ -99,6 +99,17 @@ TEMPER_INVOKE_PARAMETRIC_TEST( TestName4, 7, 7 ); // will work
 ```
 
 ___
+#### Test execution flags
+
+There are 3 different flags you can apply to your tests:
+- TEMPER_FLAG_SHOULD_RUN
+  - This marks the test to Temper as something it should run.
+- TEMPER_FLAG_SHOULD_SKIP
+  - Intended for usage in hotfixes when you just need your build to go green.
+- TEMPER_FLAG_DEPRECATED
+  - Functionally identical to the above flag but not intended for hotfixes and more a statement about the nature of this feature you've a test for.
+
+___
 #### Test cases / Conditional macros
 
 |                        Name                         |                                               Description                                                |
