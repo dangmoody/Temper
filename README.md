@@ -59,19 +59,19 @@ A test can be defined either as a part of or not a part of a suite and with or w
 
 ```c
 // Define a simple test with a Name only
-TEMPER_TEST( TestName, TEMPER_FLAG_RUN )
+TEMPER_TEST( TestName, TEMPER_FLAG_SHOULD_RUN )
 {
 	TEMPER_CHECK_TRUE( 69 == 105 );
 }
 
 // Define a test as a part of a suite
-TEMPER_SUITE_TEST( SuiteName, TestName2, TEMPER_FLAG_RUN )
+TEMPER_SUITE_TEST( SuiteName, TestName2, TEMPER_FLAG_SHOULD_RUN )
 {
 	TEMPER_CHECK_TRUE( 69 == 420 );
 }
 
 // Define a parametric test (can take whatever parameters you like)
-TEMPER_PARAMETRIC( TestName3, TEMPER_FLAG_SHOULD_RUN, int param1, int param2, TEMPER_FLAG_RUN )
+TEMPER_PARAMETRIC( TestName3, TEMPER_FLAG_SHOULD_RUN, int param1, int param2 )
 {
 	TEMPER_CHECK_EQUAL( param1, param2 );
 }
@@ -82,7 +82,7 @@ TEMPER_INVOKE_PARAMETRIC_TEST( TestName3, 5, 6 ); // will fail
 TEMPER_INVOKE_PARAMETRIC_TEST( TestName3, 7, 7 ); // will work
 
 // Define a parametric test as a part of a suite
-TEMPER_PARAMETRIC_SUITE( SuiteName, TestName4, TEMPER_FLAG_SHOULD_RUN, int param1, int param2, TEMPER_FLAG_RUN )
+TEMPER_PARAMETRIC_SUITE( SuiteName, TestName4, TEMPER_FLAG_SHOULD_RUN, int param1, int param2 )
 {
 	TEMPER_CHECK_EQUAL( param1, param2 );
 }
