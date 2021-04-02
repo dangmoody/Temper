@@ -119,7 +119,7 @@ Special Thanks:
 
 
 7. CHANGELOG
-v2.0.0, 28/03/2021:
+v2.0.0, 02/04/2021:
 	* Nearly everything has been completely re-written from scratch.
 	* Tests are now self-registering.  All you need to do now is write the test code and the tests will get called automatically for you (unless the test is marked as skipped).
 		* Because of this, the functions `TEMPER_RUN_TEST` and `TEMPER_SKIP_TEST` have been removed.
