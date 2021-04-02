@@ -732,7 +732,7 @@ TEMPERDEV__EXTERN_C temperTestContext_t g_temperTestContext;
 	void ( testName )( __VA_ARGS__ ); \
 	void ( testName )( __VA_ARGS__ )
 
-//----------------------------------------------------------------
+//----------------------------------------------------------
 
 #define TEMPERDEV__INVOKE_PARAMETRIC_TEST( counter, testName, ... ) \
 	void TEMPERDEV__CONCAT( TemperCallParametricTest_, TEMPERDEV__CONCAT( testName, counter ) )( void ); \
@@ -750,7 +750,7 @@ TEMPERDEV__EXTERN_C temperTestContext_t g_temperTestContext;
 \
 	void TEMPERDEV__CONCAT( __temper_test_info_fetcher_, TEMPERDEV__CONCAT( testName, counter ) )( void )
 
-//----------------------------------------------------------------
+//----------------------------------------------------------
 
 #if defined( _WIN32 )
 #define TEMPERDEV__COLOR_DEFAULT	0x07
@@ -1172,24 +1172,28 @@ static void TemperRunTestThreadInternal( temperTestInfo_t* information ) {
 
 //----------------------------------------------------------
 
+static void TemperPrintDividerInternal( const char* suiteName ) {
+	TEMPERDEV__LOG( "----------------------------------------------------------\nSUITE: \"%s\"\n\n", suiteName );
+}
+
+//----------------------------------------------------------
+
 static void TemperOnBeforeTestInternal( const temperTestInfo_t* information ) {
 	TEMPERDEV__ASSERT( information );
 
 	if ( g_temperTestContext.suiteFilterPrevious && information->suiteNameStr ) {
 		if ( TEMPERDEV__STRCMP( g_temperTestContext.suiteFilterPrevious, information->suiteNameStr ) != 0 ) {
-			TEMPERDEV__LOG( "------------------------------------------------------------\n\n" );
+			TemperPrintDividerInternal( information->suiteNameStr );
 			g_temperTestContext.suiteFilterPrevious = information->suiteNameStr;
 		}
 	} else if ( ( g_temperTestContext.suiteFilterPrevious && information->suiteNameStr == NULL ) ||
 				( g_temperTestContext.suiteFilterPrevious == NULL && information->suiteNameStr ) ) {
-		TEMPERDEV__LOG( "------------------------------------------------------------\n\n" );
+		TemperPrintDividerInternal( information->suiteNameStr != NULL ? information->suiteNameStr : "No suite name given" );
 		g_temperTestContext.suiteFilterPrevious = information->suiteNameStr;
 	}
 
-	if ( information->suiteNameStr ) {
-		TEMPERDEV__LOG( "TEST \t- \"%s\" : \"%s\"\n", information->suiteNameStr, information->testNameStr );
-	} else {
-		TEMPERDEV__LOG( "TEST \t- \"%s\"\n", information->testNameStr );
+	if ( information->testNameStr ) {
+		TEMPERDEV__LOG( "TEST: \"%s\"\n", information->testNameStr );
 	}
 }
 
