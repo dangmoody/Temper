@@ -150,19 +150,19 @@ v2.0.0, 28/03/2021:
 		* Therefore the command line argument `-c` has been removed.
 	* Removed `TEMPER_SUITE_EXTERN` and `TEMPER_TEST_EXTERN` since there is now no need for them.
 
-v1.1.1, 1st October 2019:
+v1.1.1, 01/10/2019:
 	* Fix bug when parsing the --time-unit command line argument.
 
-v1.1.0, 22nd September 2019:
+v1.1.0, 22/09/2019:
 	* Tests now display how long they took to run (defaulting to milliseconds).
 		* You can configure this yourself via the --time-unit command line argument.
 		* The unit you set must be either: "seconds", "ms", "us", "ns", or "clocks" (without speech marks).
 
-v1.0.1, 16th April 2019:
+v1.0.1, 16/04/2019:
 	* Support for macOS.
 	* Fixed some other weird issues appearing on some other flavours of Clang and GCC on Linux.
 
-v1.0.0, 13th February 2019:
+v1.0.0, 13/02/2019:
 	* Initial release.
 
 ===========================================================================
