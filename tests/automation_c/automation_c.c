@@ -238,7 +238,7 @@ TEMPER_PARAMETRIC( ParametricTest_WhenDeclaredWithStructParm_StructParmIsValid, 
 	TEMPER_CHECK_TRUE_AM( person != NULL, "person ptr is NULL.\n" );
 	TEMPER_CHECK_TRUE_AM( person->name != NULL, "person->name ptr inside \"%s\" is NULL.\n" );
 
-	// actual comapring what was passed in vs what was expected
+	// actual comparing what was passed in vs what was expected
 	TEMPER_CHECK_TRUE_AM( strcmp( person->name, expectedName ) == 0, "person->name was expected to be \"%s\" but was actually \"%s\".\n", expectedName, person->name );
 	TEMPER_CHECK_TRUE_AM( person->age == expectedAge, "person->age was expected to be \"%d\" but was actually \"%d\".\n", expectedAge, person->age );
 }
