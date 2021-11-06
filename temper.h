@@ -715,7 +715,6 @@ typedef struct temperTestContext_t {
 	temperBool32		quitHasBeenCalled;
 	temperBool32		partialFilter;
 	temperTimeUnit_t	timeUnit;
-	uint32_t			pad0;
 	const char*			suiteFilterPrevious;
 	const char*			suiteFilter;
 	const char*			testFilter;
