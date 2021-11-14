@@ -1373,8 +1373,6 @@ static int TemperCalculateExitCode( void ) {
 //----------------------------------------------------------
 
 int TemperExecuteAllTestsInternal( void ) {
-	TemperSetupInternal();
-
 	double start = TEMPER_GET_TIMESTAMP( g_temperTestContext.timeUnit );
 
 	for ( uint64_t i = 0; i < g_temperTestContext.testInfosCount; i++ ) {
@@ -1423,6 +1421,8 @@ int TemperExecuteAllTestsInternal( void ) {
 //----------------------------------------------------------
 
 int TemperExecuteAllTestsWithArgumentsInternal( int argc, char** argv ) {
+	TemperSetupInternal();
+
 	if ( !TemperHandleCommandLineArgumentsInternal( argc, argv ) ) {
 		return TEMPERDEV__EXIT_FAILURE;
 	}
