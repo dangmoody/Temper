@@ -307,25 +307,17 @@ extern "C" {
 #define TEMPER_CHECK_TRUE_M( condition, ... ) \
 	TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE_M(" #condition ", ...)", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, __VA_ARGS__ )
 
-//----------------------------------------------------------
-
 // If 'condition' is NOT true then marks the test as failed and aborts the test.
 #define TEMPER_CHECK_TRUE_A( condition ) \
 	TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE_A(" #condition ")", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, NULL, NULL )
-
-//----------------------------------------------------------
 
 // If 'condition' is NOT true then marks the test as failed, aborts the test & ceases execution.
 #define TEMPER_CHECK_TRUE_Q( condition ) \
 	TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE_Q(" #condition ")", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, NULL, NULL )
 
-//----------------------------------------------------------
-
 // If 'condition' is NOT true then marks the test as failed, logs the specified printf-formatted error message and aborts the test.
 #define TEMPER_CHECK_TRUE_AM( condition, ... ) \
 	TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE_AM(" #condition ", ...)", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, __VA_ARGS__ )
-
-//----------------------------------------------------------
 
 // If 'condition' is NOT true then marks the test as failed, aborts the test & ceases execution.
 #define TEMPER_CHECK_TRUE_QM( condition, ... ) \
@@ -337,31 +329,21 @@ extern "C" {
 #define TEMPER_CHECK_FALSE( condition ) \
 	TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE(" #condition ")", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, NULL, NULL )
 
-//----------------------------------------------------------
-
 // If 'condition' is NOT false then marks the test as failed and logs the specified printf-formatted error message.
 #define TEMPER_CHECK_FALSE_M( condition, ... ) \
 	TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE_M(" #condition ", ...)", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, __VA_ARGS__ )
-
-//----------------------------------------------------------
 
 // If 'condition' is NOT false then marks the test as failed and aborts the test.
 #define TEMPER_CHECK_FALSE_A( condition ) \
 	TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE_A(" #condition ")", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, NULL, NULL )
 
-//----------------------------------------------------------
-
 // If 'condition' is NOT false then marks the test as failed and aborts the test & ceases execution.
 #define TEMPER_CHECK_FALSE_Q( condition ) \
 	TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE_Q(" #condition ")", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, NULL, NULL )
 
-//----------------------------------------------------------
-
 // If 'condition' is NOT false then marks the test as failed, logs the specified printf-formatted error message and aborts the test.
 #define TEMPER_CHECK_FALSE_AM( condition, ... ) \
 	TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE_AM(" #condition ", ...)", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, __VA_ARGS__ )
-
-//----------------------------------------------------------
 
 // If 'condition' is NOT false then marks the test as failed, logs the specified printf-formatted error message and aborts the test & ceases execution.
 #define TEMPER_CHECK_FALSE_QM( condition, ... ) \
@@ -373,31 +355,21 @@ extern "C" {
 #define TEMPER_CHECK_EQUAL( conditionA, conditionB ) \
 	TemperTestTrueInternal( conditionA == conditionB, "TEMPER_CHECK_EQUAL(" #conditionA ", " #conditionB ")", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, NULL, NULL )
 
-//----------------------------------------------------------
-
 // If 'conditionA' is NOT equal to 'conditionB' then marks the test as failed and logs the specified printf-formatted error message.
 #define TEMPER_CHECK_EQUAL_M( conditionA, conditionB, ... ) \
 	TemperTestTrueInternal( conditionA == conditionB, "TEMPER_CHECK_EQUAL_M(" #conditionA ", " #conditionB ", ...)", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, __VA_ARGS__ )
-
-//----------------------------------------------------------
 
 // If 'conditionA' is NOT equal to 'conditionB' then marks the test as failed and aborts the test.
 #define TEMPER_CHECK_EQUAL_A( conditionA, conditionB ) \
 	TemperTestTrueInternal( conditionA == conditionB, "TEMPER_CHECK_EQUAL_A(" #conditionA ", " #conditionB ")", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, NULL, NULL )
 
-//----------------------------------------------------------
-
 // If 'conditionA' is NOT equal to 'conditionB' then marks the test as failed and aborts the test & ceases execution.
 #define TEMPER_CHECK_EQUAL_Q( conditionA, conditionB ) \
 	TemperTestTrueInternal( conditionA == conditionB, "TEMPER_CHECK_EQUAL_Q(" #conditionA ", " #conditionB ")", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, NULL, NULL )
 
-//----------------------------------------------------------
-
 // If 'conditionA' is NOT equal to 'conditionB' then marks the test as failed, logs the specified printf-formatted error message and aborts the test.
 #define TEMPER_CHECK_EQUAL_AM( conditionA, conditionB, ... ) \
 	TemperTestTrueInternal( conditionA == conditionB, "TEMPER_CHECK_EQUAL_AM(" #conditionA ", " #conditionB ", ...)", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, __VA_ARGS__ )
-
-//----------------------------------------------------------
 
 // If 'conditionA' is NOT equal to 'conditionB' then marks the test as failed, logs the specified printf-formatted error message and aborts the test & ceases execution.
 #define TEMPER_CHECK_EQUAL_QM( conditionA, conditionB, ... ) \
@@ -409,31 +381,21 @@ extern "C" {
 #define TEMPER_CHECK_NOT_EQUAL( conditionA, conditionB ) \
 	TemperTestTrueInternal( conditionA != conditionB, "TEMPER_CHECK_NOT_EQUAL(" #conditionA ", " #conditionB ")", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, NULL, NULL )
 
-//----------------------------------------------------------
-
 // If 'conditionA' is equal to 'conditionB' then marks the test as failed and logs the specified printf-formatted error message.
 #define TEMPER_CHECK_NOT_EQUAL_M( conditionA, conditionB, ... ) \
 	TemperTestTrueInternal( conditionA != conditionB, "TEMPER_CHECK_NOT_EQUAL_M(" #conditionA ", " #conditionB ", ...)", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, __VA_ARGS__ )
-
-//----------------------------------------------------------
 
 // If 'conditionA' is equal to 'conditionB' then marks the test as failed and aborts the test.
 #define TEMPER_CHECK_NOT_EQUAL_A( conditionA, conditionB ) \
 	TemperTestTrueInternal( conditionA != conditionB, "TEMPER_CHECK_NOT_EQUAL_A(" #conditionA ", " #conditionB ")", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, NULL, NULL )
 
-//----------------------------------------------------------
-
 // If 'conditionA' is equal to 'conditionB' then marks the test as failed and aborts the test & ceases execution.
 #define TEMPER_CHECK_NOT_EQUAL_Q( conditionA, conditionB ) \
 	TemperTestTrueInternal( conditionA != conditionB, "TEMPER_CHECK_NOT_EQUAL_Q(" #conditionA ", " #conditionB ")", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, NULL, NULL )
 
-//----------------------------------------------------------
-
 // If 'conditionA' is equal to 'conditionB' then marks the test as failed, logs the specified printf-formatted error message and aborts the test.
 #define TEMPER_CHECK_NOT_EQUAL_AM( conditionA, conditionB, ... ) \
 	TemperTestTrueInternal( conditionA != conditionB, "TEMPER_CHECK_NOT_EQUAL_AM(" #conditionA ", " #conditionB ", ...)", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, __VA_ARGS__ )
-
-//----------------------------------------------------------
 
 // If 'conditionA' is equal to 'conditionB' then marks the test as failed, logs the specified printf-formatted error message and aborts the test & ceases execution.
 #define TEMPER_CHECK_NOT_EQUAL_QM( conditionA, conditionB, ... ) \
@@ -445,31 +407,21 @@ extern "C" {
 #define TEMPER_CHECK_FLOAT_EQUAL( floatA, floatB ) \
 	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( floatA, floatB, TEMPERDEV__EPSILON_TOLERANCE_ABSOLUTE, TEMPERDEV__EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_FLOAT_EQUAL(" #floatA ", " #floatB ")", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, NULL, NULL )
 
-//----------------------------------------------------------
-
 // If 'floatA' is NOT approximately equal enough to floatB (within Temper's default margins of error) then marks the test as failed and logs the specified printf-formatted error message.
 #define TEMPER_CHECK_FLOAT_EQUAL_M( floatA, floatB, ... ) \
 	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( floatA, floatB, TEMPERDEV__EPSILON_TOLERANCE_ABSOLUTE, TEMPERDEV__EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_FLOAT_EQUAL_M(" #floatA ", " #floatB ", ...)", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, __VA_ARGS__ )
-
-//----------------------------------------------------------
 
 // If 'floatA' is NOT approximately equal enough to floatB (within Temper's default margins of error) then marks the test as failed and aborts the test.
 #define TEMPER_CHECK_FLOAT_EQUAL_A( floatA, floatB ) \
 	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( floatA, floatB, TEMPERDEV__EPSILON_TOLERANCE_ABSOLUTE, TEMPERDEV__EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_FLOAT_EQUAL_A(" #floatA ", " #floatB ")", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, NULL, NULL )
 
-//----------------------------------------------------------
-
 // If 'floatA' is NOT approximately equal enough to floatB (within Temper's default margins of error) then marks the test as failed and aborts the test & ceases execution.
 #define TEMPER_CHECK_FLOAT_EQUAL_Q( floatA, floatB ) \
 	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( floatA, floatB, TEMPERDEV__EPSILON_TOLERANCE_ABSOLUTE, TEMPERDEV__EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_FLOAT_EQUAL_Q(" #floatA ", " #floatB ")", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, NULL, NULL )
 
-//----------------------------------------------------------
-
 // If 'floatA' is NOT approximately equal enough to floatB (within Temper's default margins of error) then marks the test as failed, logs the specified printf-formatted error message, and aborts the test.
 #define TEMPER_CHECK_FLOAT_EQUAL_AM( floatA, floatB, ... ) \
 	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( floatA, floatB, TEMPERDEV__EPSILON_TOLERANCE_ABSOLUTE, TEMPERDEV__EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_FLOAT_EQUAL_AM(" #floatA ", " #floatB ", ...)", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, __VA_ARGS__ )
-
-//----------------------------------------------------------
 
 // If 'floatA' is NOT approximately equal enough to floatB (within Temper's default margins of error) then marks the test as failed, logs the specified printf-formatted error message, and aborts the test & ceases execution.
 #define TEMPER_CHECK_FLOAT_EQUAL_QM( floatA, floatB, ... ) \
@@ -481,31 +433,21 @@ extern "C" {
 #define TEMPER_CHECK_ALMOST_EQUAL( conditionA, conditionB, absoluteTolerance ) \
 	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, absoluteTolerance, TEMPERDEV__EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_ALMOST_EQUAL(" #conditionA ", " #conditionB ", " #absoluteTolerance ")", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, NULL, NULL )
 
-//----------------------------------------------------------
-
 // If 'conditionA' is NOT approximately equal enough to 'conditionB' (within 'absoluteTolerance' margin of error) then marks the test as failed and logs the specified printf-formatted error message.
 #define TEMPER_CHECK_ALMOST_EQUAL_M( conditionA, conditionB, absoluteTolerance, ... ) \
 	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, absoluteTolerance, TEMPERDEV__EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_ALMOST_EQUAL_M(" #conditionA ", " #conditionB ", " #absoluteTolerance ", ...)", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, __VA_ARGS__ )
-
-//----------------------------------------------------------
 
 // If 'conditionA' is NOT approximately equal enough to 'conditionB' (within 'absoluteTolerance' margin of error) then marks the test as failed and aborts the test.
 #define TEMPER_CHECK_ALMOST_EQUAL_A( conditionA, conditionB, absoluteTolerance ) \
 	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, absoluteTolerance, TEMPERDEV__EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_ALMOST_EQUAL_A(" #conditionA ", " #conditionB ", " #absoluteTolerance ")", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, NULL, NULL )
 
-//----------------------------------------------------------
-
 // If 'conditionA' is NOT approximately equal enough to 'conditionB' (within 'absoluteTolerance' margin of error) then marks the test as failed and aborts the test & ceases execution.
 #define TEMPER_CHECK_ALMOST_EQUAL_Q( conditionA, conditionB, absoluteTolerance ) \
 	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, absoluteTolerance, TEMPERDEV__EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_ALMOST_EQUAL_Q(" #conditionA ", " #conditionB ", " #absoluteTolerance ")", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, NULL, NULL )
 
-//----------------------------------------------------------
-
 // If 'conditionA' is NOT approximately equal enough to 'conditionB' (within 'absoluteTolerance' margin of error) then marks the test as failed, logs the specified printf-formatted error message, and aborts the test.
 #define TEMPER_CHECK_ALMOST_EQUAL_AM( conditionA, conditionB, absoluteTolerance, ... ) \
 	TemperTestTrueInternal( TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, absoluteTolerance, TEMPERDEV__EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_ALMOST_EQUAL_AM(" #conditionA ", " #conditionB ", " #absoluteTolerance ", ...)", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, __VA_ARGS__ )
-
-//----------------------------------------------------------
 
 // If 'conditionA' is NOT approximately equal enough to 'conditionB' (within 'absoluteTolerance' margin of error) then marks the test as failed, logs the specified printf-formatted error message, and aborts the test & ceases execution.
 #define TEMPER_CHECK_ALMOST_EQUAL_QM( conditionA, conditionB, absoluteTolerance, ... ) \
@@ -517,31 +459,21 @@ extern "C" {
 #define TEMPER_CHECK_NOT_ALMOST_EQUAL( conditionA, conditionB, absoluteTolerance ) \
 	TemperTestTrueInternal( !TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, absoluteTolerance, TEMPERDEV__EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_NOT_ALMOST_EQUAL(" #conditionA ", " #conditionB ", " #absoluteTolerance ")", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, NULL, NULL )
 
-//----------------------------------------------------------
-
 // If 'conditionA' is approximately equal enough to 'conditionB' (within 'absoluteTolerance' margin of error) then marks the test as failed and logs the specified printf-formatted error message.
 #define TEMPER_CHECK_NOT_ALMOST_EQUAL_M( conditionA, conditionB, absoluteTolerance, ... ) \
 	TemperTestTrueInternal( !TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, absoluteTolerance, TEMPERDEV__EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_M(" #conditionA ", " #conditionB ", " #absoluteTolerance ", ...)", TEMPER_FLAG_TEST_OKAY,  __FILE__, __LINE__, __VA_ARGS__ )
-
-//----------------------------------------------------------
 
 // If 'conditionA' is approximately equal enough to 'conditionB' (within 'absoluteTolerance' margin of error) then marks the test as failed and aborts the test.
 #define TEMPER_CHECK_NOT_ALMOST_EQUAL_A( conditionA, conditionB, absoluteTolerance ) \
 	TemperTestTrueInternal( !TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, absoluteTolerance, TEMPERDEV__EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_A(" #conditionA ", " #conditionB ", " #absoluteTolerance ")", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, NULL, NULL )
 
-//----------------------------------------------------------
-
 // If 'conditionA' is approximately equal enough to 'conditionB' (within 'absoluteTolerance' margin of error) then marks the test as failed and aborts the test & ceases execution.
 #define TEMPER_CHECK_NOT_ALMOST_EQUAL_Q( conditionA, conditionB, absoluteTolerance ) \
 	TemperTestTrueInternal( !TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, absoluteTolerance, TEMPERDEV__EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_Q(" #conditionA ", " #conditionB ", " #absoluteTolerance ")", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, NULL, NULL )
 
-//----------------------------------------------------------
-
 // If 'conditionA' is approximately equal enough to 'conditionB' (within 'absoluteTolerance' margin of error) then marks the test as failed, logs the specified printf-formatted error message, and aborts the test.
 #define TEMPER_CHECK_NOT_ALMOST_EQUAL_AM( conditionA, conditionB, absoluteTolerance, ... ) \
 	TemperTestTrueInternal( !TEMPERDEV__FLOAT_EQUALS( conditionA, conditionB, absoluteTolerance, TEMPERDEV__EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_AM(" #conditionA ", " #conditionB ", " #absoluteTolerance ", ...)", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, __VA_ARGS__ )
-
-//----------------------------------------------------------
 
 // If 'conditionA' is approximately equal enough to 'conditionB' (within 'absoluteTolerance' margin of error) then marks the test as failed, logs the specified printf-formatted error message, and aborts the test & ceases execution.
 #define TEMPER_CHECK_NOT_ALMOST_EQUAL_QM( conditionA, conditionB, absoluteTolerance, ... ) \
@@ -1190,6 +1122,8 @@ static const char* TemperGetTimeUnitStringInternal( const temperTimeUnit_t timeU
 #else	// defined( _WIN32 )
 #error Uncrecognised platform.  It appears Temper does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Temper/issues
 #endif	// defined( _WIN32 )
+
+//----------------------------------------------------------
 
 // its ok to write directly to the global test context because only one test thread runs at a time
 // if multiple test threads were running asynchronously then probably want to atomic increment at the very end of the test thread
