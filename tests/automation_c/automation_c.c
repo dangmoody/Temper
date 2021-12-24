@@ -85,7 +85,7 @@ static void AbsolveTest( const bool condition ) {
 		g_temperTestContext.currentTestErrorCount = 0;
 
 		TemperSetTextColorInternal( TEMPERDEV__COLOR_GREEN );
-		TEMPERDEV__LOG( "Current test absolved.\n" );
+		g_temperTestContext.callbacks.Log( "Current test absolved.\n" );
 		TemperSetTextColorInternal( TEMPERDEV__COLOR_DEFAULT );
 	}
 }
@@ -99,19 +99,19 @@ static void AbsolvePreviousTest( const automationAccountFor_t claim ) {
 		TEMPERDEV__ASSERT( g_temperTestContext.testsFailed > 0 );
 		g_temperTestContext.testsPassed += 1;
 		g_temperTestContext.testsFailed -= 1;
-		TEMPERDEV__LOG( "Absolved previous fail.\n" );
+		g_temperTestContext.callbacks.Log( "Absolved previous fail.\n" );
 	} else if ( claim == ACCOUNT_FOR_ONE_ABORT ) {
 		TEMPERDEV__ASSERT( g_temperTestContext.testsFailed > 0 );
 		TEMPERDEV__ASSERT( g_temperTestContext.testsAborted > 0 );
 		g_temperTestContext.testsPassed += 1;
 		g_temperTestContext.testsFailed -= 1;
 		g_temperTestContext.testsAborted -= 1;
-		TEMPERDEV__LOG( "Absolved previous abort.\n" );
+		g_temperTestContext.callbacks.Log( "Absolved previous abort.\n" );
 	} else if ( claim == ACCOUNT_FOR_ONE_SKIP ) {
 		TEMPERDEV__ASSERT( g_temperTestContext.testsSkipped > 0 );
 		g_temperTestContext.testsPassed += 1;
 		g_temperTestContext.testsSkipped -= 1;
-		TEMPERDEV__LOG( "Absolved previous skip.\n" );
+		g_temperTestContext.callbacks.Log( "Absolved previous skip.\n" );
 	}
 
 	TemperSetTextColorInternal( TEMPERDEV__COLOR_DEFAULT );
@@ -124,7 +124,7 @@ static void PassOrFailTest(const bool AllowPass, const char* message) {
 		AbsolveTest( true );
 	} else {
 		g_temperTestContext.currentTestErrorCount += 1;
-		TEMPERDEV__LOG_ERROR( message );
+		g_temperTestContext.callbacks.LogError( message );
 	}
 }
 
