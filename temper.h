@@ -48,7 +48,7 @@ Features:
 	- Automatic test registration at compile time, simply write your test and it will get called for you.
 	- Parametric tests.
 	- Early exits for tests and a bunch of new condition macros.
-	- Handling errors from your program's log output (requires a bit of extra work on your part). `// DM: I'm thinking about this`
+	- Handling errors from your program's log output (requires a bit of extra work on your part).
 	- Low friction, easily overridable functions to help hook Temper into your codebase.
 	- Support for Clang, GCC, and MSVC across Windows, Mac OS, and Linux on x64 ISAs (support for ARM in progress).
 
@@ -60,6 +60,7 @@ Download the latest release from the GitHub repository's release tab (https://gi
 
 
 3. QUICK START GUIDE
+	#define TEMPER_IMPLEMENTATION
 	#include <temper.h>
 
 	// write some tests
@@ -533,7 +534,7 @@ typedef struct temperTestInfo_t temperTestInfo_t;
 typedef struct temperCallbacks_t {
 	int		( *VPrintf )( const char* fmt, va_list args );
 	int		( *Strcmp )( const char* strA, const char* strB );
-	char*	( *Strstr )( const char* str, const char* substring );
+	bool	( *StringContains )( const char* str, const char* substring );
 
 	// Returns a timestamp from the CPU in the 'timeUnit' format.
 	// See temperTimeUnit_t for time units.
@@ -667,14 +668,14 @@ TEMPERDEV__EXTERN_C temperTestContext_t g_temperTestContext;
 //----------------------------------------------------------
 
 #if defined( __clang__ )
-#define TEMPERDEV__TEST_INFO_FETCHER( testName ) \
-	void TEMPERDEV__CONCAT( __temper_test_info_fetcher_, testName )( void ) __attribute__( ( constructor ) ); \
-	void TEMPERDEV__CONCAT( __temper_test_info_fetcher_, testName )( void )
+#define TEMPERDEV__DEFINE_TEST_INFO_FETCHER( testName ) \
+	void TEMPERDEV__CONCAT( TEMPERDEV__TEST_INFO_FETCHER_, testName )( void ) __attribute__( ( constructor ) ); \
+	void TEMPERDEV__CONCAT( TEMPERDEV__TEST_INFO_FETCHER_, testName )( void )
 #elif defined( __GNUC__ )
-#define TEMPERDEV__TEST_INFO_FETCHER( testName ) \
+#define TEMPERDEV__DEFINE_TEST_INFO_FETCHER( testName ) \
 	/* add 101 because gcc reserves constructors with priorities between 0 - 100 and __COUNTER__ starts at 0 */ \
-	void TEMPERDEV__CONCAT( __temper_test_info_fetcher_, testName )( void ) __attribute__( ( constructor( __COUNTER__ + 101 ) ) ); \
-	void TEMPERDEV__CONCAT( __temper_test_info_fetcher_, testName )( void )
+	void TEMPERDEV__CONCAT( TEMPERDEV__TEST_INFO_FETCHER_, testName )( void ) __attribute__( ( constructor( __COUNTER__ + 101 ) ) ); \
+	void TEMPERDEV__CONCAT( TEMPERDEV__TEST_INFO_FETCHER_, testName )( void )
 #elif defined( _MSC_VER )	// defined( __GNUC__ ) || defined( __clang__ )
 #ifdef _WIN64
 #define TEMPERDEV__MSVC_PREFIX	""
@@ -683,13 +684,13 @@ TEMPERDEV__EXTERN_C temperTestContext_t g_temperTestContext;
 #endif
 
 #pragma section( ".CRT$XCU", read )
-#define TEMPERDEV__TEST_INFO_FETCHER( testName ) \
-	void TEMPERDEV__CONCAT( __temper_test_info_fetcher_, testName )( void ); \
+#define TEMPERDEV__DEFINE_TEST_INFO_FETCHER( testName ) \
+	void TEMPERDEV__CONCAT( TEMPERDEV__TEST_INFO_FETCHER_, testName )( void ); \
 \
-	TEMPERDEV__EXTERN_C __declspec( allocate( ".CRT$XCU" ) ) void ( * TEMPERDEV__CONCAT( testName, _FuncPtr ) )( void ) = TEMPERDEV__CONCAT( __temper_test_info_fetcher_, testName ); \
+	TEMPERDEV__EXTERN_C __declspec( allocate( ".CRT$XCU" ) ) void ( * TEMPERDEV__CONCAT( testName, _FuncPtr ) )( void ) = TEMPERDEV__CONCAT( TEMPERDEV__TEST_INFO_FETCHER_, testName ); \
 	__pragma( comment( linker, "/include:" TEMPERDEV__MSVC_PREFIX TEMPERDEV__CONCAT( TEMPERDEV__STRINGIFY( testName ), "_FuncPtr" ) ) ) \
 \
-	void TEMPERDEV__CONCAT( __temper_test_info_fetcher_, testName )( void )
+	void TEMPERDEV__CONCAT( TEMPERDEV__TEST_INFO_FETCHER_, testName )( void )
 #endif	// defined( _MSC_VER )
 
 //----------------------------------------------------------
@@ -699,7 +700,7 @@ TEMPERDEV__EXTERN_C temperTestContext_t g_temperTestContext;
 	void ( testName )( void ); \
 \
 	/*2. This is what the runner will loop over to grab the test function as well as all the information concerning it*/ \
-	TEMPERDEV__TEST_INFO_FETCHER( testName ) { \
+	TEMPERDEV__DEFINE_TEST_INFO_FETCHER( testName ) { \
 		temperTestInfo_t testInfo; \
 		testInfo.OnBeforeTest		= onBeforeName; \
 		testInfo.TestFuncCallback	= testName; \
@@ -737,7 +738,7 @@ TEMPERDEV__EXTERN_C temperTestContext_t g_temperTestContext;
 		testName( __VA_ARGS__ ); \
 	} \
 \
-	TEMPERDEV__TEST_INFO_FETCHER( TEMPERDEV__CONCAT( testName, counter ) ) { \
+	TEMPERDEV__DEFINE_TEST_INFO_FETCHER( TEMPERDEV__CONCAT( testName, counter ) ) { \
 		temperTestInfo_t testInfo; \
 		TemperGetParametricTestInfo_ ## testName( &testInfo ); \
 		testInfo.TestFuncCallback = TEMPERDEV__CONCAT( TemperCallParametricTest_, TEMPERDEV__CONCAT( testName, counter ) ); \
@@ -745,7 +746,7 @@ TEMPERDEV__EXTERN_C temperTestContext_t g_temperTestContext;
 		TemperAddTestInternal( &testInfo ); \
 	} \
 \
-	void TEMPERDEV__CONCAT( __temper_test_info_fetcher_, TEMPERDEV__CONCAT( testName, counter ) )( void )
+	void TEMPERDEV__CONCAT( TEMPERDEV__TEST_INFO_FETCHER_, TEMPERDEV__CONCAT( testName, counter ) )( void )
 
 //----------------------------------------------------------
 
@@ -909,6 +910,10 @@ static const char* TemperGetNextArgInternal( const int argIndex, const int argc,
 }
 
 //----------------------------------------------------------
+
+static bool TemperStringContainsInternal( const char* str, const char* substring ) {
+	return strstr( str, substring ) != NULL;
+}
 
 static double TemperGetTimestampInternal( const temperTimeUnit_t timeUnit ) {
 	// should never get here
@@ -1095,8 +1100,6 @@ static const char* TemperGetTimeUnitStringInternal( const temperTimeUnit_t timeU
 #else	// defined( _WIN32 )
 #error Uncrecognised platform.  It appears Temper does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Temper/issues
 #endif	// defined( _WIN32 )
-
-//----------------------------------------------------------
 
 // its ok to write directly to the global test context because only one test thread runs at a time
 // if multiple test threads were running asynchronously then probably want to atomic increment at the very end of the test thread
@@ -1319,7 +1322,7 @@ void TemperSetupInternal( void ) {
 
 		if ( !callbacks->VPrintf )				{ callbacks->VPrintf = vprintf; }
 		if ( !callbacks->Strcmp )				{ callbacks->Strcmp = strcmp; }
-		if ( !callbacks->Strstr )				{ callbacks->Strstr = strstr; }
+		if ( !callbacks->StringContains )		{ callbacks->StringContains = TemperStringContainsInternal; }
 		if ( !callbacks->GetTimestamp )			{ callbacks->GetTimestamp = TemperGetTimestampInternal; }
 		if ( !callbacks->Maxf )					{ callbacks->Maxf = TemperMaxfInternal; }
 		if ( !callbacks->Absf )					{ callbacks->Absf = TemperAbsfInternal; }
@@ -1370,7 +1373,7 @@ static bool TemperIsSuiteFilteredInternal( const char* suiteName ) {
 	}
 
 	if ( g_temperTestContext.partialFilter ) {
-		return g_temperTestContext.callbacks.Strstr( suiteName, g_temperTestContext.suiteFilter ) != NULL;
+		return g_temperTestContext.callbacks.StringContains( suiteName, g_temperTestContext.suiteFilter );
 	} else {
 		return g_temperTestContext.callbacks.Strcmp( suiteName, g_temperTestContext.suiteFilter ) == 0;
 	}
@@ -1388,7 +1391,7 @@ static bool TemperIsTestFilteredInternal( const char* testName ) {
 	}
 
 	if ( g_temperTestContext.partialFilter ) {
-		return g_temperTestContext.callbacks.Strstr( testName, g_temperTestContext.testFilter ) != NULL;
+		return g_temperTestContext.callbacks.StringContains( testName, g_temperTestContext.testFilter );
 	} else {
 		return g_temperTestContext.callbacks.Strcmp( testName, g_temperTestContext.testFilter ) == 0;
 	}
