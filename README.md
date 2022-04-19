@@ -145,7 +145,7 @@ TEMPER_CHECK_TRUE_AM( 5 == 6, "Maths is broken." ); // Same as the example above
 ___
 ## Overriding internal functions
 
-Temper has a number of user-overridable macros (E.G.: `TEMPERDEV__GET_PROC_ADDRESS`) which you can use to help hook Temper into your own codebase.
+Temper has a number of user-overridable macros (E.G.: `TEMPERDEV_GET_PROC_ADDRESS`) which you can use to help hook Temper into your own codebase.
 
 If you are running on a platform that **ISN'T** Windows, Mac OS, or Linux then you will definitely want to override these functions as some of Temper's internal functions make calls to their respective OS-level API.
 
