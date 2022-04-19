@@ -84,37 +84,37 @@ static void AbsolveTest( const bool condition ) {
 	if ( condition ) {
 		g_temperTestContext.currentTestErrorCount = 0;
 
-		TemperSetTextColorInternal( TEMPERDEV__COLOR_GREEN );
+		TemperSetTextColorInternal( TEMPERDEV_COLOR_GREEN );
 		g_temperTestContext.callbacks.Log( "Current test absolved.\n" );
-		TemperSetTextColorInternal( TEMPERDEV__COLOR_DEFAULT );
+		TemperSetTextColorInternal( TEMPERDEV_COLOR_DEFAULT );
 	}
 }
 
 //----------------------------------------------------------
 
 static void AbsolvePreviousTest( const automationAccountFor_t claim ) {
-	TemperSetTextColorInternal( TEMPERDEV__COLOR_GREEN );
+	TemperSetTextColorInternal( TEMPERDEV_COLOR_GREEN );
 
 	if ( claim == ACCOUNT_FOR_ONE_FAILURE ) {
-		TEMPERDEV__ASSERT( g_temperTestContext.testsFailed > 0 );
+		TEMPERDEV_ASSERT( g_temperTestContext.testsFailed > 0 );
 		g_temperTestContext.testsPassed += 1;
 		g_temperTestContext.testsFailed -= 1;
 		g_temperTestContext.callbacks.Log( "Absolved previous fail.\n" );
 	} else if ( claim == ACCOUNT_FOR_ONE_ABORT ) {
-		TEMPERDEV__ASSERT( g_temperTestContext.testsFailed > 0 );
-		TEMPERDEV__ASSERT( g_temperTestContext.testsAborted > 0 );
+		TEMPERDEV_ASSERT( g_temperTestContext.testsFailed > 0 );
+		TEMPERDEV_ASSERT( g_temperTestContext.testsAborted > 0 );
 		g_temperTestContext.testsPassed += 1;
 		g_temperTestContext.testsFailed -= 1;
 		g_temperTestContext.testsAborted -= 1;
 		g_temperTestContext.callbacks.Log( "Absolved previous abort.\n" );
 	} else if ( claim == ACCOUNT_FOR_ONE_SKIP ) {
-		TEMPERDEV__ASSERT( g_temperTestContext.testsSkipped > 0 );
+		TEMPERDEV_ASSERT( g_temperTestContext.testsSkipped > 0 );
 		g_temperTestContext.testsPassed += 1;
 		g_temperTestContext.testsSkipped -= 1;
 		g_temperTestContext.callbacks.Log( "Absolved previous skip.\n" );
 	}
 
-	TemperSetTextColorInternal( TEMPERDEV__COLOR_DEFAULT );
+	TemperSetTextColorInternal( TEMPERDEV_COLOR_DEFAULT );
 }
 
 //----------------------------------------------------------
@@ -314,7 +314,7 @@ TEMPER_TEST( CheckAndCleanResults_8, TEMPER_FLAG_SHOULD_RUN ) {
 TEMPER_TEST( NoFailuresOrAborts_WhenExitCodeCalculated_ProvidesSuccessCode, TEMPER_FLAG_SHOULD_RUN ) {
 	CaptureTestCounts();
 	ClearTestCounts();
-	TEMPER_CHECK_EQUAL_M( TEMPERDEV__EXIT_SUCCESS, TemperCalculateExitCode(), "Expected the success code to be returned for no errors & no aborts" );
+	TEMPER_CHECK_EQUAL_M( TEMPERDEV_EXIT_SUCCESS, TemperCalculateExitCode(), "Expected the success code to be returned for no errors & no aborts" );
 	RestoreCapturedTestCounts();
 }
 
@@ -326,7 +326,7 @@ TEMPER_TEST( Failures_WhenExitCodeCalculated_ProvidesFailureCode, TEMPER_FLAG_SH
 	CaptureTestCounts();
 	ClearTestCounts();
 	g_temperTestContext.testsFailed = 1;
-	TEMPER_CHECK_EQUAL_M( TEMPERDEV__EXIT_FAILURE, TemperCalculateExitCode(), "Expected the failure code to be returned for there being errors" );
+	TEMPER_CHECK_EQUAL_M( TEMPERDEV_EXIT_FAILURE, TemperCalculateExitCode(), "Expected the failure code to be returned for there being errors" );
 	RestoreCapturedTestCounts();
 }
 
@@ -338,7 +338,7 @@ TEMPER_TEST( Aborts_WhenExitCodeCalculated_ProvidesFailureCode, TEMPER_FLAG_SHOU
 	CaptureTestCounts();
 	ClearTestCounts();
 	g_temperTestContext.testsAborted = 1;
-	TEMPER_CHECK_EQUAL_M( TEMPERDEV__EXIT_FAILURE, TemperCalculateExitCode(), "Expected the failure code to be returned for there being aborts" );
+	TEMPER_CHECK_EQUAL_M( TEMPERDEV_EXIT_FAILURE, TemperCalculateExitCode(), "Expected the failure code to be returned for there being aborts" );
 	RestoreCapturedTestCounts();
 }
 
