@@ -186,6 +186,7 @@ extern "C" {
 #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
 #pragma clang diagnostic ignored "-Wc++98-compat-pedantic"
 #pragma clang diagnostic ignored "-Wtypedef-redefinition"
+#pragma clang diagnostic ignored "-Wdeclaration-after-statement" // DM: clang 14 moans about this but its bullshit
 #if defined( __APPLE__ )
 // DM: only disabling this one to avoid a warning that gets generated when trying to convert function pointers to void*
 // if anyone knows of a better way to get around that without disabling all pedantic warnings I'd love to hear about it
@@ -704,7 +705,7 @@ typedef struct temperTestContext_t {
 
 //----------------------------------------------------------
 
-TEMPERDEV_EXTERN_C temperTestContext_t g_temperTestContext;
+TEMPERDEV_EXTERN_C temperTestContext_t	g_temperTestContext;
 
 //----------------------------------------------------------
 
@@ -821,17 +822,17 @@ TEMPERDEV_EXTERN_C temperTestContext_t g_temperTestContext;
 #if defined( _WIN32 )
 #define TEMPERDEV_COLOR_DEFAULT	0x07
 #define TEMPERDEV_COLOR_RED		0x0C
-#define TEMPERDEV_COLOR_GREEN		0x02
-#define TEMPERDEV_COLOR_YELLOW		0x0E
+#define TEMPERDEV_COLOR_GREEN	0x02
+#define TEMPERDEV_COLOR_YELLOW	0x0E
 
-typedef uint32_t					temperTextColor_t;
+typedef uint32_t				temperTextColor_t;
 #elif defined( __linux__ ) || defined( __APPLE__ )
 #define TEMPERDEV_COLOR_DEFAULT	"\033[0m"
 #define TEMPERDEV_COLOR_RED		"\033[0;31m"
-#define TEMPERDEV_COLOR_GREEN		"\033[0;32m"
-#define TEMPERDEV_COLOR_YELLOW		"\033[1;33m"
+#define TEMPERDEV_COLOR_GREEN	"\033[0;32m"
+#define TEMPERDEV_COLOR_YELLOW	"\033[1;33m"
 
-typedef const char*					temperTextColor_t;
+typedef const char*				temperTextColor_t;
 #endif // defined( _WIN32 )
 
 //----------------------------------------------------------
@@ -842,9 +843,9 @@ TEMPERDEV_EXTERN_C void	TemperTestTrueInternal( const bool condition, const char
 
 TEMPERDEV_EXTERN_C void	TemperSetupInternal( void );
 
-TEMPERDEV_EXTERN_C int		TemperExecuteAllTestsInternal( void );
+TEMPERDEV_EXTERN_C int	TemperExecuteAllTestsInternal( void );
 
-TEMPERDEV_EXTERN_C int		TemperExecuteAllTestsWithArgumentsInternal( int argc, char** argv );
+TEMPERDEV_EXTERN_C int	TemperExecuteAllTestsWithArgumentsInternal( int argc, char** argv );
 
 TEMPERDEV_EXTERN_C bool	TemperFloatEqualsInternal( const float a, const float b, const float absoluteTolerance, const float relativeTolerance );
 
@@ -1359,10 +1360,10 @@ static void TemperOnAllTestsFinishedInternal( void ) {
 
 	if ( g_temperTestContext.suiteFilter || g_temperTestContext.testFilter ) {
 		g_temperTestContext.callbacks.Log( "\t- Total tests matching filters: %d\n\t- Suite filter: %s\n\t- Test filter: %s\n\t- Partial results %s\n",
-				g_temperTestContext.totalTestsFoundWithFilters,
-				g_temperTestContext.suiteFilter,
-				g_temperTestContext.testFilter,
-				g_temperTestContext.partialFilter ? "PERMITTED" : "DISCARDED" );
+			g_temperTestContext.totalTestsFoundWithFilters,
+			g_temperTestContext.suiteFilter,
+			g_temperTestContext.testFilter,
+			g_temperTestContext.partialFilter ? "PERMITTED" : "DISCARDED" );
 	}
 
 	g_temperTestContext.callbacks.Log(

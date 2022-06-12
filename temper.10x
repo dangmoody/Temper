@@ -14,16 +14,31 @@
 		<RunCommand></RunCommand>
 		<DebugCommand></DebugCommand>
 		<ExePathCommand></ExePathCommand>
+		<DebugSln></DebugSln>
 		<Configurations>
 			<Configuration>Debug</Configuration>
 			<Configuration>Release</Configuration>
 		</Configurations>
 		<Platforms>
 			<Platform>x64</Platform>
-			<Platform>Win32</Platform>
 		</Platforms>
 		<AdditionalIncludePaths></AdditionalIncludePaths>
-		<ConfigProperties></ConfigProperties>
+		<Defines></Defines>
+		<ConfigProperties>
+			<ConfigAndPlatform>
+				<Name>Debug:x64</Name>
+				<Defines></Defines>
+				<ForceIncludes></ForceIncludes>
+			</ConfigAndPlatform>
+			<Config>
+				<Name>Debug</Name>
+				<Defines></Defines>
+			</Config>
+			<Platform>
+				<Name>x64</Name>
+				<Defines></Defines>
+			</Platform>
+		</ConfigProperties>
 		<Children></Children>
 	</Workspace>
 </N10X>
