@@ -488,12 +488,21 @@ CONDITION_TEST( CheckNotAlmostEqual_ValuesAroundUpperLowerBoundaries_ErrorCountI
 
 //----------------------------------------------------------
 
+#if defined( __clang__ )
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeclaration-after-statement"
+#endif
+
 int main( int argc, char** argv ) {
 	TEMPER_RUN( argc, argv );
 	int exitCode = TEMPER_GET_EXIT_CODE();
 	printf( "\nAutomation returned: %d.\n", exitCode );
 	return exitCode;
 }
+
+#if defined( __clang__ )
+#pragma clang diagnostic pop
+#endif
 
 //----------------------------------------------------------
 
