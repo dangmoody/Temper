@@ -109,29 +109,10 @@ if not exist %build_dir% (
 	mkdir %build_dir%
 )
 
-REM find vcvars64.bat location
-REM prefer the newest versions so put them at the top of the chain
-set vcvars_script=""
-if /I [%vcvars_script%]==[""] (
-	if exist "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat" (
-		echo Found VS 2022 build tools
-		set vcvars_script="C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat"
-	)
+REM github actions doesnt need to run this
+if /I ["%CI%"] == [""] (
+	call "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat"
 )
-
-if /I [%vcvars_script%]==[""] (
-	if exist "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat" (
-		echo Found VS 2019 build tools
-		set vcvars_script="C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat"
-	)
-)
-
-if /I [%vcvars_script%]==[""] (
-	echo ERROR: no vcvars64.bat script could be found.  Make sure you have this installed.
-	goto :ShowUsage
-)
-
-call %vcvars_script%
 
 echo CALLING: cl /Fe:%build_dir%\\!output_filename! /Fd:%build_dir%\\!output_filename!.pdb /Fo:%build_dir%\\!output_filename!.obj !symbols! !optimisation! !defines! %warninglevels% !ignorewarnings! !source_files!
 cl /Fe:%build_dir%\\!output_filename! /Fd:%build_dir%\\!output_filename!.pdb /Fo:%build_dir%\\!output_filename!.obj !symbols! !optimisation! !defines! %warninglevels% !ignorewarnings! !source_files!
