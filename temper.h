@@ -682,14 +682,16 @@ typedef struct temperTestContext_t {
 	uint32_t			testsFailed;
 	uint32_t			testsAborted;
 	uint32_t			testsSkipped;
+	uint32_t			testsQuit;
 	uint32_t			totalTestsFoundWithFilters;
 	uint32_t			totalTestsExecuted;
 	uint32_t			currentTestErrorCount;
 	int32_t				exitCode;
 	temperBool32		currentTestWasAborted;
-	temperBool32		quitHasBeenCalled;
+	temperBool32		negateQuitAttempts;
 	temperBool32		partialFilter;
 	temperTimeUnit_t	timeUnit;
+	uint32_t			pad0;
 	const char*			suiteFilterPrevious;
 	const char*			suiteFilter;
 	const char*			testFilter;
@@ -1276,9 +1278,10 @@ static void TemperOnAfterTestInternal( const temperTestInfo_t* information ) {
 	if ( information->testingFlag == TEMPER_FLAG_SHOULD_RUN ) {
 		const char* timeUnitStr = TemperGetTimeUnitStringInternal( g_temperTestContext.timeUnit );
 
-		if( g_temperTestContext.quitHasBeenCalled ) {
+		if( g_temperTestContext.testsQuit > 0 ) {
 			TemperSetTextColorInternal( TEMPERDEV_COLOR_RED );
 			g_temperTestContext.callbacks.Log( "=== TEST INVOKED EARLY EXIT (%.3f %s) ===\n\n", g_temperTestContext.currentTestEndTime - g_temperTestContext.currentTestStartTime, timeUnitStr );
+			TemperSetTextColorInternal( TEMPERDEV_COLOR_DEFAULT );
 		}
 		else if( g_temperTestContext.currentTestWasAborted ) {
 			TemperSetTextColorInternal( TEMPERDEV_COLOR_RED );
@@ -1310,7 +1313,7 @@ static void TemperAbortTestOnFailInternal( const temperTestInterruptFlag_t testI
 		g_temperTestContext.currentTestWasAborted = true;
 
 		if( testInteruptFlag == TEMPER_FLAG_TEST_QUIT ) {
-			g_temperTestContext.quitHasBeenCalled = true;
+			g_temperTestContext.testsQuit += 1;
 		}
 
 		TEMPERDEV_EXIT_TEST_THREAD();
@@ -1343,13 +1346,26 @@ void TemperTestTrueInternal( const bool condition, const char* conditionStr, con
 
 //----------------------------------------------------------
 
+static int TemperCalculateExitCode( void ) {
+	return g_temperTestContext.testsFailed == 0 && g_temperTestContext.testsAborted == 0 && g_temperTestContext.testsQuit == 0? TEMPERDEV_EXIT_SUCCESS : TEMPERDEV_EXIT_FAILURE;
+}
+
+//----------------------------------------------------------
+
 static void TemperOnAllTestsFinishedInternal( void ) {
 	uint32_t totalFound = g_temperTestContext.totalTestsFoundWithFilters;
+
+	if( TEMPERDEV_EXIT_FAILURE == TemperCalculateExitCode() ){
+		TemperSetTextColorInternal( TEMPERDEV_COLOR_RED );
+	}
+	else{
+		TemperSetTextColorInternal( TEMPERDEV_COLOR_GREEN );
+	}
 
 	g_temperTestContext.callbacks.Log(
 		"------------------------------------------------------------\n"
 		"\n"
-		"\n=== ALL TESTS FINISHED ===\n"
+		"\n=== TEMPER: Testing report ===\n"
 		"Total time taken: %.3f %s\n"
 		"Total tests defined: %d\n"
 		"Total tests found & ran: %d\n"
@@ -1370,10 +1386,12 @@ static void TemperOnAllTestsFinishedInternal( void ) {
 		"Passed:   %d ( %d%% )\n"
 		"Failed:   %d ( %d%% )\n"
 		"Aborted:  %d ( %d%% )\n"
+		"Quit:     %d ( %d%% )\n"
 		"Skipped:  %d ( %d%% )\n",
 		g_temperTestContext.testsPassed,  TemperGetPercentInternal( g_temperTestContext.testsPassed,  totalFound ),
 		g_temperTestContext.testsFailed,  TemperGetPercentInternal( g_temperTestContext.testsFailed,  totalFound ),
 		g_temperTestContext.testsAborted, TemperGetPercentInternal( g_temperTestContext.testsAborted, totalFound ),
+		g_temperTestContext.testsQuit,    TemperGetPercentInternal( g_temperTestContext.testsQuit,    totalFound ),
 		g_temperTestContext.testsSkipped, TemperGetPercentInternal( g_temperTestContext.testsSkipped, totalFound )
 	);
 }
@@ -1419,10 +1437,12 @@ void TemperSetupInternal( void ) {
 	g_temperTestContext.testsFailed = 0;
 	g_temperTestContext.testsAborted = 0;
 	g_temperTestContext.testsSkipped = 0;
+	g_temperTestContext.testsQuit = 0;
 	g_temperTestContext.totalTestsFoundWithFilters = 0;
 	g_temperTestContext.totalTestsExecuted = 0;
 	g_temperTestContext.currentTestErrorCount = 0;
 	g_temperTestContext.currentTestWasAborted = false;
+	g_temperTestContext.negateQuitAttempts = false;
 	g_temperTestContext.partialFilter = false;
 	g_temperTestContext.timeUnit = TEMPER_TIME_UNIT_US;
 	g_temperTestContext.suiteFilterPrevious = NULL;
@@ -1468,13 +1488,8 @@ static bool TemperIsTestFilteredInternal( const char* testName ) {
 
 //----------------------------------------------------------
 
-static int TemperCalculateExitCode( void ) {
-	return g_temperTestContext.testsFailed == 0 && g_temperTestContext.testsAborted == 0 ? TEMPERDEV_EXIT_SUCCESS : TEMPERDEV_EXIT_FAILURE;
-}
-
-//----------------------------------------------------------
-
 int TemperExecuteAllTestsInternal( void ) {
+	g_temperTestContext.callbacks.Log( "\n=== TEMPER: Executing Tests ===\n\n" );
 	double start = g_temperTestContext.callbacks.GetTimestamp( g_temperTestContext.timeUnit );
 
 	for ( uint64_t i = 0; i < g_temperTestContext.testInfosCount; i++ ) {
@@ -1509,7 +1524,7 @@ int TemperExecuteAllTestsInternal( void ) {
 
 				g_temperTestContext.callbacks.OnAfterTest( testInfo );
 
-				if( g_temperTestContext.quitHasBeenCalled ) {
+				if( g_temperTestContext.testsQuit > 0 && !g_temperTestContext.negateQuitAttempts) {
 					break;
 				}
 			}

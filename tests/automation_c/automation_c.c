@@ -18,7 +18,8 @@
 typedef enum automationAccountFor_t {
 	ACCOUNT_FOR_ONE_FAILURE = 0,
 	ACCOUNT_FOR_ONE_ABORT,
-	ACCOUNT_FOR_ONE_SKIP
+	ACCOUNT_FOR_ONE_SKIP,
+	ACCOUNT_FOR_QUIT_ATTEMPT
 } automationAccountFor_t;
 
 //----------------------------------------------------------
@@ -27,15 +28,22 @@ static uint32_t capturedPassCount = 0;
 static uint32_t capturedFailCount = 0;
 static uint32_t capturedAbortCount = 0;
 static uint32_t capturedSkipCount = 0;
+static uint32_t capturedQuitCount = 0;
+
+//----------------------------------------------------------
+
+#define THE_ABORT_TEST_FAILURE_NUMBER 1
+static uint32_t testAbortTestNumberWeNeverExpectSet = 0;
 
 //----------------------------------------------------------
 
 static void DumpInfo(const char* prefix) {
-	printf( "INFO_DUMP(%s): pass = %d/%d, fail = %d/%d, abort = %d/%d, skip = %d/%d\n",
+	printf( "INFO_DUMP(%s): pass = %d/%d, fail = %d/%d, abort = %d/%d, quit = %d/%d\nskip = %d/%d\n",
 			prefix,
 			capturedPassCount, g_temperTestContext.testsPassed,
 			capturedFailCount, g_temperTestContext.testsFailed,
 			capturedAbortCount, g_temperTestContext.testsAborted,
+			capturedQuitCount, g_temperTestContext.testsQuit,
 			capturedSkipCount, g_temperTestContext.testsSkipped );
 }
 
@@ -45,6 +53,7 @@ static void CaptureTestCounts( void ) {
 	capturedPassCount = g_temperTestContext.testsPassed;
 	capturedFailCount = g_temperTestContext.testsFailed;
 	capturedAbortCount = g_temperTestContext.testsAborted;
+	capturedQuitCount = g_temperTestContext.testsQuit;
 	capturedSkipCount = g_temperTestContext.testsSkipped;
 	DumpInfo( "CaptureCounts" );
 }
@@ -55,6 +64,7 @@ static void ClearTestCounts( void ) {
 	g_temperTestContext.testsPassed = 0;
 	g_temperTestContext.testsFailed = 0;
 	g_temperTestContext.testsAborted = 0;
+	g_temperTestContext.testsQuit = 0;
 	g_temperTestContext.testsSkipped = 0;
 }
 
@@ -64,15 +74,17 @@ static void RestoreCapturedTestCounts( void ) {
 	g_temperTestContext.testsPassed = capturedPassCount;
 	g_temperTestContext.testsFailed = capturedFailCount;
 	g_temperTestContext.testsAborted = capturedAbortCount;
+	g_temperTestContext.testsQuit = capturedQuitCount;
 	g_temperTestContext.testsSkipped = capturedSkipCount;
 }
 
 //----------------------------------------------------------
 
-static bool AssertResults( uint32_t passDiff, uint32_t failDiff, uint32_t abortDiff, uint32_t skipDiff ) {
+static bool AssertResults( uint32_t passDiff, uint32_t failDiff, uint32_t abortDiff, uint32_t quitDiff, uint32_t skipDiff ) {
 	TEMPER_CHECK_EQUAL_M( g_temperTestContext.testsPassed, ( capturedPassCount + passDiff ), "The passed test counter is not as expected: %d, %d\n", g_temperTestContext.testsPassed, capturedPassCount + passDiff );
 	TEMPER_CHECK_EQUAL_M( g_temperTestContext.testsFailed, ( capturedFailCount + failDiff ), "The failed test counter is not as expected: %d, %d\n", g_temperTestContext.testsFailed, capturedFailCount + failDiff );
 	TEMPER_CHECK_EQUAL_M( g_temperTestContext.testsAborted, ( capturedAbortCount + abortDiff ), "The aborted test counter is not as expected: %d, %d\n", g_temperTestContext.testsAborted, capturedAbortCount + abortDiff );
+	TEMPER_CHECK_EQUAL_M( g_temperTestContext.testsQuit, ( capturedQuitCount + quitDiff ), "The aborted test counter is not as expected: %d, %d\n", g_temperTestContext.testsQuit, capturedQuitCount + abortDiff );
 	TEMPER_CHECK_EQUAL_M( g_temperTestContext.testsSkipped, ( capturedSkipCount + skipDiff ), "The skipped test counter is not as expected: %d, %d\n", g_temperTestContext.testsSkipped, capturedSkipCount + skipDiff );
 
 	return g_temperTestContext.currentTestErrorCount == 0;
@@ -112,6 +124,15 @@ static void AbsolvePreviousTest( const automationAccountFor_t claim ) {
 		g_temperTestContext.testsPassed += 1;
 		g_temperTestContext.testsSkipped -= 1;
 		g_temperTestContext.callbacks.Log( "Absolved previous skip.\n" );
+	}else if ( claim == ACCOUNT_FOR_QUIT_ATTEMPT ) {
+		TEMPERDEV_ASSERT( g_temperTestContext.testsFailed > 0 );
+		TEMPERDEV_ASSERT( g_temperTestContext.testsAborted > 0 );
+		TEMPERDEV_ASSERT( g_temperTestContext.testsQuit > 0 );
+		g_temperTestContext.testsPassed += 1;
+		g_temperTestContext.testsFailed -= 1;
+		g_temperTestContext.testsAborted -= 1;
+		g_temperTestContext.testsQuit -= 1;
+		g_temperTestContext.callbacks.Log( "Absolved quit.\n" );
 	}
 
 	TemperSetTextColorInternal( TEMPERDEV_COLOR_DEFAULT );
@@ -144,7 +165,7 @@ RESULT_DEPENDANT_TEST( IsolatedTest_WhenDeclared_IsExecuted, TEMPER_FLAG_SHOULD_
 }
 
 TEMPER_TEST( CheckAndCleanResults_0, TEMPER_FLAG_SHOULD_RUN ) {
-	AssertResults( 1, 0, 0, 0 );
+	AssertResults( 1, 0, 0, 0, 0 );
 }
 
 //----------------------------------------------------------
@@ -190,7 +211,7 @@ RESULT_DEPDENDANT_TEST_PARAMETRIC( ParametricTest_WithRunFlag_IsExecuted, const 
 TEMPER_INVOKE_PARAMETRIC_TEST( ParametricTest_WithRunFlag_IsExecuted, true );
 
 TEMPER_TEST( CheckAndCleanResults_3, TEMPER_FLAG_SHOULD_RUN ) {
-	AssertResults( 1, 0, 0, 0 );
+	AssertResults( 1, 0, 0, 0, 0 );
 }
 
 //----------------------------------------------------------
@@ -274,7 +295,7 @@ RESULT_DEPENDANT_TEST( TemperCheck_WhenErrorTriggered_FailsTest, TEMPER_FLAG_SHO
 }
 
 TEMPER_TEST( CheckAndCleanResults_6, TEMPER_FLAG_SHOULD_RUN ) {
-	if ( AssertResults( 0, 1, 0, 0 ) ) {
+	if ( AssertResults( 0, 1, 0, 0, 0 ) ) {
 		AbsolvePreviousTest( ACCOUNT_FOR_ONE_FAILURE );
 	}
 }
@@ -283,28 +304,34 @@ TEMPER_TEST( CheckAndCleanResults_6, TEMPER_FLAG_SHOULD_RUN ) {
 // EXCEL_TestName - If a test triggered an aborts, total tests aborted increments
 //----------------------------------------------------------
 
-RESULT_DEPENDANT_TEST( TemperCheck_WhenAbortTriggered_AbortsTest, TEMPER_FLAG_SHOULD_RUN ) {
+RESULT_DEPENDANT_TEST( CheckTrue_WhenAbortTriggered_AbortsTest, TEMPER_FLAG_SHOULD_RUN ) {
 	TEMPER_CHECK_TRUE_AM( false, "We expect this test to abort.\n" );
-	TEMPER_CHECK_TRUE_M( false, "We shouldn't hit this. Asserted in the CheckAndClean.\n" );
+	testAbortTestNumberWeNeverExpectSet = THE_ABORT_TEST_FAILURE_NUMBER;
 }
 
 TEMPER_TEST( CheckAndCleanResults_7, TEMPER_FLAG_SHOULD_RUN ) {
-	if ( AssertResults( 0, 1, 1, 0 ) ) {
+	if ( AssertResults( 0, 1, 1, 0, 0 ) ) {
 		AbsolvePreviousTest( ACCOUNT_FOR_ONE_ABORT );
 	}
+
+	TEMPER_CHECK_NOT_EQUAL_M(testAbortTestNumberWeNeverExpectSet, THE_ABORT_TEST_FAILURE_NUMBER, "Aborts in tests do not kill threads as the failure number was set.");
+	testAbortTestNumberWeNeverExpectSet = 0;
 }
 
 RESULT_DEPDENDANT_TEST_PARAMETRIC( CheckTrue_WhenAbortTriggered_AbortsParametricTest, const bool check ) {
 	TEMPER_CHECK_TRUE_AM( check, "We expect this test to abort.\n" );
-	TEMPER_CHECK_TRUE_M( check, "We shouldn't hit this. Asserted in the CheckAndClean.\n" );
+	testAbortTestNumberWeNeverExpectSet = THE_ABORT_TEST_FAILURE_NUMBER;
 }
 
 TEMPER_INVOKE_PARAMETRIC_TEST( CheckTrue_WhenAbortTriggered_AbortsParametricTest, false );
 
 TEMPER_TEST( CheckAndCleanResults_8, TEMPER_FLAG_SHOULD_RUN ) {
-	if( AssertResults( 0, 1, 1, 0 ) ) {
+	if( AssertResults( 0, 1, 1, 0, 0 ) ) {
 		AbsolvePreviousTest( ACCOUNT_FOR_ONE_ABORT );
 	}
+
+	TEMPER_CHECK_NOT_EQUAL_M(testAbortTestNumberWeNeverExpectSet, THE_ABORT_TEST_FAILURE_NUMBER, "Aborts in parameteric tests do not kill threads as the failure number was set.");
+	testAbortTestNumberWeNeverExpectSet = 0;
 }
 
 //----------------------------------------------------------
@@ -484,6 +511,44 @@ CONDITION_TEST( CheckNotAlmostEqual_ValuesAroundUpperLowerBoundaries_ErrorCountI
 	TEMPER_CHECK_NOT_ALMOST_EQUAL( lhs, -2.6f, epsilon );		// Below lower threshold
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 3 ? errorCountCorrect : false;
 	PassOrFailTest( errorCountCorrect, "Should have incremented the error count to 3.\n" );
+}
+
+//----------------------------------------------------------
+// > QUIT TESTS
+//----------------------------------------------------------
+
+RESULT_DEPENDANT_TEST( CheckTrue_WhenQuitTriggered_QuitInvokedAndAbortsTest, TEMPER_FLAG_SHOULD_RUN ) {
+	g_temperTestContext.negateQuitAttempts = true;
+	TEMPER_CHECK_TRUE_QM(false, "Expected error 3 - We expect this test to quit now.\n");
+	testAbortTestNumberWeNeverExpectSet = THE_ABORT_TEST_FAILURE_NUMBER;
+}
+
+TEMPER_TEST( CheckAndCleanResults_9, TEMPER_FLAG_SHOULD_RUN ) {
+	g_temperTestContext.negateQuitAttempts = false; // we do not quit ourselves within this test but if we fail to absolve we will want the quit status of the previous test to fall through and end the run.
+	if ( AssertResults( 0, 1, 1, 1, 0 ) ) {
+		AbsolvePreviousTest( ACCOUNT_FOR_QUIT_ATTEMPT );
+	}
+
+	TEMPER_CHECK_NOT_EQUAL_M(testAbortTestNumberWeNeverExpectSet, THE_ABORT_TEST_FAILURE_NUMBER, "Quits do not trigger aborts as the failure number was set.");
+	testAbortTestNumberWeNeverExpectSet = 0;
+}
+
+RESULT_DEPDENDANT_TEST_PARAMETRIC( CheckTrue_WhenQuitTriggered_QuitInvokedAndAbortsParametricTest, const bool check ) {
+	g_temperTestContext.negateQuitAttempts = true;
+	TEMPER_CHECK_TRUE_QM( check, "We expect this test to quit.\n" );
+	testAbortTestNumberWeNeverExpectSet = THE_ABORT_TEST_FAILURE_NUMBER;
+}
+
+TEMPER_INVOKE_PARAMETRIC_TEST( CheckTrue_WhenQuitTriggered_QuitInvokedAndAbortsParametricTest, false );
+
+TEMPER_TEST( CheckAndCleanResults_10, TEMPER_FLAG_SHOULD_RUN ) {
+	g_temperTestContext.negateQuitAttempts = false; // we do not quit ourselves within this test but if we fail to absolve we will want the quit status of the previous test to fall through and end the run.
+	if( AssertResults( 0, 1, 1, 1, 0 ) ) {
+		AbsolvePreviousTest( ACCOUNT_FOR_QUIT_ATTEMPT );
+	}
+
+	TEMPER_CHECK_NOT_EQUAL_M(testAbortTestNumberWeNeverExpectSet, THE_ABORT_TEST_FAILURE_NUMBER, "Aborts in parameteric tests do not kill threads as the failure number was set.");
+	testAbortTestNumberWeNeverExpectSet = 0;
 }
 
 //----------------------------------------------------------
