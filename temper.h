@@ -120,6 +120,9 @@ Special Thanks:
 
 
 7. CHANGELOG
+v2.1.0, <INSERT RELEASE DATE HERE>:
+	* Errors are now logged explicitly to stderr.  Everything else is now logged explicitly to stdout.
+
 v2.0.1, 12/06/2022:
 	* Rename __temper_test_info_fetcher_ struct prefix to TEMPERDEV_TEST_INFO_FETCHER to avoid triggering compiler warnings on the user's end.
 	* Rename all macros to no longer include double underscores anywhere. For example, TEMPERDEV__COLOR_YELLOW is now called TEMPERDEV_COLOR_YELLOW.
