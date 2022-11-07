@@ -120,6 +120,12 @@ Special Thanks:
 
 
 7. CHANGELOG
+v2.0.1, 12/06/2022:
+	* Rename __temper_test_info_fetcher_ struct prefix to TEMPERDEV_TEST_INFO_FETCHER to avoid triggering compiler warnings on the user's end.
+	* Rename all macros to no longer include double underscores anywhere. For example, TEMPERDEV__COLOR_YELLOW is now called TEMPERDEV_COLOR_YELLOW.
+	* Replaced certain overridable #defines with function pointers for better ease-of-use.
+	* Ignore additional bogus warning for Clang 14.
+
 v2.0.0, 02/04/2021:
 	* Nearly everything has been completely re-written from scratch.
 	* Tests are now self-registering.  All you need to do now is write the test code and the tests will get called automatically for you (unless the test is marked as skipped).
