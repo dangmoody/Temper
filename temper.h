@@ -607,7 +607,7 @@ typedef struct temperTestInfo_t temperTestInfo_t;
 //----------------------------------------------------------
 
 typedef struct temperCallbacks_t {
-	int		( *VPrintf )( const char* fmt, va_list args );
+	int		( *VFPrintf )( FILE* file, const char* fmt, va_list args );
 	int		( *Strcmp )( const char* strA, const char* strB );
 	bool	( *StringContains )( const char* str, const char* substring );
 
@@ -618,7 +618,7 @@ typedef struct temperCallbacks_t {
 	float	( *Maxf )( const float a, const float b );
 	float	( *Absf )( const float x );
 	bool	( *FloatEquals )( const float a, const float b, const float absoluteTolerance, const float relativeTolerance );
-	void	( *Log )( const char* fmt, ... );
+	void	( *Log )( FILE* file, const char* fmt, ... );
 	void	( *LogWarning )( const char* fmt, ... );
 	void	( *LogError )( const char* fmt, ... );
 	void	( *OnBeforeTest )( const temperTestInfo_t* information );
@@ -880,12 +880,12 @@ static void TemperSetTextColorInternal( const temperTextColor_t color ) {
 
 //----------------------------------------------------------
 
-static void TemperLogInternal( const char* fmt, ... ) {
+static void TemperLogInternal( FILE* file, const char* fmt, ... ) {
 	TEMPERDEV_ASSERT( fmt );
 
 	va_list args;
 	va_start( args, fmt );
-	g_temperTestContext.callbacks.VPrintf( fmt, args );
+	g_temperTestContext.callbacks.VFPrintf( file, fmt, args );
 	va_end( args );
 }
 
@@ -903,7 +903,7 @@ static void TemperLogWarningInternal( const char* fmt, ... ) {
 
 	TemperSetTextColorInternal( TEMPERDEV_COLOR_YELLOW );
 
-	g_temperTestContext.callbacks.VPrintf( fmt, args );
+	g_temperTestContext.callbacks.VFPrintf( stderr, fmt, args );
 
 	TemperSetTextColorInternal( TEMPERDEV_COLOR_DEFAULT );
 
@@ -924,7 +924,7 @@ static void TemperLogErrorInternal( const char* fmt, ... ) {
 
 	TemperSetTextColorInternal( TEMPERDEV_COLOR_YELLOW );
 
-	g_temperTestContext.callbacks.VPrintf( fmt, args );
+	g_temperTestContext.callbacks.VFPrintf( stderr, fmt, args );
 
 	TemperSetTextColorInternal( TEMPERDEV_COLOR_DEFAULT );
 
@@ -1031,7 +1031,7 @@ static double TemperGetTimestampInternal( const temperTimeUnit_t timeUnit ) {
 //----------------------------------------------------------
 
 static void TemperShowUsageInternal( void ) {
-	g_temperTestContext.callbacks.Log(
+	g_temperTestContext.callbacks.Log( stdout,
 		"Arguments:\n"
 		"    [-h|--help]\n"
 		"        Shows this help and then exits.\n"
@@ -1252,7 +1252,7 @@ static void TemperRunTestThreadInternal( temperTestInfo_t* information ) {
 //----------------------------------------------------------
 
 static void TemperPrintDividerInternal( const char* suiteName ) {
-	g_temperTestContext.callbacks.Log( "----------------------------------------------------------\nSUITE: \"%s\"\n\n", suiteName );
+	g_temperTestContext.callbacks.Log( stdout, "----------------------------------------------------------\nSUITE: \"%s\"\n\n", suiteName );
 }
 
 //----------------------------------------------------------
@@ -1272,7 +1272,7 @@ static void TemperOnBeforeTestInternal( const temperTestInfo_t* information ) {
 	}
 
 	if ( information->testNameStr ) {
-		g_temperTestContext.callbacks.Log( "TEST: \"%s\"\n", information->testNameStr );
+		g_temperTestContext.callbacks.Log( stdout, "TEST: \"%s\"\n", information->testNameStr );
 	}
 }
 
@@ -1286,26 +1286,26 @@ static void TemperOnAfterTestInternal( const temperTestInfo_t* information ) {
 
 		if( g_temperTestContext.testsQuit > 0 ) {
 			TemperSetTextColorInternal( TEMPERDEV_COLOR_RED );
-			g_temperTestContext.callbacks.Log( "=== TEST INVOKED EARLY EXIT (%.3f %s) ===\n\n", g_temperTestContext.currentTestEndTime - g_temperTestContext.currentTestStartTime, timeUnitStr );
+			g_temperTestContext.callbacks.Log( stdout, "=== TEST INVOKED EARLY EXIT (%.3f %s) ===\n\n", g_temperTestContext.currentTestEndTime - g_temperTestContext.currentTestStartTime, timeUnitStr );
 			TemperSetTextColorInternal( TEMPERDEV_COLOR_DEFAULT );
 		}
 		else if( g_temperTestContext.currentTestWasAborted ) {
 			TemperSetTextColorInternal( TEMPERDEV_COLOR_RED );
-			g_temperTestContext.callbacks.Log( "=== TEST ABORTED (%.3f %s) ===\n\n", g_temperTestContext.currentTestEndTime - g_temperTestContext.currentTestStartTime, timeUnitStr );
+			g_temperTestContext.callbacks.Log( stderr, "=== TEST ABORTED (%.3f %s) ===\n\n", g_temperTestContext.currentTestEndTime - g_temperTestContext.currentTestStartTime, timeUnitStr );
 			TemperSetTextColorInternal( TEMPERDEV_COLOR_DEFAULT );
 		} else if ( g_temperTestContext.currentTestErrorCount > 0 ) {
 			TemperSetTextColorInternal( TEMPERDEV_COLOR_RED );
-			g_temperTestContext.callbacks.Log( "TEST FAILED (%.3f %s)\n\n", g_temperTestContext.currentTestEndTime - g_temperTestContext.currentTestStartTime, timeUnitStr );
+			g_temperTestContext.callbacks.Log( stderr, "TEST FAILED (%.3f %s)\n\n", g_temperTestContext.currentTestEndTime - g_temperTestContext.currentTestStartTime, timeUnitStr );
 			TemperSetTextColorInternal( TEMPERDEV_COLOR_DEFAULT );
 		} else {
 			TemperSetTextColorInternal( TEMPERDEV_COLOR_GREEN );
-			g_temperTestContext.callbacks.Log( "TEST SUCCEEDED (%.3f %s)\n\n", g_temperTestContext.currentTestEndTime - g_temperTestContext.currentTestStartTime, timeUnitStr );
+			g_temperTestContext.callbacks.Log( stdout, "TEST SUCCEEDED (%.3f %s)\n\n", g_temperTestContext.currentTestEndTime - g_temperTestContext.currentTestStartTime, timeUnitStr );
 			TemperSetTextColorInternal( TEMPERDEV_COLOR_DEFAULT );
 		}
 	} else {
 		const char* skipReason = information->testingFlag == TEMPER_FLAG_DEPRECATED ? "DEPRECATED" : "SHOULD_SKIP";
 		TemperSetTextColorInternal( TEMPERDEV_COLOR_YELLOW );
-		g_temperTestContext.callbacks.Log( "TEST FLAGGED \"%s\"\n\n", skipReason );
+		g_temperTestContext.callbacks.Log( stdout, "TEST FLAGGED \"%s\"\n\n", skipReason );
 		TemperSetTextColorInternal( TEMPERDEV_COLOR_DEFAULT );
 	}
 }
@@ -1334,13 +1334,13 @@ void TemperTestTrueInternal( const bool condition, const char* conditionStr, con
 
 		{
 			TemperSetTextColorInternal( TEMPERDEV_COLOR_RED );
-			g_temperTestContext.callbacks.Log( "FAILED: " );
+			g_temperTestContext.callbacks.Log( stderr, "FAILED: " );
 			TemperSetTextColorInternal( TEMPERDEV_COLOR_YELLOW );
-			g_temperTestContext.callbacks.Log( "%s at %s line %d.\n", conditionStr, file, line );
+			g_temperTestContext.callbacks.Log( stderr, "%s at %s line %d.\n", conditionStr, file, line );
 			if ( fmt ) {
 				va_list args;
 				va_start( args, fmt );
-				g_temperTestContext.callbacks.VPrintf( fmt, args );
+				g_temperTestContext.callbacks.VFPrintf( stderr, fmt, args );
 				va_end( args );
 			}
 			TemperSetTextColorInternal( TEMPERDEV_COLOR_DEFAULT );
@@ -1368,7 +1368,7 @@ static void TemperOnAllTestsFinishedInternal( void ) {
 		TemperSetTextColorInternal( TEMPERDEV_COLOR_GREEN );
 	}
 
-	g_temperTestContext.callbacks.Log(
+	g_temperTestContext.callbacks.Log( stdout,
 		"------------------------------------------------------------\n"
 		"\n"
 		"\n=== TEMPER: Testing report ===\n"
@@ -1381,14 +1381,14 @@ static void TemperOnAllTestsFinishedInternal( void ) {
 	);
 
 	if ( g_temperTestContext.suiteFilter || g_temperTestContext.testFilter ) {
-		g_temperTestContext.callbacks.Log( "\t- Total tests matching filters: %d\n\t- Suite filter: %s\n\t- Test filter: %s\n\t- Partial results %s\n",
+		g_temperTestContext.callbacks.Log( stdout, "\t- Total tests matching filters: %d\n\t- Suite filter: %s\n\t- Test filter: %s\n\t- Partial results %s\n",
 			g_temperTestContext.totalTestsFoundWithFilters,
 			g_temperTestContext.suiteFilter,
 			g_temperTestContext.testFilter,
 			g_temperTestContext.partialFilter ? "PERMITTED" : "DISCARDED" );
 	}
 
-	g_temperTestContext.callbacks.Log(
+	g_temperTestContext.callbacks.Log( stdout,
 		"Passed:   %d ( %d%% )\n"
 		"Failed:   %d ( %d%% )\n"
 		"Aborted:  %d ( %d%% )\n"
@@ -1413,7 +1413,7 @@ void TemperSetupInternal( void ) {
 	{
 		temperCallbacks_t* callbacks = &g_temperTestContext.callbacks;
 
-		if ( !callbacks->VPrintf )				{ callbacks->VPrintf = vprintf; }
+		if ( !callbacks->VFPrintf )				{ callbacks->VFPrintf = vfprintf; }
 		if ( !callbacks->Strcmp )				{ callbacks->Strcmp = strcmp; }
 		if ( !callbacks->StringContains )		{ callbacks->StringContains = TemperStringContainsInternal; }
 		if ( !callbacks->GetTimestamp )			{ callbacks->GetTimestamp = TemperGetTimestampInternal; }
@@ -1495,7 +1495,7 @@ static bool TemperIsTestFilteredInternal( const char* testName ) {
 //----------------------------------------------------------
 
 int TemperExecuteAllTestsInternal( void ) {
-	g_temperTestContext.callbacks.Log( "\n=== TEMPER: Executing Tests ===\n\n" );
+	g_temperTestContext.callbacks.Log( stdout, "\n=== TEMPER: Executing Tests ===\n\n" );
 	double start = g_temperTestContext.callbacks.GetTimestamp( g_temperTestContext.timeUnit );
 
 	for ( uint64_t i = 0; i < g_temperTestContext.testInfosCount; i++ ) {

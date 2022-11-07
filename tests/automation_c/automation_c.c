@@ -97,7 +97,7 @@ static void AbsolveTest( const bool condition ) {
 		g_temperTestContext.currentTestErrorCount = 0;
 
 		TemperSetTextColorInternal( TEMPERDEV_COLOR_GREEN );
-		g_temperTestContext.callbacks.Log( "Current test absolved.\n" );
+		g_temperTestContext.callbacks.Log( stdout, "Current test absolved.\n" );
 		TemperSetTextColorInternal( TEMPERDEV_COLOR_DEFAULT );
 	}
 }
@@ -111,19 +111,19 @@ static void AbsolvePreviousTest( const automationAccountFor_t claim ) {
 		TEMPERDEV_ASSERT( g_temperTestContext.testsFailed > 0 );
 		g_temperTestContext.testsPassed += 1;
 		g_temperTestContext.testsFailed -= 1;
-		g_temperTestContext.callbacks.Log( "Absolved previous fail.\n" );
+		g_temperTestContext.callbacks.Log( stdout, "Absolved previous fail.\n" );
 	} else if ( claim == ACCOUNT_FOR_ONE_ABORT ) {
 		TEMPERDEV_ASSERT( g_temperTestContext.testsFailed > 0 );
 		TEMPERDEV_ASSERT( g_temperTestContext.testsAborted > 0 );
 		g_temperTestContext.testsPassed += 1;
 		g_temperTestContext.testsFailed -= 1;
 		g_temperTestContext.testsAborted -= 1;
-		g_temperTestContext.callbacks.Log( "Absolved previous abort.\n" );
+		g_temperTestContext.callbacks.Log( stdout, "Absolved previous abort.\n" );
 	} else if ( claim == ACCOUNT_FOR_ONE_SKIP ) {
 		TEMPERDEV_ASSERT( g_temperTestContext.testsSkipped > 0 );
 		g_temperTestContext.testsPassed += 1;
 		g_temperTestContext.testsSkipped -= 1;
-		g_temperTestContext.callbacks.Log( "Absolved previous skip.\n" );
+		g_temperTestContext.callbacks.Log( stdout, "Absolved previous skip.\n" );
 	}else if ( claim == ACCOUNT_FOR_QUIT_ATTEMPT ) {
 		TEMPERDEV_ASSERT( g_temperTestContext.testsFailed > 0 );
 		TEMPERDEV_ASSERT( g_temperTestContext.testsAborted > 0 );
@@ -132,7 +132,7 @@ static void AbsolvePreviousTest( const automationAccountFor_t claim ) {
 		g_temperTestContext.testsFailed -= 1;
 		g_temperTestContext.testsAborted -= 1;
 		g_temperTestContext.testsQuit -= 1;
-		g_temperTestContext.callbacks.Log( "Absolved quit.\n" );
+		g_temperTestContext.callbacks.Log( stdout, "Absolved quit.\n" );
 	}
 
 	TemperSetTextColorInternal( TEMPERDEV_COLOR_DEFAULT );
