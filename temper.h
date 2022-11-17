@@ -380,75 +380,75 @@ extern "C" {
 
 //----------------------------------------------------------
 
-// If 'conditionA' is NOT equal to 'conditionB' then marks the test as failed.
-#define TEMPER_CHECK_EQUAL( conditionA, conditionB ) \
-	TemperTestTrueInternal( conditionA == conditionB, "TEMPER_CHECK_EQUAL(" #conditionA ", " #conditionB ")", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, NULL, NULL )
+// If 'a' is NOT equal to 'b' then marks the test as failed.
+#define TEMPER_CHECK_EQUAL( a, b ) \
+	TemperTestTrueInternal( a == b, "TEMPER_CHECK_EQUAL(" #a ", " #b ")", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-// If 'conditionA' is NOT equal to 'conditionB' then marks the test as failed and logs the specified printf-formatted error message.
-#define TEMPER_CHECK_EQUAL_M( conditionA, conditionB, ... ) \
-	TemperTestTrueInternal( conditionA == conditionB, "TEMPER_CHECK_EQUAL_M(" #conditionA ", " #conditionB ", ...)", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, __VA_ARGS__ )
+// If 'a' is NOT equal to 'b' then marks the test as failed and logs the specified printf-formatted error message.
+#define TEMPER_CHECK_EQUAL_M( a, b, ... ) \
+	TemperTestTrueInternal( a == b, "TEMPER_CHECK_EQUAL_M(" #a ", " #b ", ...)", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
-// If 'conditionA' is NOT equal to 'conditionB' then marks the test as failed and aborts the test.
-#define TEMPER_CHECK_EQUAL_A( conditionA, conditionB ) \
-	TemperTestTrueInternal( conditionA == conditionB, "TEMPER_CHECK_EQUAL_A(" #conditionA ", " #conditionB ")", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, NULL, NULL )
+// If 'a' is NOT equal to 'b' then marks the test as failed and aborts the test.
+#define TEMPER_CHECK_EQUAL_A( a, b ) \
+	TemperTestTrueInternal( a == b, "TEMPER_CHECK_EQUAL_A(" #a ", " #b ")", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-// If 'conditionA' is NOT equal to 'conditionB' then marks the test as failed and aborts the test & ceases execution.
-#define TEMPER_CHECK_EQUAL_Q( conditionA, conditionB ) \
-	TemperTestTrueInternal( conditionA == conditionB, "TEMPER_CHECK_EQUAL_Q(" #conditionA ", " #conditionB ")", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, NULL, NULL )
+// If 'a' is NOT equal to 'b' then marks the test as failed and aborts the test & ceases execution.
+#define TEMPER_CHECK_EQUAL_Q( a, b ) \
+	TemperTestTrueInternal( a == b, "TEMPER_CHECK_EQUAL_Q(" #a ", " #b ")", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-// If 'conditionA' is NOT equal to 'conditionB' then marks the test as failed, logs the specified printf-formatted error message and aborts the test.
-#define TEMPER_CHECK_EQUAL_AM( conditionA, conditionB, ... ) \
-	TemperTestTrueInternal( conditionA == conditionB, "TEMPER_CHECK_EQUAL_AM(" #conditionA ", " #conditionB ", ...)", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, __VA_ARGS__ )
+// If 'a' is NOT equal to 'b' then marks the test as failed, logs the specified printf-formatted error message and aborts the test.
+#define TEMPER_CHECK_EQUAL_AM( a, b, ... ) \
+	TemperTestTrueInternal( a == b, "TEMPER_CHECK_EQUAL_AM(" #a ", " #b ", ...)", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
-// If 'conditionA' is NOT equal to 'conditionB' then marks the test as failed, logs the specified printf-formatted error message and aborts the test & ceases execution.
-#define TEMPER_CHECK_EQUAL_QM( conditionA, conditionB, ... ) \
-	TemperTestTrueInternal( conditionA == conditionB, "TEMPER_CHECK_EQUAL_QM(" #conditionA ", " #conditionB ", ...)", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, __VA_ARGS__ )
+// If 'a' is NOT equal to 'b' then marks the test as failed, logs the specified printf-formatted error message and aborts the test & ceases execution.
+#define TEMPER_CHECK_EQUAL_QM( a, b, ... ) \
+	TemperTestTrueInternal( a == b, "TEMPER_CHECK_EQUAL_QM(" #a ", " #b ", ...)", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
-// If 'conditionA' is equal to 'conditionB' then marks the test as failed.
-#define TEMPER_CHECK_NOT_EQUAL( conditionA, conditionB ) \
-	TemperTestTrueInternal( conditionA != conditionB, "TEMPER_CHECK_NOT_EQUAL(" #conditionA ", " #conditionB ")", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, NULL, NULL )
+// If 'a' is equal to 'b' then marks the test as failed.
+#define TEMPER_CHECK_NOT_EQUAL( a, b ) \
+	TemperTestTrueInternal( a != b, "TEMPER_CHECK_NOT_EQUAL(" #a ", " #b ")", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-// If 'conditionA' is equal to 'conditionB' then marks the test as failed and logs the specified printf-formatted error message.
-#define TEMPER_CHECK_NOT_EQUAL_M( conditionA, conditionB, ... ) \
-	TemperTestTrueInternal( conditionA != conditionB, "TEMPER_CHECK_NOT_EQUAL_M(" #conditionA ", " #conditionB ", ...)", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, __VA_ARGS__ )
+// If 'a' is equal to 'b' then marks the test as failed and logs the specified printf-formatted error message.
+#define TEMPER_CHECK_NOT_EQUAL_M( a, b, ... ) \
+	TemperTestTrueInternal( a != b, "TEMPER_CHECK_NOT_EQUAL_M(" #a ", " #b ", ...)", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
-// If 'conditionA' is equal to 'conditionB' then marks the test as failed and aborts the test.
-#define TEMPER_CHECK_NOT_EQUAL_A( conditionA, conditionB ) \
-	TemperTestTrueInternal( conditionA != conditionB, "TEMPER_CHECK_NOT_EQUAL_A(" #conditionA ", " #conditionB ")", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, NULL, NULL )
+// If 'a' is equal to 'b' then marks the test as failed and aborts the test.
+#define TEMPER_CHECK_NOT_EQUAL_A( a, b ) \
+	TemperTestTrueInternal( a != b, "TEMPER_CHECK_NOT_EQUAL_A(" #a ", " #b ")", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-// If 'conditionA' is equal to 'conditionB' then marks the test as failed and aborts the test & ceases execution.
-#define TEMPER_CHECK_NOT_EQUAL_Q( conditionA, conditionB ) \
-	TemperTestTrueInternal( conditionA != conditionB, "TEMPER_CHECK_NOT_EQUAL_Q(" #conditionA ", " #conditionB ")", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, NULL, NULL )
+// If 'a' is equal to 'b' then marks the test as failed and aborts the test & ceases execution.
+#define TEMPER_CHECK_NOT_EQUAL_Q( a, b ) \
+	TemperTestTrueInternal( a != b, "TEMPER_CHECK_NOT_EQUAL_Q(" #a ", " #b ")", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, NULL, NULL )
 
 //----------------------------------------------------------
 
-// If 'conditionA' is equal to 'conditionB' then marks the test as failed, logs the specified printf-formatted error message and aborts the test.
-#define TEMPER_CHECK_NOT_EQUAL_AM( conditionA, conditionB, ... ) \
-	TemperTestTrueInternal( conditionA != conditionB, "TEMPER_CHECK_NOT_EQUAL_AM(" #conditionA ", " #conditionB ", ...)", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, __VA_ARGS__ )
+// If 'a' is equal to 'b' then marks the test as failed, logs the specified printf-formatted error message and aborts the test.
+#define TEMPER_CHECK_NOT_EQUAL_AM( a, b, ... ) \
+	TemperTestTrueInternal( a != b, "TEMPER_CHECK_NOT_EQUAL_AM(" #a ", " #b ", ...)", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
-// If 'conditionA' is equal to 'conditionB' then marks the test as failed, logs the specified printf-formatted error message and aborts the test & ceases execution.
-#define TEMPER_CHECK_NOT_EQUAL_QM( conditionA, conditionB, ... ) \
-	TemperTestTrueInternal( conditionA != conditionB, "TEMPER_CHECK_NOT_EQUAL_QM(" #conditionA ", " #conditionB ", ...)", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, __VA_ARGS__ )
+// If 'a' is equal to 'b' then marks the test as failed, logs the specified printf-formatted error message and aborts the test & ceases execution.
+#define TEMPER_CHECK_NOT_EQUAL_QM( a, b, ... ) \
+	TemperTestTrueInternal( a != b, "TEMPER_CHECK_NOT_EQUAL_QM(" #a ", " #b ", ...)", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
