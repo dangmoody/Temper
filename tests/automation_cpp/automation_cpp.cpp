@@ -72,7 +72,7 @@ typedef int( *TestingLambda )( const int a, const int b );
 
 //----------------------------------------------------------
 
-TEMPER_PARAMETRIC( ParsingStructs, TEMPER_FLAG_SHOULD_RUN, const TestingStruct& theStruct, const int expectedA, const int expectedB ) {
+TEMPER_TEST_PARAMETRIC( ParsingStructs, TEMPER_FLAG_SHOULD_RUN, const TestingStruct& theStruct, const int expectedA, const int expectedB ) {
 	TEMPER_CHECK_TRUE_M( theStruct.a == expectedA && theStruct.b == expectedB, "parsing structs in parametrics is broken." );
 }
 
@@ -83,7 +83,7 @@ TEMPER_INVOKE_PARAMETRIC_TEST( ParsingStructs, TestingStruct( 2, 18 ), 2, 18 );
 
 //----------------------------------------------------------
 
-TEMPER_PARAMETRIC( ParsingSimpleClasses, TEMPER_FLAG_SHOULD_RUN, TestingClassA theClass, const int expectedResult ) {
+TEMPER_TEST_PARAMETRIC( ParsingSimpleClasses, TEMPER_FLAG_SHOULD_RUN, TestingClassA theClass, const int expectedResult ) {
 	theClass.DoSomeMath();
 	TEMPER_CHECK_EQUAL_M( theClass.result, expectedResult, "parsing classes in parametrics is broken." );
 }
@@ -95,7 +95,7 @@ TEMPER_INVOKE_PARAMETRIC_TEST( ParsingSimpleClasses, TestingClassA( 5, 10 ), 50 
 
 //----------------------------------------------------------
 
-TEMPER_PARAMETRIC( ParsingComplexClasses, TEMPER_FLAG_SHOULD_RUN, TestingClassB theClass, const int expectedResult ) {
+TEMPER_TEST_PARAMETRIC( ParsingComplexClasses, TEMPER_FLAG_SHOULD_RUN, TestingClassB theClass, const int expectedResult ) {
 	theClass.DoSomeMath();
 	TEMPER_CHECK_EQUAL_M( theClass.result, expectedResult, "parsing complex classes in parametrics is broken." );
 }
@@ -107,7 +107,7 @@ TEMPER_INVOKE_PARAMETRIC_TEST( ParsingComplexClasses, TestingClassB( 21, 2 ), 25
 
 //----------------------------------------------------------
 
-TEMPER_PARAMETRIC( ParsingLambdas, TEMPER_FLAG_SHOULD_RUN, const TestingLambda theLambda, const int a, const int b, const int expectedResult ) {
+TEMPER_TEST_PARAMETRIC( ParsingLambdas, TEMPER_FLAG_SHOULD_RUN, const TestingLambda theLambda, const int a, const int b, const int expectedResult ) {
 	const int result = theLambda( a, b );
 	TEMPER_CHECK_EQUAL_M( result, expectedResult, "parsing lambdas in parametrics is broken." );
 }
@@ -120,12 +120,12 @@ TEMPER_INVOKE_PARAMETRIC_TEST( ParsingLambdas, []( const int a, const int b ) {r
 
 //----------------------------------------------------------
 
-TEMPER_PARAMETRIC( ParsingIntTemplates, TEMPER_FLAG_SHOULD_RUN, TestingTemplateStruct<int> theStruct, const int expectedResult ) {
+TEMPER_TEST_PARAMETRIC( ParsingIntTemplates, TEMPER_FLAG_SHOULD_RUN, TestingTemplateStruct<int> theStruct, const int expectedResult ) {
 	int result = theStruct.DoSomeMath();
 	TEMPER_CHECK_EQUAL_M( result, expectedResult, "parsing lambdas in parametrics is broken." );
 }
 
-TEMPER_PARAMETRIC( ParsingFloatTemplates, TEMPER_FLAG_SHOULD_RUN, TestingTemplateStruct<float> theStruct, const float expectedResult ) {
+TEMPER_TEST_PARAMETRIC( ParsingFloatTemplates, TEMPER_FLAG_SHOULD_RUN, TestingTemplateStruct<float> theStruct, const float expectedResult ) {
 	float result = theStruct.DoSomeMath();
 	TEMPER_CHECK_FLOAT_EQUAL_M( result, expectedResult, "parsing lambdas in parametrics is broken." );
 }

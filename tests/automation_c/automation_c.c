@@ -153,8 +153,8 @@ static void PassOrFailTest(const bool AllowPass, const char* message) {
 //----------------------------------------------------------
 
 #define RESULT_DEPENDANT_TEST( name, flag )				TEMPER_TEST_C( name, CaptureTestCounts, NULL, flag )
-#define CONDITION_TEST( testName )						TEMPER_SUITE_TEST( ConditionTests, testName, TEMPER_FLAG_SHOULD_RUN )
-#define RESULT_DEPDENDANT_TEST_PARAMETRIC( name, ... )	TEMPER_PARAMETRIC_C( name, CaptureTestCounts, NULL, TEMPER_FLAG_SHOULD_RUN, __VA_ARGS__ )
+#define CONDITION_TEST( testName )						TEMPER_TEST_SUITE( ConditionTests, testName, TEMPER_FLAG_SHOULD_RUN )
+#define RESULT_DEPDENDANT_TEST_PARAMETRIC( name, ... )	TEMPER_TEST_PARAMETRIC_C( name, CaptureTestCounts, NULL, TEMPER_FLAG_SHOULD_RUN, __VA_ARGS__ )
 
 //----------------------------------------------------------
 // EXCEL_TestName - When a test is marked as "Should Run" it runs
@@ -220,7 +220,7 @@ TEMPER_TEST( CheckAndCleanResults_3, TEMPER_FLAG_SHOULD_RUN ) {
 // EXCEL_TestName - When a parametric test is marked as "Should skip" then all invokes are skipped
 //----------------------------------------------------------
 
-TEMPER_PARAMETRIC( ParametricTest_WithDeprecatedFlag_TriggersSkipCount, TEMPER_FLAG_DEPRECATED, const bool check ) {
+TEMPER_TEST_PARAMETRIC( ParametricTest_WithDeprecatedFlag_TriggersSkipCount, TEMPER_FLAG_DEPRECATED, const bool check ) {
 	TEMPER_CHECK_TRUE_AM( check, "This test shouldn't have executed, it's flagged as Deprecated." );
 }
 
@@ -232,7 +232,7 @@ TEMPER_TEST( CheckAndCleanResults_4, TEMPER_FLAG_SHOULD_RUN ) {
 	}
 }
 
-TEMPER_PARAMETRIC( ParametricTest_WithSkipFlag_TriggersSkipCount, TEMPER_FLAG_SHOULD_SKIP, const bool check ) {
+TEMPER_TEST_PARAMETRIC( ParametricTest_WithSkipFlag_TriggersSkipCount, TEMPER_FLAG_SHOULD_SKIP, const bool check ) {
 	TEMPER_CHECK_TRUE_AM( check, "This test shouldn't have executed, it's flagged as Skipped." );
 }
 
@@ -254,7 +254,7 @@ typedef struct person_t {
 	uint32_t	age;
 } person_t;
 
-TEMPER_PARAMETRIC( ParametricTest_WhenDeclaredWithStructParm_StructParmIsValid, TEMPER_FLAG_SHOULD_RUN, person_t* person, const char* expectedName, const uint32_t expectedAge ) {
+TEMPER_TEST_PARAMETRIC( ParametricTest_WhenDeclaredWithStructParm_StructParmIsValid, TEMPER_FLAG_SHOULD_RUN, person_t* person, const char* expectedName, const uint32_t expectedAge ) {
 	// general data validation
 	TEMPER_CHECK_TRUE_AM( person != NULL, "person ptr is NULL.\n" );
 	TEMPER_CHECK_TRUE_AM( person->name != NULL, "person->name ptr inside \"%s\" is NULL.\n" );

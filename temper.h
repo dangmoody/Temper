@@ -122,6 +122,10 @@ Special Thanks:
 7. CHANGELOG
 v2.1.0, <INSERT RELEASE DATE HERE>:
 	* Errors are now logged explicitly to stderr.  Everything else is now logged explicitly to stdout.
+	* Unified the names of the test macros for better searchability/auto-completion:
+		* Renamed TEMPER_SUITE_TEST to TEMPER_TEST_SUITE.
+		* Renamed TEMPER_PARAMETRIC to TEMPER_TEST_PARAMETRIC.
+		* Renamed TEMPER_SUITE_PARAMETRIC to TEMPER_TEST_PARAMETRIC_SUITE.
 
 v2.0.1, 12/06/2022:
 	* Rename __temper_test_info_fetcher_ struct prefix to TEMPERDEV_TEST_INFO_FETCHER to avoid triggering compiler warnings on the user's end.
@@ -273,31 +277,31 @@ extern "C" {
 //----------------------------------------------------------
 
 // Defines a test called 'testName', which is part of suite 'suiteName', and will either run, skip, or otherwise depedening on 'runFlag'.
-#define TEMPER_SUITE_TEST( suiteName, testName, runFlag ) \
+#define TEMPER_TEST_SUITE( suiteName, testName, runFlag ) \
 	TEMPERDEV_DEFINE_TEST( #suiteName, testName, NULL, NULL, runFlag )
 
 // Defines a test called 'testName', which is part of suite 'suiteName', with callbacks 'onBefore' and 'onAfter', and will either run, skip, or otherwise depedening on 'runFlag'.
-#define TEMPER_SUITE_TEST_C( suiteName,  testName, onBefore, onAfter, runFlag ) \
+#define TEMPER_TEST_SUITE_C( suiteName,  testName, onBefore, onAfter, runFlag ) \
 	TEMPERDEV_DEFINE_TEST( #suiteName, testName, onBefore, onAfter, runFlag )
 
 //----------------------------------------------------------
 
 // Defines a test called 'testName', that takes any user-defined parameters, and will either run, skip, or otherwise depedening on 'runFlag'.
-#define TEMPER_PARAMETRIC( testName, runFlag, ... ) \
+#define TEMPER_TEST_PARAMETRIC( testName, runFlag, ... ) \
 	TEMPERDEV_DEFINE_PARAMETRIC( NULL, testName, NULL, NULL, runFlag, __VA_ARGS__ )
 
 // Defines a test called 'testName', that takes any user-defined parameters, with callbacks 'onBefore' and 'onAfter', and will either run, skip, or otherwise depedening on 'runFlag'.
-#define TEMPER_PARAMETRIC_C( testName, onBefore, onAfter, runFlag, ... ) \
+#define TEMPER_TEST_PARAMETRIC_C( testName, onBefore, onAfter, runFlag, ... ) \
 	TEMPERDEV_DEFINE_PARAMETRIC( NULL, testName, onBefore, onAfter, runFlag, __VA_ARGS__ )
 
 //----------------------------------------------------------
 
 // Defines a test called 'testName', that takes any user-defined parameters, which is part of suite 'suiteName', and will either run, skip, or otherwise depedening on 'runFlag'.
-#define TEMPER_PARAMETRIC_SUITE( suiteName, testName, runFlag, ... ) \
+#define TEMPER_TEST_PARAMETRIC_SUITE( suiteName, testName, runFlag, ... ) \
 	TEMPERDEV_DEFINE_PARAMETRIC( #suiteName, testName, NULL, NULL, runFlag, __VA_ARGS__ )
 
 // Defines a test called 'testName', that takes any user-defined parameters, which is part of suite 'suiteName', with callbacks 'onBefore' and 'onAfter', and will either run, skip, or otherwise depedening on 'runFlag'.
-#define TEMPER_PARAMETRIC_SUITE_C( suiteName, testName, onBefore, onAfter, runFlag, ... ) \
+#define TEMPER_TEST_PARAMETRIC_SUITE_C( suiteName, testName, onBefore, onAfter, runFlag, ... ) \
 	TEMPERDEV_DEFINE_PARAMETRIC( #suiteName, testName, onBefore, onAfter, runFlag, __VA_ARGS__ )
 
 //----------------------------------------------------------
