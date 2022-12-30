@@ -703,6 +703,7 @@ typedef struct temperTestContext_t {
 	temperBool32		currentTestWasAborted;
 	temperBool32		negateQuitAttempts;
 	temperBool32		partialFilter;
+	temperBool32		onlyShowFailedTests;
 	temperTimeUnit_t	timeUnit;
 	uint32_t			pad0;
 	const char*			suiteFilterPrevious;
@@ -1102,6 +1103,11 @@ static bool TemperHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 			continue;
 		}
 
+		if ( g_temperTestContext.callbacks.Strcmp( arg, "-f" ) == 0 ) {
+			g_temperTestContext.onlyShowFailedTests = true;
+			continue;
+		}
+
 		if ( g_temperTestContext.callbacks.Strcmp( arg, "--time-unit" ) == 0 ) {
 			const char* nextArg = TemperGetNextArgInternal( argIndex, argc, argv );
 			if ( !nextArg ) {
@@ -1305,9 +1311,11 @@ static void TemperOnAfterTestInternal( const temperTestInfo_t* information ) {
 			g_temperTestContext.callbacks.Log( stderr, "TEST FAILED (%.3f %s)\n\n", g_temperTestContext.currentTestEndTime - g_temperTestContext.currentTestStartTime, timeUnitStr );
 			TemperSetTextColorInternal( TEMPERDEV_COLOR_DEFAULT );
 		} else {
-			TemperSetTextColorInternal( TEMPERDEV_COLOR_GREEN );
-			g_temperTestContext.callbacks.Log( stdout, "TEST SUCCEEDED (%.3f %s)\n\n", g_temperTestContext.currentTestEndTime - g_temperTestContext.currentTestStartTime, timeUnitStr );
-			TemperSetTextColorInternal( TEMPERDEV_COLOR_DEFAULT );
+			if ( !g_temperTestContext.onlyShowFailedTests ) {
+				TemperSetTextColorInternal( TEMPERDEV_COLOR_GREEN );
+				g_temperTestContext.callbacks.Log( "TEST SUCCEEDED (%.3f %s)\n\n", g_temperTestContext.currentTestEndTime - g_temperTestContext.currentTestStartTime, timeUnitStr );
+				TemperSetTextColorInternal( TEMPERDEV_COLOR_DEFAULT );
+			}
 		}
 	} else {
 		const char* skipReason = information->testingFlag == TEMPER_FLAG_DEPRECATED ? "DEPRECATED" : "SHOULD_SKIP";
@@ -1457,6 +1465,7 @@ void TemperSetupInternal( void ) {
 	g_temperTestContext.currentTestWasAborted = false;
 	g_temperTestContext.negateQuitAttempts = false;
 	g_temperTestContext.partialFilter = false;
+	g_temperTestContext.onlyShowFailedTests = false;
 	g_temperTestContext.timeUnit = TEMPER_TIME_UNIT_US;
 	g_temperTestContext.suiteFilterPrevious = NULL;
 	g_temperTestContext.suiteFilter = NULL;
