@@ -1149,7 +1149,7 @@ static void TemperOnAfterTestInternal( const temperTestInfo_t* information ) {
 		} else {
 			if ( !g_temperTestContext.onlyShowFailedTests ) {
 				TemperSetTextColorInternal( TEMPERDEV_COLOR_GREEN );
-				g_temperTestContext.callbacks.Log( "TEST SUCCEEDED (%.3f %s)\n\n", g_temperTestContext.currentTestEndTime - g_temperTestContext.currentTestStartTime, timeUnitStr );
+				g_temperTestContext.callbacks.Log( stderr, "TEST SUCCEEDED (%.3f %s)\n\n", g_temperTestContext.currentTestEndTime - g_temperTestContext.currentTestStartTime, timeUnitStr );
 				TemperSetTextColorInternal( TEMPERDEV_COLOR_DEFAULT );
 			}
 		}
