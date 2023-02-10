@@ -1,0 +1,12 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "type": "shell",
+            "command": "${workspaceFolder}/scripts/build_clang_gcc.sh --output binary.exe --compiler clang --config debug --source ${workspaceFolder}/tests/automation_c/automation_c.c"
+        }
+    ]
+}

@@ -265,303 +265,114 @@ extern "C" {
 #define TEMPER_GET_EXIT_CODE()	g_temperTestContext.exitCode
 
 //----------------------------------------------------------
-
-// Defines a test called 'testName', and will either run, skip, or otherwise depedening on 'runFlag'.
-#define TEMPER_TEST( testName, runFlag ) \
-	TEMPERDEV_DEFINE_TEST( NULL, testName, NULL, NULL, runFlag )
-
-// Defines a test called 'testName', with callbacks 'onBefore' and 'onAfter', and will either run, skip, or otherwise depedening on 'runFlag'.
-#define TEMPER_TEST_C( testName, onBefore, onAfter, runFlag ) \
-	TEMPERDEV_DEFINE_TEST( NULL, testName, onBefore, onAfter, runFlag )
-
+// PARAMETRIC TEST MACROS
 //----------------------------------------------------------
 
-// Defines a test called 'testName', which is part of suite 'suiteName', and will either run, skip, or otherwise depedening on 'runFlag'.
-#define TEMPER_TEST_SUITE( suiteName, testName, runFlag ) \
-	TEMPERDEV_DEFINE_TEST( #suiteName, testName, NULL, NULL, runFlag )
-
-// Defines a test called 'testName', which is part of suite 'suiteName', with callbacks 'onBefore' and 'onAfter', and will either run, skip, or otherwise depedening on 'runFlag'.
-#define TEMPER_TEST_SUITE_C( suiteName,  testName, onBefore, onAfter, runFlag ) \
-	TEMPERDEV_DEFINE_TEST( #suiteName, testName, onBefore, onAfter, runFlag )
-
-//----------------------------------------------------------
-
-// Defines a test called 'testName', that takes any user-defined parameters, and will either run, skip, or otherwise depedening on 'runFlag'.
-#define TEMPER_TEST_PARAMETRIC( testName, runFlag, ... ) \
-	TEMPERDEV_DEFINE_PARAMETRIC( NULL, testName, NULL, NULL, runFlag, __VA_ARGS__ )
-
-// Defines a test called 'testName', that takes any user-defined parameters, with callbacks 'onBefore' and 'onAfter', and will either run, skip, or otherwise depedening on 'runFlag'.
-#define TEMPER_TEST_PARAMETRIC_C( testName, onBefore, onAfter, runFlag, ... ) \
-	TEMPERDEV_DEFINE_PARAMETRIC( NULL, testName, onBefore, onAfter, runFlag, __VA_ARGS__ )
+#define TEMPER_TEST( testName, runFlag )														TEMPERDEV_DEFINE_TEST( NULL, testName, NULL, NULL, runFlag )
+#define TEMPER_TEST_C( testName, onBefore, onAfter, runFlag )									TEMPERDEV_DEFINE_TEST( NULL, testName, onBefore, onAfter, runFlag )
+#define TEMPER_TEST_SUITE( suiteName, testName, runFlag )										TEMPERDEV_DEFINE_TEST( #suiteName, testName, NULL, NULL, runFlag )
+#define TEMPER_TEST_SUITE_C( suiteName,  testName, onBefore, onAfter, runFlag )					TEMPERDEV_DEFINE_TEST( #suiteName, testName, onBefore, onAfter, runFlag )
+#define TEMPER_TEST_PARAMETRIC( testName, runFlag, ... )										TEMPERDEV_DEFINE_PARAMETRIC( NULL, testName, NULL, NULL, runFlag, __VA_ARGS__ )
+#define TEMPER_TEST_PARAMETRIC_C( testName, onBefore, onAfter, runFlag, ... )					TEMPERDEV_DEFINE_PARAMETRIC( NULL, testName, onBefore, onAfter, runFlag, __VA_ARGS__ )
+#define TEMPER_TEST_PARAMETRIC_SUITE( suiteName, testName, runFlag, ... )						TEMPERDEV_DEFINE_PARAMETRIC( #suiteName, testName, NULL, NULL, runFlag, __VA_ARGS__ )
+#define TEMPER_TEST_PARAMETRIC_SUITE_C( suiteName, testName, onBefore, onAfter, runFlag, ... )	TEMPERDEV_DEFINE_PARAMETRIC( #suiteName, testName, onBefore, onAfter, runFlag, __VA_ARGS__ )
+#define TEMPER_INVOKE_PARAMETRIC_TEST( testName, ... )											TEMPERDEV_INVOKE_PARAMETRIC_TEST( __COUNTER__, testName, __VA_ARGS__ )
 
 //----------------------------------------------------------
-
-// Defines a test called 'testName', that takes any user-defined parameters, which is part of suite 'suiteName', and will either run, skip, or otherwise depedening on 'runFlag'.
-#define TEMPER_TEST_PARAMETRIC_SUITE( suiteName, testName, runFlag, ... ) \
-	TEMPERDEV_DEFINE_PARAMETRIC( #suiteName, testName, NULL, NULL, runFlag, __VA_ARGS__ )
-
-// Defines a test called 'testName', that takes any user-defined parameters, which is part of suite 'suiteName', with callbacks 'onBefore' and 'onAfter', and will either run, skip, or otherwise depedening on 'runFlag'.
-#define TEMPER_TEST_PARAMETRIC_SUITE_C( suiteName, testName, onBefore, onAfter, runFlag, ... ) \
-	TEMPERDEV_DEFINE_PARAMETRIC( #suiteName, testName, onBefore, onAfter, runFlag, __VA_ARGS__ )
-
+// COMMON COMPARISON MACROS
 //----------------------------------------------------------
 
-// Runs a parametric test with the specified parameters.
-#define TEMPER_INVOKE_PARAMETRIC_TEST( testName, ... ) \
-	TEMPERDEV_INVOKE_PARAMETRIC_TEST( __COUNTER__, testName, __VA_ARGS__ )
+#define TEMPER_CHECK_TRUE( condition )															TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE(" #condition ")", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_TRUE_M( condition, ... )													TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE_M(" #condition ", ...)", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, __VA_ARGS__ )
+#define TEMPER_CHECK_TRUE_A( condition )														TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE_A(" #condition ")", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_TRUE_Q( condition )														TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE_Q(" #condition ")", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_TRUE_AM( condition, ... )													TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE_AM(" #condition ", ...)", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, __VA_ARGS__ )
+#define TEMPER_CHECK_TRUE_QM( condition, ... )													TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE_QM(" #condition ", ...)", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, __VA_ARGS__ )
+
+#define TEMPER_CHECK_FALSE( condition )															TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE(" #condition ")", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_FALSE_M( condition, ... )													TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE_M(" #condition ", ...)", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, __VA_ARGS__ )
+#define TEMPER_CHECK_FALSE_A( condition )														TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE_A(" #condition ")", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_FALSE_Q( condition )														TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE_Q(" #condition ")", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_FALSE_AM( condition, ... )													TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE_AM(" #condition ", ...)", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, __VA_ARGS__ )
+#define TEMPER_CHECK_FALSE_QM( condition, ... )													TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE_QM(" #condition ", ...)", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, __VA_ARGS__ )
+
+#define TEMPER_CHECK_EQUAL( a, b )																TemperTestTrueInternal( a == b, "TEMPER_CHECK_EQUAL(" #a ", " #b ")", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_EQUAL_M( a, b, ... )														TemperTestTrueInternal( a == b, "TEMPER_CHECK_EQUAL_M(" #a ", " #b ", ...)", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, __VA_ARGS__ )
+#define TEMPER_CHECK_EQUAL_A( a, b )															TemperTestTrueInternal( a == b, "TEMPER_CHECK_EQUAL_A(" #a ", " #b ")", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_EQUAL_Q( a, b )															TemperTestTrueInternal( a == b, "TEMPER_CHECK_EQUAL_Q(" #a ", " #b ")", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_EQUAL_AM( a, b, ... )														TemperTestTrueInternal( a == b, "TEMPER_CHECK_EQUAL_AM(" #a ", " #b ", ...)", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, __VA_ARGS__ )
+#define TEMPER_CHECK_EQUAL_QM( a, b, ... )														TemperTestTrueInternal( a == b, "TEMPER_CHECK_EQUAL_QM(" #a ", " #b ", ...)", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, __VA_ARGS__ )
+
+#define TEMPER_CHECK_NOT_EQUAL( a, b )															TemperTestTrueInternal( a != b, "TEMPER_CHECK_NOT_EQUAL(" #a ", " #b ")", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_NOT_EQUAL_M( a, b, ... )													TemperTestTrueInternal( a != b, "TEMPER_CHECK_NOT_EQUAL_M(" #a ", " #b ", ...)", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, __VA_ARGS__ )
+#define TEMPER_CHECK_NOT_EQUAL_A( a, b )														TemperTestTrueInternal( a != b, "TEMPER_CHECK_NOT_EQUAL_A(" #a ", " #b ")", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_NOT_EQUAL_Q( a, b )														TemperTestTrueInternal( a != b, "TEMPER_CHECK_NOT_EQUAL_Q(" #a ", " #b ")", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_NOT_EQUAL_AM( a, b, ... )													TemperTestTrueInternal( a != b, "TEMPER_CHECK_NOT_EQUAL_AM(" #a ", " #b ", ...)", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, __VA_ARGS__ )
+#define TEMPER_CHECK_NOT_EQUAL_QM( a, b, ... )													TemperTestTrueInternal( a != b, "TEMPER_CHECK_NOT_EQUAL_QM(" #a ", " #b ", ...)", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, __VA_ARGS__ )
 
 //----------------------------------------------------------
-
-// If 'condition' is NOT true then marks the test as failed.
-#define TEMPER_CHECK_TRUE( condition ) \
-	TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE(" #condition ")", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, NULL, NULL )
-
+//	FLOAT COMPARISON MACROS
 //----------------------------------------------------------
 
-// If 'condition' is NOT true then marks the test as failed and logs the specified printf-formatted error message.
-#define TEMPER_CHECK_TRUE_M( condition, ... ) \
-	TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE_M(" #condition ", ...)", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, __VA_ARGS__ )
+#define TEMPER_CHECK_FLOAT_EQUAL( a, b )														TemperTestTrueInternal( g_temperTestContext.callbacks.FloatEquals( a, b, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_ABSOLUTE, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_RELATIVE ), "TEMPER_CHECK_FLOAT_EQUAL(" #a ", " #b ")", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_FLOAT_EQUAL_M( a, b, ... )													TemperTestTrueInternal( g_temperTestContext.callbacks.FloatEquals( a, b, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_ABSOLUTE, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_RELATIVE ), "TEMPER_CHECK_FLOAT_EQUAL_M(" #a ", " #b ", ...)", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, __VA_ARGS__ )
+#define TEMPER_CHECK_FLOAT_EQUAL_A( a, b )														TemperTestTrueInternal( g_temperTestContext.callbacks.FloatEquals( a, b, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_ABSOLUTE, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_RELATIVE ), "TEMPER_CHECK_FLOAT_EQUAL_A(" #a ", " #b ")", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_FLOAT_EQUAL_Q( a, b )														TemperTestTrueInternal( g_temperTestContext.callbacks.FloatEquals( a, b, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_ABSOLUTE, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_RELATIVE ), "TEMPER_CHECK_FLOAT_EQUAL_Q(" #a ", " #b ")", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_FLOAT_EQUAL_AM( a, b, ... )												TemperTestTrueInternal( g_temperTestContext.callbacks.FloatEquals( a, b, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_ABSOLUTE, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_RELATIVE ), "TEMPER_CHECK_FLOAT_EQUAL_AM(" #a ", " #b ", ...)", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, __VA_ARGS__ )
+#define TEMPER_CHECK_FLOAT_EQUAL_QM( a, b, ... )												TemperTestTrueInternal( g_temperTestContext.callbacks.FloatEquals( a, b, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_ABSOLUTE, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_RELATIVE ), "TEMPER_CHECK_FLOAT_EQUAL_QM(" #a ", " #b ", ...)", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, __VA_ARGS__ )
+
+#define TEMPER_CHECK_NOT_FLOAT_EQUAL( a, b )													TemperTestTrueInternal( !g_temperTestContext.callbacks.FloatEquals( a, b, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_ABSOLUTE, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_RELATIVE ), "TEMPER_CHECK_FLOAT_EQUAL(" #a ", " #b ")", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_NOT_FLOAT_EQUAL_M( a, b, ... )												TemperTestTrueInternal( !g_temperTestContext.callbacks.FloatEquals( a, b, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_ABSOLUTE, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_RELATIVE ), "TEMPER_CHECK_FLOAT_EQUAL_M(" #a ", " #b ", ...)", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, __VA_ARGS__ )
+#define TEMPER_CHECK_NOT_FLOAT_EQUAL_A( a, b )													TemperTestTrueInternal( !g_temperTestContext.callbacks.FloatEquals( a, b, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_ABSOLUTE, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_RELATIVE ), "TEMPER_CHECK_FLOAT_EQUAL_A(" #a ", " #b ")", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_NOT_FLOAT_EQUAL_Q( a, b )													TemperTestTrueInternal( !g_temperTestContext.callbacks.FloatEquals( a, b, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_ABSOLUTE, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_RELATIVE ), "TEMPER_CHECK_FLOAT_EQUAL_Q(" #a ", " #b ")", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_NOT_FLOAT_EQUAL_AM( a, b, ... )											TemperTestTrueInternal( !g_temperTestContext.callbacks.FloatEquals( a, b, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_ABSOLUTE, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_RELATIVE ), "TEMPER_CHECK_FLOAT_EQUAL_AM(" #a ", " #b ", ...)", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, __VA_ARGS__ )
+#define TEMPER_CHECK_NOT_FLOAT_EQUAL_QM( a, b, ... )											TemperTestTrueInternal( !g_temperTestContext.callbacks.FloatEquals( a, b, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_ABSOLUTE, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_RELATIVE ), "TEMPER_CHECK_FLOAT_EQUAL_QM(" #a ", " #b ", ...)", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, __VA_ARGS__ )
+
+#define TEMPER_CHECK_FLOAT_S_EQUAL( a, b, absoluteTolerance )									TemperTestTrueInternal( g_temperTestContext.callbacks.FloatEquals( a, b, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_RELATIVE ), "TEMPER_CHECK_ALMOST_EQUAL(" #a ", " #b ", " #absoluteTolerance ")", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_FLOAT_S_EQUAL_M( a, b, absoluteTolerance, ... )							TemperTestTrueInternal( g_temperTestContext.callbacks.FloatEquals( a, b, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_RELATIVE ), "TEMPER_CHECK_ALMOST_EQUAL_M(" #a ", " #b ", " #absoluteTolerance ", ...)", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, __VA_ARGS__ )
+#define TEMPER_CHECK_FLOAT_S_EQUAL_A( a, b, absoluteTolerance )									TemperTestTrueInternal( g_temperTestContext.callbacks.FloatEquals( a, b, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_RELATIVE ), "TEMPER_CHECK_ALMOST_EQUAL_A(" #a ", " #b ", " #absoluteTolerance ")", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_FLOAT_S_EQUAL_Q( a, b, absoluteTolerance )									TemperTestTrueInternal( g_temperTestContext.callbacks.FloatEquals( a, b, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_RELATIVE ), "TEMPER_CHECK_ALMOST_EQUAL_Q(" #a ", " #b ", " #absoluteTolerance ")", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_FLOAT_S_EQUAL_AM( a, b, absoluteTolerance, ... )							TemperTestTrueInternal( g_temperTestContext.callbacks.FloatEquals( a, b, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_RELATIVE ), "TEMPER_CHECK_ALMOST_EQUAL_AM(" #a ", " #b ", " #absoluteTolerance ", ...)", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, __VA_ARGS__ )
+#define TEMPER_CHECK_FLOAT_S_EQUAL_QM( a, b, absoluteTolerance, ... )							TemperTestTrueInternal( g_temperTestContext.callbacks.FloatEquals( a, b, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_RELATIVE ), "TEMPER_CHECK_ALMOST_EQUAL_QM(" #a ", " #b ", " #absoluteTolerance ", ...)", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, __VA_ARGS__ )
+
+#define TEMPER_CHECK_NOT_FLOAT_S_EQUAL( a, b, absoluteTolerance )								TemperTestTrueInternal( !g_temperTestContext.callbacks.FloatEquals( a, b, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_RELATIVE ), "TEMPER_CHECK_NOT_ALMOST_EQUAL(" #a ", " #b ", " #absoluteTolerance ")", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_NOT_FLOAT_S_EQUAL_M( a, b, absoluteTolerance, ... )						TemperTestTrueInternal( !g_temperTestContext.callbacks.FloatEquals( a, b, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_RELATIVE ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_M(" #a ", " #b ", " #absoluteTolerance ", ...)", TEMPER_FLAG_TEST_OKAY,  __FILE__, __LINE__, __VA_ARGS__ )
+#define TEMPER_CHECK_NOT_FLOAT_S_EQUAL_A( a, b, absoluteTolerance )								TemperTestTrueInternal( !g_temperTestContext.callbacks.FloatEquals( a, b, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_RELATIVE ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_A(" #a ", " #b ", " #absoluteTolerance ")", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_NOT_FLOAT_S_EQUAL_Q( a, b, absoluteTolerance )								TemperTestTrueInternal( !g_temperTestContext.callbacks.FloatEquals( a, b, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_RELATIVE ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_Q(" #a ", " #b ", " #absoluteTolerance ")", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_NOT_FLOAT_S_EQUAL_AM( a, b, absoluteTolerance, ... )						TemperTestTrueInternal( !g_temperTestContext.callbacks.FloatEquals( a, b, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_RELATIVE ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_AM(" #a ", " #b ", " #absoluteTolerance ", ...)", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, __VA_ARGS__ )
+#define TEMPER_CHECK_NOT_FLOAT_S_EQUAL_QM( a, b, absoluteTolerance, ... )						TemperTestTrueInternal( !g_temperTestContext.callbacks.FloatEquals( a, b, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_FLOAT_RELATIVE ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_QM(" #a ", " #b ", " #absoluteTolerance ", ...)", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, __VA_ARGS__ )
 
 //----------------------------------------------------------
-
-// If 'condition' is NOT true then marks the test as failed and aborts the test.
-#define TEMPER_CHECK_TRUE_A( condition ) \
-	TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE_A(" #condition ")", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, NULL, NULL )
-
+//	DOUBLE COMPARISON MACROS
 //----------------------------------------------------------
 
-// If 'condition' is NOT true then marks the test as failed, aborts the test & ceases execution.
-#define TEMPER_CHECK_TRUE_Q( condition ) \
-	TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE_Q(" #condition ")", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, NULL, NULL )
-
-//----------------------------------------------------------
-
-// If 'condition' is NOT true then marks the test as failed, logs the specified printf-formatted error message and aborts the test.
-#define TEMPER_CHECK_TRUE_AM( condition, ... ) \
-	TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE_AM(" #condition ", ...)", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, __VA_ARGS__ )
-
-//----------------------------------------------------------
-
-// If 'condition' is NOT true then marks the test as failed, aborts the test & ceases execution.
-#define TEMPER_CHECK_TRUE_QM( condition, ... ) \
-	TemperTestTrueInternal( condition, "TEMPER_CHECK_TRUE_QM(" #condition ", ...)", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, __VA_ARGS__ )
-
-//----------------------------------------------------------
-
-// If 'condition' is NOT false then marks the test as failed.
-#define TEMPER_CHECK_FALSE( condition ) \
-	TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE(" #condition ")", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, NULL, NULL )
-
-//----------------------------------------------------------
-
-// If 'condition' is NOT false then marks the test as failed and logs the specified printf-formatted error message.
-#define TEMPER_CHECK_FALSE_M( condition, ... ) \
-	TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE_M(" #condition ", ...)", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, __VA_ARGS__ )
-
-//----------------------------------------------------------
-
-// If 'condition' is NOT false then marks the test as failed and aborts the test.
-#define TEMPER_CHECK_FALSE_A( condition ) \
-	TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE_A(" #condition ")", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, NULL, NULL )
-
-//----------------------------------------------------------
-
-// If 'condition' is NOT false then marks the test as failed and aborts the test & ceases execution.
-#define TEMPER_CHECK_FALSE_Q( condition ) \
-	TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE_Q(" #condition ")", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, NULL, NULL )
-
-//----------------------------------------------------------
-
-// If 'condition' is NOT false then marks the test as failed, logs the specified printf-formatted error message and aborts the test.
-#define TEMPER_CHECK_FALSE_AM( condition, ... ) \
-	TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE_AM(" #condition ", ...)", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, __VA_ARGS__ )
-
-//----------------------------------------------------------
-
-// If 'condition' is NOT false then marks the test as failed, logs the specified printf-formatted error message and aborts the test & ceases execution.
-#define TEMPER_CHECK_FALSE_QM( condition, ... ) \
-	TemperTestTrueInternal( !(condition), "TEMPER_CHECK_FALSE_QM(" #condition ", ...)", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, __VA_ARGS__ )
-
-//----------------------------------------------------------
-
-// If 'a' is NOT equal to 'b' then marks the test as failed.
-#define TEMPER_CHECK_EQUAL( a, b ) \
-	TemperTestTrueInternal( a == b, "TEMPER_CHECK_EQUAL(" #a ", " #b ")", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, NULL, NULL )
-
-//----------------------------------------------------------
-
-// If 'a' is NOT equal to 'b' then marks the test as failed and logs the specified printf-formatted error message.
-#define TEMPER_CHECK_EQUAL_M( a, b, ... ) \
-	TemperTestTrueInternal( a == b, "TEMPER_CHECK_EQUAL_M(" #a ", " #b ", ...)", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, __VA_ARGS__ )
-
-//----------------------------------------------------------
-
-// If 'a' is NOT equal to 'b' then marks the test as failed and aborts the test.
-#define TEMPER_CHECK_EQUAL_A( a, b ) \
-	TemperTestTrueInternal( a == b, "TEMPER_CHECK_EQUAL_A(" #a ", " #b ")", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, NULL, NULL )
-
-//----------------------------------------------------------
-
-// If 'a' is NOT equal to 'b' then marks the test as failed and aborts the test & ceases execution.
-#define TEMPER_CHECK_EQUAL_Q( a, b ) \
-	TemperTestTrueInternal( a == b, "TEMPER_CHECK_EQUAL_Q(" #a ", " #b ")", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, NULL, NULL )
-
-//----------------------------------------------------------
-
-// If 'a' is NOT equal to 'b' then marks the test as failed, logs the specified printf-formatted error message and aborts the test.
-#define TEMPER_CHECK_EQUAL_AM( a, b, ... ) \
-	TemperTestTrueInternal( a == b, "TEMPER_CHECK_EQUAL_AM(" #a ", " #b ", ...)", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, __VA_ARGS__ )
-
-//----------------------------------------------------------
-
-// If 'a' is NOT equal to 'b' then marks the test as failed, logs the specified printf-formatted error message and aborts the test & ceases execution.
-#define TEMPER_CHECK_EQUAL_QM( a, b, ... ) \
-	TemperTestTrueInternal( a == b, "TEMPER_CHECK_EQUAL_QM(" #a ", " #b ", ...)", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, __VA_ARGS__ )
-
-//----------------------------------------------------------
-
-// If 'a' is equal to 'b' then marks the test as failed.
-#define TEMPER_CHECK_NOT_EQUAL( a, b ) \
-	TemperTestTrueInternal( a != b, "TEMPER_CHECK_NOT_EQUAL(" #a ", " #b ")", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, NULL, NULL )
-
-//----------------------------------------------------------
-
-// If 'a' is equal to 'b' then marks the test as failed and logs the specified printf-formatted error message.
-#define TEMPER_CHECK_NOT_EQUAL_M( a, b, ... ) \
-	TemperTestTrueInternal( a != b, "TEMPER_CHECK_NOT_EQUAL_M(" #a ", " #b ", ...)", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, __VA_ARGS__ )
-
-//----------------------------------------------------------
-
-// If 'a' is equal to 'b' then marks the test as failed and aborts the test.
-#define TEMPER_CHECK_NOT_EQUAL_A( a, b ) \
-	TemperTestTrueInternal( a != b, "TEMPER_CHECK_NOT_EQUAL_A(" #a ", " #b ")", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, NULL, NULL )
-
-//----------------------------------------------------------
-
-// If 'a' is equal to 'b' then marks the test as failed and aborts the test & ceases execution.
-#define TEMPER_CHECK_NOT_EQUAL_Q( a, b ) \
-	TemperTestTrueInternal( a != b, "TEMPER_CHECK_NOT_EQUAL_Q(" #a ", " #b ")", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, NULL, NULL )
-
-//----------------------------------------------------------
-
-// If 'a' is equal to 'b' then marks the test as failed, logs the specified printf-formatted error message and aborts the test.
-#define TEMPER_CHECK_NOT_EQUAL_AM( a, b, ... ) \
-	TemperTestTrueInternal( a != b, "TEMPER_CHECK_NOT_EQUAL_AM(" #a ", " #b ", ...)", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, __VA_ARGS__ )
-
-//----------------------------------------------------------
-
-// If 'a' is equal to 'b' then marks the test as failed, logs the specified printf-formatted error message and aborts the test & ceases execution.
-#define TEMPER_CHECK_NOT_EQUAL_QM( a, b, ... ) \
-	TemperTestTrueInternal( a != b, "TEMPER_CHECK_NOT_EQUAL_QM(" #a ", " #b ", ...)", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, __VA_ARGS__ )
-
-//----------------------------------------------------------
-
-// If 'floatA' is NOT approximately equal enough to floatB (within Temper's default margins of error) then marks the test as failed.
-#define TEMPER_CHECK_FLOAT_EQUAL( floatA, floatB ) \
-	TemperTestTrueInternal( g_temperTestContext.callbacks.FloatEquals( floatA, floatB, TEMPERDEV_EPSILON_TOLERANCE_ABSOLUTE, TEMPERDEV_EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_FLOAT_EQUAL(" #floatA ", " #floatB ")", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, NULL, NULL )
-
-//----------------------------------------------------------
-
-// If 'floatA' is NOT approximately equal enough to floatB (within Temper's default margins of error) then marks the test as failed and logs the specified printf-formatted error message.
-#define TEMPER_CHECK_FLOAT_EQUAL_M( floatA, floatB, ... ) \
-	TemperTestTrueInternal( g_temperTestContext.callbacks.FloatEquals( floatA, floatB, TEMPERDEV_EPSILON_TOLERANCE_ABSOLUTE, TEMPERDEV_EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_FLOAT_EQUAL_M(" #floatA ", " #floatB ", ...)", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, __VA_ARGS__ )
-
-//----------------------------------------------------------
-
-// If 'floatA' is NOT approximately equal enough to floatB (within Temper's default margins of error) then marks the test as failed and aborts the test.
-#define TEMPER_CHECK_FLOAT_EQUAL_A( floatA, floatB ) \
-	TemperTestTrueInternal( g_temperTestContext.callbacks.FloatEquals( floatA, floatB, TEMPERDEV_EPSILON_TOLERANCE_ABSOLUTE, TEMPERDEV_EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_FLOAT_EQUAL_A(" #floatA ", " #floatB ")", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, NULL, NULL )
-
-//----------------------------------------------------------
-
-// If 'floatA' is NOT approximately equal enough to floatB (within Temper's default margins of error) then marks the test as failed and aborts the test & ceases execution.
-#define TEMPER_CHECK_FLOAT_EQUAL_Q( floatA, floatB ) \
-	TemperTestTrueInternal( g_temperTestContext.callbacks.FloatEquals( floatA, floatB, TEMPERDEV_EPSILON_TOLERANCE_ABSOLUTE, TEMPERDEV_EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_FLOAT_EQUAL_Q(" #floatA ", " #floatB ")", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, NULL, NULL )
-
-//----------------------------------------------------------
-
-// If 'floatA' is NOT approximately equal enough to floatB (within Temper's default margins of error) then marks the test as failed, logs the specified printf-formatted error message, and aborts the test.
-#define TEMPER_CHECK_FLOAT_EQUAL_AM( floatA, floatB, ... ) \
-	TemperTestTrueInternal( g_temperTestContext.callbacks.FloatEquals( floatA, floatB, TEMPERDEV_EPSILON_TOLERANCE_ABSOLUTE, TEMPERDEV_EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_FLOAT_EQUAL_AM(" #floatA ", " #floatB ", ...)", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, __VA_ARGS__ )
-
-//----------------------------------------------------------
-
-// If 'floatA' is NOT approximately equal enough to floatB (within Temper's default margins of error) then marks the test as failed, logs the specified printf-formatted error message, and aborts the test & ceases execution.
-#define TEMPER_CHECK_FLOAT_EQUAL_QM( floatA, floatB, ... ) \
-	TemperTestTrueInternal( g_temperTestContext.callbacks.FloatEquals( floatA, floatB, TEMPERDEV_EPSILON_TOLERANCE_ABSOLUTE, TEMPERDEV_EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_FLOAT_EQUAL_QM(" #floatA ", " #floatB ", ...)", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, __VA_ARGS__ )
-
-//----------------------------------------------------------
-
-// If 'conditionA' is NOT approximately equal enough to 'conditionB' (within 'tolerance' margin of error) then marks the test as failed.
-#define TEMPER_CHECK_ALMOST_EQUAL( conditionA, conditionB, absoluteTolerance ) \
-	TemperTestTrueInternal( g_temperTestContext.callbacks.FloatEquals( conditionA, conditionB, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_ALMOST_EQUAL(" #conditionA ", " #conditionB ", " #absoluteTolerance ")", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, NULL, NULL )
-
-//----------------------------------------------------------
-
-// If 'conditionA' is NOT approximately equal enough to 'conditionB' (within 'absoluteTolerance' margin of error) then marks the test as failed and logs the specified printf-formatted error message.
-#define TEMPER_CHECK_ALMOST_EQUAL_M( conditionA, conditionB, absoluteTolerance, ... ) \
-	TemperTestTrueInternal( g_temperTestContext.callbacks.FloatEquals( conditionA, conditionB, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_ALMOST_EQUAL_M(" #conditionA ", " #conditionB ", " #absoluteTolerance ", ...)", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, __VA_ARGS__ )
-
-//----------------------------------------------------------
-
-// If 'conditionA' is NOT approximately equal enough to 'conditionB' (within 'absoluteTolerance' margin of error) then marks the test as failed and aborts the test.
-#define TEMPER_CHECK_ALMOST_EQUAL_A( conditionA, conditionB, absoluteTolerance ) \
-	TemperTestTrueInternal( g_temperTestContext.callbacks.FloatEquals( conditionA, conditionB, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_ALMOST_EQUAL_A(" #conditionA ", " #conditionB ", " #absoluteTolerance ")", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, NULL, NULL )
-
-//----------------------------------------------------------
-
-// If 'conditionA' is NOT approximately equal enough to 'conditionB' (within 'absoluteTolerance' margin of error) then marks the test as failed and aborts the test & ceases execution.
-#define TEMPER_CHECK_ALMOST_EQUAL_Q( conditionA, conditionB, absoluteTolerance ) \
-	TemperTestTrueInternal( g_temperTestContext.callbacks.FloatEquals( conditionA, conditionB, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_ALMOST_EQUAL_Q(" #conditionA ", " #conditionB ", " #absoluteTolerance ")", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, NULL, NULL )
-
-//----------------------------------------------------------
-
-// If 'conditionA' is NOT approximately equal enough to 'conditionB' (within 'absoluteTolerance' margin of error) then marks the test as failed, logs the specified printf-formatted error message, and aborts the test.
-#define TEMPER_CHECK_ALMOST_EQUAL_AM( conditionA, conditionB, absoluteTolerance, ... ) \
-	TemperTestTrueInternal( g_temperTestContext.callbacks.FloatEquals( conditionA, conditionB, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_ALMOST_EQUAL_AM(" #conditionA ", " #conditionB ", " #absoluteTolerance ", ...)", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, __VA_ARGS__ )
-
-//----------------------------------------------------------
-
-// If 'conditionA' is NOT approximately equal enough to 'conditionB' (within 'absoluteTolerance' margin of error) then marks the test as failed, logs the specified printf-formatted error message, and aborts the test & ceases execution.
-#define TEMPER_CHECK_ALMOST_EQUAL_QM( conditionA, conditionB, absoluteTolerance, ... ) \
-	TemperTestTrueInternal( g_temperTestContext.callbacks.FloatEquals( conditionA, conditionB, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_ALMOST_EQUAL_QM(" #conditionA ", " #conditionB ", " #absoluteTolerance ", ...)", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, __VA_ARGS__ )
-
-//----------------------------------------------------------
-
-// If 'conditionA' is approximately equal enough to 'conditionB' (within 'absoluteTolerance' margin of error) then marks the test as failed.
-#define TEMPER_CHECK_NOT_ALMOST_EQUAL( conditionA, conditionB, absoluteTolerance ) \
-	TemperTestTrueInternal( !g_temperTestContext.callbacks.FloatEquals( conditionA, conditionB, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_NOT_ALMOST_EQUAL(" #conditionA ", " #conditionB ", " #absoluteTolerance ")", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, NULL, NULL )
-
-//----------------------------------------------------------
-
-// If 'conditionA' is approximately equal enough to 'conditionB' (within 'absoluteTolerance' margin of error) then marks the test as failed and logs the specified printf-formatted error message.
-#define TEMPER_CHECK_NOT_ALMOST_EQUAL_M( conditionA, conditionB, absoluteTolerance, ... ) \
-	TemperTestTrueInternal( !g_temperTestContext.callbacks.FloatEquals( conditionA, conditionB, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_M(" #conditionA ", " #conditionB ", " #absoluteTolerance ", ...)", TEMPER_FLAG_TEST_OKAY,  __FILE__, __LINE__, __VA_ARGS__ )
-
-//----------------------------------------------------------
-
-// If 'conditionA' is approximately equal enough to 'conditionB' (within 'absoluteTolerance' margin of error) then marks the test as failed and aborts the test.
-#define TEMPER_CHECK_NOT_ALMOST_EQUAL_A( conditionA, conditionB, absoluteTolerance ) \
-	TemperTestTrueInternal( !g_temperTestContext.callbacks.FloatEquals( conditionA, conditionB, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_A(" #conditionA ", " #conditionB ", " #absoluteTolerance ")", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, NULL, NULL )
-
-//----------------------------------------------------------
-
-// If 'conditionA' is approximately equal enough to 'conditionB' (within 'absoluteTolerance' margin of error) then marks the test as failed and aborts the test & ceases execution.
-#define TEMPER_CHECK_NOT_ALMOST_EQUAL_Q( conditionA, conditionB, absoluteTolerance ) \
-	TemperTestTrueInternal( !g_temperTestContext.callbacks.FloatEquals( conditionA, conditionB, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_Q(" #conditionA ", " #conditionB ", " #absoluteTolerance ")", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, NULL, NULL )
-
-//----------------------------------------------------------
-
-// If 'conditionA' is approximately equal enough to 'conditionB' (within 'absoluteTolerance' margin of error) then marks the test as failed, logs the specified printf-formatted error message, and aborts the test.
-#define TEMPER_CHECK_NOT_ALMOST_EQUAL_AM( conditionA, conditionB, absoluteTolerance, ... ) \
-	TemperTestTrueInternal( !g_temperTestContext.callbacks.FloatEquals( conditionA, conditionB, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_AM(" #conditionA ", " #conditionB ", " #absoluteTolerance ", ...)", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, __VA_ARGS__ )
-
-//----------------------------------------------------------
-
-// If 'conditionA' is approximately equal enough to 'conditionB' (within 'absoluteTolerance' margin of error) then marks the test as failed, logs the specified printf-formatted error message, and aborts the test & ceases execution.
-#define TEMPER_CHECK_NOT_ALMOST_EQUAL_QM( conditionA, conditionB, absoluteTolerance, ... ) \
-	TemperTestTrueInternal( !g_temperTestContext.callbacks.FloatEquals( conditionA, conditionB, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_RELATIVE ), "TEMPER_CHECK_NOT_ALMOST_EQUAL_QM(" #conditionA ", " #conditionB ", " #absoluteTolerance ", ...)", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, __VA_ARGS__ )
-
+#define TEMPER_CHECK_DOUBLE_EQUAL( a, b )														TemperTestTrueInternal( g_temperTestContext.callbacks.DoubleEquals( a, b, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_ABSOLUTE, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_RELATIVE ), "TEMPER_CHECK_DOUBLE_EQUAL(" #a ", " #b ")", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_DOUBLE_EQUAL_M( a, b, ... )												TemperTestTrueInternal( g_temperTestContext.callbacks.DoubleEquals( a, b, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_ABSOLUTE, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_RELATIVE ), "TEMPER_CHECK_DOUBLE_EQUAL_M(" #a ", " #b ", ...)", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, __VA_ARGS__ )
+#define TEMPER_CHECK_DOUBLE_EQUAL_A( a, b )														TemperTestTrueInternal( g_temperTestContext.callbacks.DoubleEquals( a, b, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_ABSOLUTE, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_RELATIVE ), "TEMPER_CHECK_DOUBLE_EQUAL_A(" #a ", " #b ")", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_DOUBLE_EQUAL_Q( a, b )														TemperTestTrueInternal( g_temperTestContext.callbacks.DoubleEquals( a, b, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_ABSOLUTE, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_RELATIVE ), "TEMPER_CHECK_DOUBLE_EQUAL_Q(" #a ", " #b ")", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_DOUBLE_EQUAL_AM( a, b, ... )												TemperTestTrueInternal( g_temperTestContext.callbacks.DoubleEquals( a, b, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_ABSOLUTE, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_RELATIVE ), "TEMPER_CHECK_DOUBLE_EQUAL_AM(" #a ", " #b ", ...)", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, __VA_ARGS__ )
+#define TEMPER_CHECK_DOUBLE_EQUAL_QM( a, b, ... )												TemperTestTrueInternal( g_temperTestContext.callbacks.DoubleEquals( a, b, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_ABSOLUTE, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_RELATIVE ), "TEMPER_CHECK_DOUBLE_EQUAL_QM(" #a ", " #b ", ...)", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, __VA_ARGS__ )
+
+#define TEMPER_CHECK_NOT_DOUBLE_EQUAL( a, b )													TemperTestTrueInternal( !g_temperTestContext.callbacks.DoubleEquals( a, b, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_ABSOLUTE, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_RELATIVE ), "TEMPER_CHECK_NOT_DOUBLE_EQUAL(" #a ", " #b ")", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_NOT_DOUBLE_EQUAL_M( a, b, ... )											TemperTestTrueInternal( !g_temperTestContext.callbacks.DoubleEquals( a, b, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_ABSOLUTE, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_RELATIVE ), "TEMPER_CHECK_NOT_DOUBLE_EQUAL_M(" #a ", " #b ", ...)", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, __VA_ARGS__ )
+#define TEMPER_CHECK_NOT_DOUBLE_EQUAL_A( a, b )													TemperTestTrueInternal( !g_temperTestContext.callbacks.DoubleEquals( a, b, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_ABSOLUTE, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_RELATIVE ), "TEMPER_CHECK_NOT_DOUBLE_EQUAL_A(" #a ", " #b ")", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_NOT_DOUBLE_EQUAL_Q( a, b )													TemperTestTrueInternal( !g_temperTestContext.callbacks.DoubleEquals( a, b, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_ABSOLUTE, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_RELATIVE ), "TEMPER_CHECK_NOT_DOUBLE_EQUAL_Q(" #a ", " #b ")", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_NOT_DOUBLE_EQUAL_AM( a, b, ... )											TemperTestTrueInternal( !g_temperTestContext.callbacks.DoubleEquals( a, b, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_ABSOLUTE, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_RELATIVE ), "TEMPER_CHECK_NOT_DOUBLE_EQUAL_AM(" #a ", " #b ", ...)", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, __VA_ARGS__ )
+#define TEMPER_CHECK_NOT_DOUBLE_EQUAL_QM( a, b, ... )											TemperTestTrueInternal( !g_temperTestContext.callbacks.DoubleEquals( a, b, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_ABSOLUTE, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_RELATIVE ), "TEMPER_CHECK_NOT_DOUBLE_EQUAL_QM(" #a ", " #b ", ...)", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, __VA_ARGS__ )
+
+#define TEMPER_CHECK_DOUBLE_S_EQUAL( a, b, absoluteTolerance )									TemperTestTrueInternal( g_temperTestContext.callbacks.DoubleEquals( a, b, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_RELATIVE ), "TEMPER_CHECK_DOUBLE_S_EQUAL(" #a ", " #b ", " #absoluteTolerance ")", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_DOUBLE_S_EQUAL_M( a, b, absoluteTolerance, ... )							TemperTestTrueInternal( g_temperTestContext.callbacks.DoubleEquals( a, b, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_RELATIVE ), "TEMPER_CHECK_DOUBLE_S_EQUAL_M(" #a ", " #b ", " #absoluteTolerance ", ...)", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, __VA_ARGS__ )
+#define TEMPER_CHECK_DOUBLE_S_EQUAL_A( a, b, absoluteTolerance )								TemperTestTrueInternal( g_temperTestContext.callbacks.DoubleEquals( a, b, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_RELATIVE ), "TEMPER_CHECK_DOUBLE_S_EQUAL_A(" #a ", " #b ", " #absoluteTolerance ")", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_DOUBLE_S_EQUAL_Q( a, b, absoluteTolerance )								TemperTestTrueInternal( g_temperTestContext.callbacks.DoubleEquals( a, b, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_RELATIVE ), "TEMPER_CHECK_DOUBLE_S_EQUAL_Q(" #a ", " #b ", " #absoluteTolerance ")", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_DOUBLE_S_EQUAL_AM( a, b, absoluteTolerance, ... )							TemperTestTrueInternal( g_temperTestContext.callbacks.DoubleEquals( a, b, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_RELATIVE ), "TEMPER_CHECK_DOUBLE_S_EQUAL_AM(" #a ", " #b ", " #absoluteTolerance ", ...)", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, __VA_ARGS__ )
+#define TEMPER_CHECK_DOUBLE_S_EQUAL_QM( a, b, absoluteTolerance, ... )							TemperTestTrueInternal( g_temperTestContext.callbacks.DoubleEquals( a, b, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_RELATIVE ), "TEMPER_CHECK_DOUBLE_S_EQUAL_QM(" #a ", " #b ", " #absoluteTolerance ", ...)", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, __VA_ARGS__ )
+
+#define TEMPER_CHECK_NOT_DOUBLE_S_EQUAL( a, b, absoluteTolerance )								TemperTestTrueInternal( !g_temperTestContext.callbacks.DoubleEquals( a, b, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_RELATIVE ), "TEMPER_CHECK_NOT_DOUBLE_S_EQUAL(" #a ", " #b ", " #absoluteTolerance ")", TEMPER_FLAG_TEST_OKAY, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_NOT_DOUBLE_S_EQUAL_M( a, b, absoluteTolerance, ... )						TemperTestTrueInternal( !g_temperTestContext.callbacks.DoubleEquals( a, b, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_RELATIVE ), "TEMPER_CHECK_NOT_DOUBLE_S_EQUAL_M(" #a ", " #b ", " #absoluteTolerance ", ...)", TEMPER_FLAG_TEST_OKAY,  __FILE__, __LINE__, __VA_ARGS__ )
+#define TEMPER_CHECK_NOT_DOUBLE_S_EQUAL_A( a, b, absoluteTolerance )							TemperTestTrueInternal( !g_temperTestContext.callbacks.DoubleEquals( a, b, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_RELATIVE ), "TEMPER_CHECK_NOT_DOUBLE_S_EQUAL_A(" #a ", " #b ", " #absoluteTolerance ")", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_NOT_DOUBLE_S_EQUAL_Q( a, b, absoluteTolerance )							TemperTestTrueInternal( !g_temperTestContext.callbacks.DoubleEquals( a, b, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_RELATIVE ), "TEMPER_CHECK_NOT_DOUBLE_S_EQUAL_Q(" #a ", " #b ", " #absoluteTolerance ")", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, NULL, NULL )
+#define TEMPER_CHECK_NOT_DOUBLE_S_EQUAL_AM( a, b, absoluteTolerance, ... )						TemperTestTrueInternal( !g_temperTestContext.callbacks.DoubleEquals( a, b, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_RELATIVE ), "TEMPER_CHECK_NOT_DOUBLE_S_EQUAL_AM(" #a ", " #b ", " #absoluteTolerance ", ...)", TEMPER_FLAG_TEST_ABORT, __FILE__, __LINE__, __VA_ARGS__ )
+#define TEMPER_CHECK_NOT_DOUBLE_S_EQUAL_QM( a, b, absoluteTolerance, ... )						TemperTestTrueInternal( !g_temperTestContext.callbacks.DoubleEquals( a, b, absoluteTolerance, TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_RELATIVE ), "TEMPER_CHECK_NOT_DOUBLE_S_EQUAL_QM(" #a ", " #b ", " #absoluteTolerance ", ...)", TEMPER_FLAG_TEST_QUIT, __FILE__, __LINE__, __VA_ARGS__ )
 
 //==========================================================
 // User-Overridable Preprocessor defines
@@ -624,7 +435,10 @@ typedef struct temperCallbacks_t {
 
 	float	( *Maxf )( const float a, const float b );
 	float	( *Absf )( const float x );
+	double	( *Maxd )( const double a, const double b );
+	double	( *Absd )( const double x );
 	bool	( *FloatEquals )( const float a, const float b, const float absoluteTolerance, const float relativeTolerance );
+	bool	( *DoubleEquals )( const double a, const double b, const double absoluteTolerance, const double relativeTolerance );
 	void	( *Log )( FILE* file, const char* fmt, ... );
 	void	( *LogWarning )( const char* fmt, ... );
 	void	( *LogError )( const char* fmt, ... );
@@ -737,8 +551,10 @@ TEMPERDEV_EXTERN_C temperTestContext_t	g_temperTestContext;
 
 //----------------------------------------------------------
 
-#define TEMPERDEV_EPSILON_TOLERANCE_ABSOLUTE	1e-6f
-#define TEMPERDEV_EPSILON_TOLERANCE_RELATIVE	1e-9f
+#define TEMPERDEV_EPSILON_TOLERANCE_FLOAT_ABSOLUTE	1e-6f
+#define TEMPERDEV_EPSILON_TOLERANCE_FLOAT_RELATIVE	1e-9f
+#define TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_ABSOLUTE	1e-14
+#define TEMPERDEV_EPSILON_TOLERANCE_DOUBLE_RELATIVE	1e-17
 
 //----------------------------------------------------------
 
@@ -865,6 +681,8 @@ TEMPERDEV_EXTERN_C int	TemperExecuteAllTestsWithArgumentsInternal( int argc, cha
 
 TEMPERDEV_EXTERN_C bool	TemperFloatEqualsInternal( const float a, const float b, const float absoluteTolerance, const float relativeTolerance );
 
+TEMPERDEV_EXTERN_C bool	TemperDoubleEqualsInternal( const double a, const double b, const double absoluteTolerance, const double relativeTolerance );
+
 //----------------------------------------------------------
 
 #ifdef TEMPER_IMPLEMENTATION
@@ -959,10 +777,28 @@ static float TemperAbsfInternal( const float x ) {
 
 //----------------------------------------------------------
 
-// uses Christer Ericson's solution:
-// https://realtimecollisiondetection.net/blog/?p=89
+static double TemperMaxdInternal( const double a, const double b ) {
+	return ( a > b ) ? a : b;
+}
+
+//----------------------------------------------------------
+
+static double TemperAbsdInternal( const double x ) {
+	return g_temperTestContext.callbacks.Maxd( -x, x );
+}
+
+//----------------------------------------------------------
+
+// uses Christer Ericson's solution: https://realtimecollisiondetection.net/blog/?p=89
 bool TemperFloatEqualsInternal( const float a, const float b, const float absoluteTolerance, const float relativeTolerance ) {
 	return g_temperTestContext.callbacks.Absf( a - b ) <= g_temperTestContext.callbacks.Maxf( absoluteTolerance, relativeTolerance * g_temperTestContext.callbacks.Maxf( g_temperTestContext.callbacks.Absf( a ), g_temperTestContext.callbacks.Absf( b ) ) );
+}
+
+//----------------------------------------------------------
+
+// uses Christer Ericson's solution: https://realtimecollisiondetection.net/blog/?p=89
+bool TemperDoubleEqualsInternal( const double a, const double b, const double absoluteTolerance, const double relativeTolerance ) {
+	return g_temperTestContext.callbacks.Absd( a - b ) <= g_temperTestContext.callbacks.Maxd( absoluteTolerance, relativeTolerance * g_temperTestContext.callbacks.Maxd( g_temperTestContext.callbacks.Absd( a ), g_temperTestContext.callbacks.Absd( b ) ) );
 }
 
 //----------------------------------------------------------
@@ -1434,7 +1270,10 @@ void TemperSetupInternal( void ) {
 		if ( !callbacks->GetTimestamp )			{ callbacks->GetTimestamp = TemperGetTimestampInternal; }
 		if ( !callbacks->Maxf )					{ callbacks->Maxf = TemperMaxfInternal; }
 		if ( !callbacks->Absf )					{ callbacks->Absf = TemperAbsfInternal; }
+		if ( !callbacks->Maxd )					{ callbacks->Maxd = TemperMaxdInternal; }
+		if ( !callbacks->Absd )					{ callbacks->Absd = TemperAbsdInternal; }
 		if ( !callbacks->FloatEquals )			{ callbacks->FloatEquals = TemperFloatEqualsInternal; }
+		if ( !callbacks->DoubleEquals )			{ callbacks->DoubleEquals = TemperDoubleEqualsInternal; }
 		if ( !callbacks->Log )					{ callbacks->Log = TemperLogInternal; }
 		if ( !callbacks->LogWarning )			{ callbacks->LogWarning = TemperLogWarningInternal; }
 		if ( !callbacks->LogError )				{ callbacks->LogError = TemperLogErrorInternal; }
