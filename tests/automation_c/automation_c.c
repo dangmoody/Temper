@@ -499,15 +499,15 @@ CONDITION_TEST( CheckFloatSEqual_ValuesAroundUpperLowerBoundaries_ErrorCountIncr
 	const float lhs = 5.0f;
 	const float epsilon = 7.5f;
 	bool errorCountCorrect = g_temperTestContext.currentTestErrorCount == 0 ? true : false;
-	TEMPER_CHECK_FLOAT_S_EQUAL( lhs, 5.0f, epsilon );
+	TEMPER_CHECK_FLOAT_WITHIN_RANGE( lhs, 5.0f, epsilon );
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 0 ? errorCountCorrect : false;
-	TEMPER_CHECK_FLOAT_S_EQUAL( lhs, 12.5f, epsilon );
+	TEMPER_CHECK_FLOAT_WITHIN_RANGE( lhs, 12.5f, epsilon );
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 0 ? errorCountCorrect : false;
-	TEMPER_CHECK_FLOAT_S_EQUAL( lhs, 12.6f, epsilon );		// Above upper threshold
+	TEMPER_CHECK_FLOAT_WITHIN_RANGE( lhs, 12.6f, epsilon );		// Above upper threshold
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 1 ? errorCountCorrect : false;
-	TEMPER_CHECK_FLOAT_S_EQUAL( lhs, -2.5f, epsilon );
+	TEMPER_CHECK_FLOAT_WITHIN_RANGE( lhs, -2.5f, epsilon );
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 1 ? errorCountCorrect : false;
-	TEMPER_CHECK_FLOAT_S_EQUAL( lhs, -2.6f, epsilon );		// Below lower threshold
+	TEMPER_CHECK_FLOAT_WITHIN_RANGE( lhs, -2.6f, epsilon );		// Below lower threshold
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 2 ? errorCountCorrect : false;
 	PassOrFailTest( errorCountCorrect, "Should have incremented the error count to 2.\n" );
 }
@@ -520,15 +520,15 @@ CONDITION_TEST( CheckNotFloatSEqual_ValuesAroundUpperLowerBoundaries_ErrorCountI
 	const float lhs = 5.0f;
 	const float epsilon = 7.5f;
 	bool errorCountCorrect = g_temperTestContext.currentTestErrorCount == 0 ? true : false;
-	TEMPER_CHECK_NOT_FLOAT_S_EQUAL( lhs, 5.0f, epsilon );
+	TEMPER_CHECK_FLOAT_NOT_WITHIN_RANGE( lhs, 5.0f, epsilon );
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 1 ? errorCountCorrect : false;
-	TEMPER_CHECK_NOT_FLOAT_S_EQUAL( lhs, 12.5f, epsilon );
+	TEMPER_CHECK_FLOAT_NOT_WITHIN_RANGE( lhs, 12.5f, epsilon );
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 2 ? errorCountCorrect : false;
-	TEMPER_CHECK_NOT_FLOAT_S_EQUAL( lhs, 12.6f, epsilon );		// Above upper threshold
+	TEMPER_CHECK_FLOAT_NOT_WITHIN_RANGE( lhs, 12.6f, epsilon );		// Above upper threshold
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 2 ? errorCountCorrect : false;
-	TEMPER_CHECK_NOT_FLOAT_S_EQUAL( lhs, -2.5f, epsilon );
+	TEMPER_CHECK_FLOAT_NOT_WITHIN_RANGE( lhs, -2.5f, epsilon );
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 3 ? errorCountCorrect : false;
-	TEMPER_CHECK_NOT_FLOAT_S_EQUAL( lhs, -2.6f, epsilon );		// Below lower threshold
+	TEMPER_CHECK_FLOAT_NOT_WITHIN_RANGE( lhs, -2.6f, epsilon );		// Below lower threshold
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 3 ? errorCountCorrect : false;
 	PassOrFailTest( errorCountCorrect, "Should have incremented the error count to 3.\n" );
 }
@@ -581,15 +581,15 @@ CONDITION_TEST( CheckDoubleSEqual_ValuesAroundUpperLowerBoundaries_ErrorCountInc
 	const double lhs = 5.0;
 	const double epsilon = 7.5;
 	bool errorCountCorrect = g_temperTestContext.currentTestErrorCount == 0 ? true : false;
-	TEMPER_CHECK_DOUBLE_S_EQUAL( lhs, 5.0, epsilon );
+	TEMPER_CHECK_DOUBLE_WITHIN_RANGE( lhs, 5.0, epsilon );
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 0 ? errorCountCorrect : false;
-	TEMPER_CHECK_DOUBLE_S_EQUAL( lhs, 12.5, epsilon );
+	TEMPER_CHECK_DOUBLE_WITHIN_RANGE( lhs, 12.5, epsilon );
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 0 ? errorCountCorrect : false;
-	TEMPER_CHECK_DOUBLE_S_EQUAL( lhs, 12.6, epsilon );		// Above upper threshold
+	TEMPER_CHECK_DOUBLE_WITHIN_RANGE( lhs, 12.6, epsilon );		// Above upper threshold
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 1 ? errorCountCorrect : false;
-	TEMPER_CHECK_DOUBLE_S_EQUAL( lhs, -2.5, epsilon );
+	TEMPER_CHECK_DOUBLE_WITHIN_RANGE( lhs, -2.5, epsilon );
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 1 ? errorCountCorrect : false;
-	TEMPER_CHECK_DOUBLE_S_EQUAL( lhs, -2.6, epsilon );		// Below lower threshold
+	TEMPER_CHECK_DOUBLE_WITHIN_RANGE( lhs, -2.6, epsilon );		// Below lower threshold
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 2 ? errorCountCorrect : false;
 	PassOrFailTest( errorCountCorrect, "Should have incremented the error count to 2.\n" );
 }
@@ -602,15 +602,15 @@ CONDITION_TEST( CheckNotDoubleSEqual_ValuesAroundUpperLowerBoundaries_ErrorCount
 	const double lhs = 5.0;
 	const double epsilon = 7.5;
 	bool errorCountCorrect = g_temperTestContext.currentTestErrorCount == 0 ? true : false;
-	TEMPER_CHECK_NOT_DOUBLE_S_EQUAL( lhs, 5.0, epsilon );
+	TEMPER_CHECK_DOUBLE_NOT_WITHIN_RANGE( lhs, 5.0, epsilon );
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 1 ? errorCountCorrect : false;
-	TEMPER_CHECK_NOT_DOUBLE_S_EQUAL( lhs, 12.5, epsilon );
+	TEMPER_CHECK_DOUBLE_NOT_WITHIN_RANGE( lhs, 12.5, epsilon );
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 2 ? errorCountCorrect : false;
-	TEMPER_CHECK_NOT_DOUBLE_S_EQUAL( lhs, 12.6, epsilon );		// Above upper threshold
+	TEMPER_CHECK_DOUBLE_NOT_WITHIN_RANGE( lhs, 12.6, epsilon );		// Above upper threshold
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 2 ? errorCountCorrect : false;
-	TEMPER_CHECK_NOT_DOUBLE_S_EQUAL( lhs, -2.5, epsilon );
+	TEMPER_CHECK_DOUBLE_NOT_WITHIN_RANGE( lhs, -2.5, epsilon );
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 3 ? errorCountCorrect : false;
-	TEMPER_CHECK_NOT_DOUBLE_S_EQUAL( lhs, -2.6, epsilon );		// Below lower threshold
+	TEMPER_CHECK_DOUBLE_NOT_WITHIN_RANGE( lhs, -2.6, epsilon );		// Below lower threshold
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 3 ? errorCountCorrect : false;
 	PassOrFailTest( errorCountCorrect, "Should have incremented the error count to 3.\n" );
 }
