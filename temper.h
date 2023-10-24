@@ -100,6 +100,9 @@ Temper supports the following command line arguments:
 		Set the units to measure test times in.
 		The default is microseconds.
 
+	-f
+		Only log tests that fail.
+
 
 5. CONTRIBUTING
 Yes!
@@ -126,6 +129,9 @@ v2.1.0, <INSERT RELEASE DATE HERE>:
 		* Renamed TEMPER_SUITE_TEST to TEMPER_TEST_SUITE.
 		* Renamed TEMPER_PARAMETRIC to TEMPER_TEST_PARAMETRIC.
 		* Renamed TEMPER_SUITE_PARAMETRIC to TEMPER_TEST_PARAMETRIC_SUITE.
+	* Added new cmd line arg `-f`:
+		* If enabled, Temper will only log tests that failed.  Tests that succeeded will not output anything.
+		* This is useful when the program has a lot of tests.
 
 v2.0.1, 12/06/2022:
 	* Rename __temper_test_info_fetcher_ struct prefix to TEMPERDEV_TEST_INFO_FETCHER to avoid triggering compiler warnings on the user's end.
@@ -199,7 +205,12 @@ extern "C" {
 #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
 #pragma clang diagnostic ignored "-Wc++98-compat-pedantic"
 #pragma clang diagnostic ignored "-Wtypedef-redefinition"
-#pragma clang diagnostic ignored "-Wdeclaration-after-statement" // DM: clang 14 moans about this but its bullshit
+#if __has_warning( "-Wdeclaration-after-statement" )
+#pragma clang diagnostic ignored "-Wdeclaration-after-statement"	// clang 14 moans about this but its bullshit
+#endif // __has_warning( "-Wdeclaration-after-statement" )
+#if __has_warning( "-Wunsafe-buffer-usage" )
+#pragma clang diagnostic ignored "-Wunsafe-buffer-usage"			// clang 17 bullshit
+#endif // __has_warning( "-Wunsafe-buffer-usage" )
 #if defined( __APPLE__ )
 // DM: only disabling this one to avoid a warning that gets generated when trying to convert function pointers to void*
 // if anyone knows of a better way to get around that without disabling all pedantic warnings I'd love to hear about it
@@ -425,7 +436,12 @@ typedef struct temperTestInfo_t temperTestInfo_t;
 //----------------------------------------------------------
 
 typedef struct temperCallbacks_t {
+	void*	( *Malloc )( size_t size );
+	void	( *Free )( void* ptr );
+
 	int		( *VFPrintf )( FILE* file, const char* fmt, va_list args );
+	int		( *SNPrintf )( char* s, size_t n, const char* format, ... );
+	int		( *VSNPrintf )( char* s, size_t n, const char* format, va_list args );
 	int		( *Strcmp )( const char* strA, const char* strB );
 	bool	( *StringContains )( const char* str, const char* substring );
 
@@ -455,7 +471,11 @@ typedef struct temperCallbacks_t {
 // You as the user probably don't want to be directly touching any of this.
 //==========================================================
 
-typedef uint32_t temperBool32;
+#define TEMPERDEV_BIT( x )				( 1 << ( x ) )
+
+//----------------------------------------------------------
+
+typedef uint8_t	temperBool8;
 
 //----------------------------------------------------------
 
@@ -495,33 +515,52 @@ typedef struct temperTestInfo_t {
 
 //----------------------------------------------------------
 
+// we have an option to only log tests that fail
+// but we log things on-the-fly
+// so in order to only log tests that fail (if the flag is turned on) we need to store all of the "fail" messages for later
+// this struct contains the error message that WOULD be printed, so that we can hold on to it and then only print it at the end of a test if it has failed
+typedef struct temperTestFailInfo_t {
+	char*	msg;
+} temperTestFailInfo_t;
+
+//----------------------------------------------------------
+
+typedef enum temperTestContextFlagBits_t {
+	TEMPER_TEST_CONTEXT_FLAG_NEGATE_QUIT_ATTEMPTS	= TEMPERDEV_BIT( 0 ),
+	TEMPER_TEST_CONTEXT_FLAG_PARTIAL_FILTER			= TEMPERDEV_BIT( 1 ),
+	TEMPER_TEST_CONTEXT_FLAG_ONLY_SHOW_FAILED_TESTS	= TEMPERDEV_BIT( 2 ),
+} temperTestContextFlagBits_t;
+typedef int32_t temperTestContextFlags_t;
+
+//----------------------------------------------------------
+
 typedef struct temperTestContext_t {
-	temperCallbacks_t	callbacks;
-	uint64_t			testInfosCount;
-	temperTestInfo_t*	testInfos;
+	temperCallbacks_t			callbacks;
+	uint64_t					testInfosCount;
+	temperTestInfo_t*			testInfos;
+	uint64_t					deferredTestFailMessagesCount;
+	temperTestFailInfo_t*		deferredTestFailMessages;
 #ifdef _WIN32
-	int64_t				timestampFrequency;
+	int64_t						timestampFrequency;
 #endif
-	double				currentTestStartTime;
-	double				currentTestEndTime;
-	double				totalExecutionTime;
-	uint32_t			testsPassed;
-	uint32_t			testsFailed;
-	uint32_t			testsAborted;
-	uint32_t			testsSkipped;
-	uint32_t			testsQuit;
-	uint32_t			totalTestsFoundWithFilters;
-	uint32_t			totalTestsExecuted;
-	uint32_t			currentTestErrorCount;
-	int32_t				exitCode;
-	temperBool32		currentTestWasAborted;
-	temperBool32		negateQuitAttempts;
-	temperBool32		partialFilter;
-	temperBool32		onlyShowFailedTests;
-	temperTimeUnit_t	timeUnit;
-	const char*			suiteFilterPrevious;
-	const char*			suiteFilter;
-	const char*			testFilter;
+	double						currentTestStartTime;
+	double						currentTestEndTime;
+	double						totalExecutionTime;
+	uint32_t					testsPassed;
+	uint32_t					testsFailed;
+	uint32_t					testsAborted;
+	uint32_t					testsSkipped;
+	uint32_t					testsQuit;
+	uint32_t					totalTestsFoundWithFilters;
+	uint32_t					totalTestsExecuted;
+	uint32_t					currentTestErrorCount;
+	int32_t						exitCode;
+	temperTestContextFlags_t	flags;
+	temperTimeUnit_t			timeUnit;
+	temperBool8					currentTestWasAborted;
+	const char*					suiteFilterPrevious;
+	const char*					suiteFilter;
+	const char*					testFilter;
 } temperTestContext_t;
 
 //----------------------------------------------------------
@@ -535,10 +574,6 @@ typedef struct temperTestContext_t {
 //----------------------------------------------------------
 
 TEMPERDEV_EXTERN_C temperTestContext_t	g_temperTestContext;
-
-//----------------------------------------------------------
-
-#define TEMPERDEV_BIT( x )				( 1 << ( x ) )
 
 //----------------------------------------------------------
 
@@ -587,8 +622,8 @@ TEMPERDEV_EXTERN_C temperTestContext_t	g_temperTestContext;
 #define TEMPERDEV_DEFINE_TEST_INFO_FETCHER( testName ) \
 	void TEMPERDEV_CONCAT( TEMPERDEV_TEST_INFO_FETCHER_, testName )( void ); \
 \
-	TEMPERDEV_EXTERN_C __declspec( allocate( ".CRT$XCU" ) ) void ( * TEMPERDEV_CONCAT( testName, _FuncPtr ) )( void ) = TEMPERDEV_CONCAT( TEMPERDEV_TEST_INFO_FETCHER_, testName ); \
 	__pragma( comment( linker, "/include:" TEMPERDEV_MSVC_PREFIX TEMPERDEV_CONCAT( TEMPERDEV_STRINGIFY( testName ), "_FuncPtr" ) ) ) \
+	TEMPERDEV_EXTERN_C __declspec( allocate( ".CRT$XCU" ) ) void ( * TEMPERDEV_CONCAT( testName, _FuncPtr ) )( void ) = TEMPERDEV_CONCAT( TEMPERDEV_TEST_INFO_FETCHER_, testName ); \
 \
 	void TEMPERDEV_CONCAT( TEMPERDEV_TEST_INFO_FETCHER_, testName )( void )
 #endif	// defined( _MSC_VER )
@@ -888,6 +923,9 @@ static void TemperShowUsageInternal( void ) {
 		"    -p\n"
 		"        Enable partial filtering, which will only run tests and suites that contain the text specified in the filters.\n"
 		"\n"
+		"    -f\n"
+		"        Only log tests that fail.\n"
+		"\n"
 		"    --time-unit [seconds|ms|us|ns|clocks]\n"
 		"        Set the units to measure test times in.\n"
 		"        The default is microseconds.\n"
@@ -934,12 +972,12 @@ static bool TemperHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 		}
 
 		if ( g_temperTestContext.callbacks.Strcmp( arg, "-p" ) == 0 ) {
-			g_temperTestContext.partialFilter = true;
+			g_temperTestContext.flags |= TEMPER_TEST_CONTEXT_FLAG_PARTIAL_FILTER;
 			continue;
 		}
 
 		if ( g_temperTestContext.callbacks.Strcmp( arg, "-f" ) == 0 ) {
-			g_temperTestContext.onlyShowFailedTests = true;
+			g_temperTestContext.flags |= TEMPER_TEST_CONTEXT_FLAG_ONLY_SHOW_FAILED_TESTS;
 			continue;
 		}
 
@@ -983,7 +1021,7 @@ static bool TemperHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 	}
 
 	// if partial filtering was enabled but the user did not then specify a suite or test filter then they need to know about incorrect usage
-	if ( g_temperTestContext.partialFilter ) {
+	if ( g_temperTestContext.flags & TEMPER_TEST_CONTEXT_FLAG_PARTIAL_FILTER ) {
 		if ( !g_temperTestContext.suiteFilter && !g_temperTestContext.testFilter ) {
 			g_temperTestContext.callbacks.LogError(
 				"Partial filtering (-p) was enabled but suite or test filtering (-s, -t) was not.\n"
@@ -1120,7 +1158,9 @@ static void TemperOnBeforeTestInternal( const temperTestInfo_t* information ) {
 	}
 
 	if ( information->testNameStr ) {
-		g_temperTestContext.callbacks.Log( stdout, "TEST: \"%s\"\n", information->testNameStr );
+		if ( ( g_temperTestContext.flags & TEMPER_TEST_CONTEXT_FLAG_ONLY_SHOW_FAILED_TESTS ) == 0 ) {
+			g_temperTestContext.callbacks.Log( stdout, "TEST: \"%s\"\n", information->testNameStr );
+		}
 	}
 }
 
@@ -1132,21 +1172,39 @@ static void TemperOnAfterTestInternal( const temperTestInfo_t* information ) {
 	if ( information->testingFlag == TEMPER_FLAG_SHOULD_RUN ) {
 		const char* timeUnitStr = TemperGetTimeUnitStringInternal( g_temperTestContext.timeUnit );
 
-		if( g_temperTestContext.testsQuit > 0 ) {
+		if ( g_temperTestContext.testsQuit > 0 ) {
 			TemperSetTextColorInternal( TEMPERDEV_COLOR_RED );
 			g_temperTestContext.callbacks.Log( stdout, "=== TEST INVOKED EARLY EXIT (%.3f %s) ===\n\n", g_temperTestContext.currentTestEndTime - g_temperTestContext.currentTestStartTime, timeUnitStr );
 			TemperSetTextColorInternal( TEMPERDEV_COLOR_DEFAULT );
-		}
-		else if( g_temperTestContext.currentTestWasAborted ) {
+		} else if ( g_temperTestContext.currentTestWasAborted ) {
 			TemperSetTextColorInternal( TEMPERDEV_COLOR_RED );
 			g_temperTestContext.callbacks.Log( stderr, "=== TEST ABORTED (%.3f %s) ===\n\n", g_temperTestContext.currentTestEndTime - g_temperTestContext.currentTestStartTime, timeUnitStr );
 			TemperSetTextColorInternal( TEMPERDEV_COLOR_DEFAULT );
 		} else if ( g_temperTestContext.currentTestErrorCount > 0 ) {
+			if ( g_temperTestContext.flags & TEMPER_TEST_CONTEXT_FLAG_ONLY_SHOW_FAILED_TESTS ) {
+				g_temperTestContext.callbacks.Log( stdout, "TEST: \"%s\"\n", information->testNameStr );
+
+				for ( uint32_t i = 0; i < g_temperTestContext.deferredTestFailMessagesCount; i++ ) {
+					temperTestFailInfo_t* deferredTestFailInfo = &g_temperTestContext.deferredTestFailMessages[i];
+
+					TemperSetTextColorInternal( TEMPERDEV_COLOR_RED );
+					g_temperTestContext.callbacks.Log( stderr, "FAILED: " );
+					TemperSetTextColorInternal( TEMPERDEV_COLOR_YELLOW );
+					g_temperTestContext.callbacks.Log( stderr, deferredTestFailInfo->msg );
+					TemperSetTextColorInternal( TEMPERDEV_COLOR_DEFAULT );
+
+					g_temperTestContext.callbacks.Free( deferredTestFailInfo->msg );
+					deferredTestFailInfo->msg = NULL;
+				}
+
+				// reset the list, we're done with this now
+				g_temperTestContext.deferredTestFailMessagesCount = 0;
+			}
 			TemperSetTextColorInternal( TEMPERDEV_COLOR_RED );
 			g_temperTestContext.callbacks.Log( stderr, "TEST FAILED (%.3f %s)\n\n", g_temperTestContext.currentTestEndTime - g_temperTestContext.currentTestStartTime, timeUnitStr );
 			TemperSetTextColorInternal( TEMPERDEV_COLOR_DEFAULT );
 		} else {
-			if ( !g_temperTestContext.onlyShowFailedTests ) {
+			if ( ( g_temperTestContext.flags & TEMPER_TEST_CONTEXT_FLAG_ONLY_SHOW_FAILED_TESTS ) == 0 ) {
 				TemperSetTextColorInternal( TEMPERDEV_COLOR_GREEN );
 				g_temperTestContext.callbacks.Log( stderr, "TEST SUCCEEDED (%.3f %s)\n\n", g_temperTestContext.currentTestEndTime - g_temperTestContext.currentTestStartTime, timeUnitStr );
 				TemperSetTextColorInternal( TEMPERDEV_COLOR_DEFAULT );
@@ -1168,7 +1226,7 @@ static void TemperAbortTestOnFailInternal( const temperTestInterruptFlag_t testI
 		g_temperTestContext.testsAborted += 1;
 		g_temperTestContext.currentTestWasAborted = true;
 
-		if( testInteruptFlag == TEMPER_FLAG_TEST_QUIT ) {
+		if ( testInteruptFlag == TEMPER_FLAG_TEST_QUIT ) {
 			g_temperTestContext.testsQuit += 1;
 		}
 
@@ -1178,11 +1236,42 @@ static void TemperAbortTestOnFailInternal( const temperTestInterruptFlag_t testI
 
 //----------------------------------------------------------
 
+static void TemperAddDeferredFailLogInternal( const char* conditionStr, const char* file, const uint32_t line, const char* fmt, va_list args ) {
+	uint64_t index = g_temperTestContext.deferredTestFailMessagesCount++;
+
+	g_temperTestContext.deferredTestFailMessages = (temperTestFailInfo_t*) TEMPERDEV_REALLOC( g_temperTestContext.deferredTestFailMessages, g_temperTestContext.deferredTestFailMessagesCount * sizeof( temperTestFailInfo_t ) );
+
+	temperTestFailInfo_t* testFailInfo = &g_temperTestContext.deferredTestFailMessages[index];
+	int maxLength = 0;
+	maxLength += g_temperTestContext.callbacks.SNPrintf( NULL, 0, "%s at %s line %d.\n", conditionStr, file, line );
+	if ( fmt ) {
+		maxLength += g_temperTestContext.callbacks.VSNPrintf( NULL, 0, fmt, args );
+	}
+	maxLength++;	// null terminator
+
+	testFailInfo->msg = (char*) g_temperTestContext.callbacks.Malloc( (size_t) maxLength * sizeof( char ) );
+
+	int length = g_temperTestContext.callbacks.SNPrintf( testFailInfo->msg, (size_t) maxLength, "%s at %s line %d.\n", conditionStr, file, line );
+	if ( fmt ) {
+		length += g_temperTestContext.callbacks.VSNPrintf( testFailInfo->msg + length, (size_t) maxLength - (size_t) length, fmt, args );
+	}
+	testFailInfo->msg[length] = 0;
+}
+
+//----------------------------------------------------------
+
 void TemperTestTrueInternal( const bool condition, const char* conditionStr, const temperTestInterruptFlag_t testInteruptFlag, const char* file, const uint32_t line, const char* fmt, ... ) {
 	if ( !( condition ) ) {
 		g_temperTestContext.currentTestErrorCount += 1;
 
-		{
+		// if we are only logging tests that fail then take the error message that would get printed and store it to print later
+		// otherwise just print it right now
+		if ( g_temperTestContext.flags & TEMPER_TEST_CONTEXT_FLAG_ONLY_SHOW_FAILED_TESTS ) {
+			va_list args;
+			va_start( args, fmt );
+			TemperAddDeferredFailLogInternal( conditionStr, file, line, fmt, args );
+			va_end( args );
+		} else {
 			TemperSetTextColorInternal( TEMPERDEV_COLOR_RED );
 			g_temperTestContext.callbacks.Log( stderr, "FAILED: " );
 			TemperSetTextColorInternal( TEMPERDEV_COLOR_YELLOW );
@@ -1211,10 +1300,9 @@ static int TemperCalculateExitCode( void ) {
 static void TemperOnAllTestsFinishedInternal( void ) {
 	uint32_t totalFound = g_temperTestContext.totalTestsFoundWithFilters;
 
-	if( TEMPERDEV_EXIT_FAILURE == TemperCalculateExitCode() ){
+	if ( TEMPERDEV_EXIT_FAILURE == TemperCalculateExitCode() ){
 		TemperSetTextColorInternal( TEMPERDEV_COLOR_RED );
-	}
-	else{
+	} else {
 		TemperSetTextColorInternal( TEMPERDEV_COLOR_GREEN );
 	}
 
@@ -1235,7 +1323,7 @@ static void TemperOnAllTestsFinishedInternal( void ) {
 			g_temperTestContext.totalTestsFoundWithFilters,
 			g_temperTestContext.suiteFilter,
 			g_temperTestContext.testFilter,
-			g_temperTestContext.partialFilter ? "PERMITTED" : "DISCARDED" );
+			( g_temperTestContext.flags & TEMPER_TEST_CONTEXT_FLAG_PARTIAL_FILTER ) ? "PERMITTED" : "DISCARDED" );
 	}
 
 	g_temperTestContext.callbacks.Log( stdout,
@@ -1263,7 +1351,11 @@ void TemperSetupInternal( void ) {
 	{
 		temperCallbacks_t* callbacks = &g_temperTestContext.callbacks;
 
+		if ( !callbacks->Malloc )				{ callbacks->Malloc = malloc; }
+		if ( !callbacks->Free )					{ callbacks->Free = free; }
 		if ( !callbacks->VFPrintf )				{ callbacks->VFPrintf = vfprintf; }
+		if ( !callbacks->SNPrintf )				{ callbacks->SNPrintf = snprintf; }
+		if ( !callbacks->VSNPrintf )			{ callbacks->VSNPrintf = vsnprintf; }
 		if ( !callbacks->Strcmp )				{ callbacks->Strcmp = strcmp; }
 		if ( !callbacks->StringContains )		{ callbacks->StringContains = TemperStringContainsInternal; }
 		if ( !callbacks->GetTimestamp )			{ callbacks->GetTimestamp = TemperGetTimestampInternal; }
@@ -1300,10 +1392,8 @@ void TemperSetupInternal( void ) {
 	g_temperTestContext.totalTestsFoundWithFilters = 0;
 	g_temperTestContext.totalTestsExecuted = 0;
 	g_temperTestContext.currentTestErrorCount = 0;
+	g_temperTestContext.flags = 0;
 	g_temperTestContext.currentTestWasAborted = false;
-	g_temperTestContext.negateQuitAttempts = false;
-	g_temperTestContext.partialFilter = false;
-	g_temperTestContext.onlyShowFailedTests = false;
 	g_temperTestContext.timeUnit = TEMPER_TIME_UNIT_US;
 	g_temperTestContext.suiteFilterPrevious = NULL;
 	g_temperTestContext.suiteFilter = NULL;
@@ -1321,7 +1411,7 @@ static bool TemperIsSuiteFilteredInternal( const char* suiteName ) {
 		return false;
 	}
 
-	if ( g_temperTestContext.partialFilter ) {
+	if ( g_temperTestContext.flags & TEMPER_TEST_CONTEXT_FLAG_PARTIAL_FILTER ) {
 		return g_temperTestContext.callbacks.StringContains( suiteName, g_temperTestContext.suiteFilter );
 	} else {
 		return g_temperTestContext.callbacks.Strcmp( suiteName, g_temperTestContext.suiteFilter ) == 0;
@@ -1339,7 +1429,7 @@ static bool TemperIsTestFilteredInternal( const char* testName ) {
 		return false;
 	}
 
-	if ( g_temperTestContext.partialFilter ) {
+	if ( g_temperTestContext.flags & TEMPER_TEST_CONTEXT_FLAG_PARTIAL_FILTER ) {
 		return g_temperTestContext.callbacks.StringContains( testName, g_temperTestContext.testFilter );
 	} else {
 		return g_temperTestContext.callbacks.Strcmp( testName, g_temperTestContext.testFilter ) == 0;
@@ -1384,7 +1474,7 @@ int TemperExecuteAllTestsInternal( void ) {
 
 				g_temperTestContext.callbacks.OnAfterTest( testInfo );
 
-				if( g_temperTestContext.testsQuit > 0 && !g_temperTestContext.negateQuitAttempts) {
+				if( g_temperTestContext.testsQuit > 0 && ( ( g_temperTestContext.flags & TEMPER_TEST_CONTEXT_FLAG_NEGATE_QUIT_ATTEMPTS ) == 0 ) ) {
 					break;
 				}
 			}
