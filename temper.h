@@ -1380,17 +1380,6 @@ void TemperSetupInternal( void ) {
 		if ( !callbacks->VSNPrintf )			{ callbacks->VSNPrintf = vsnprintf; }
 		if ( !callbacks->FFlush )				{ callbacks->FFlush = fflush; }
 		if ( !callbacks->FOpen )				{ callbacks->FOpen = fopen; }
-#if defined( _WIN32 )
-		if ( !callbacks->Dup )					{ callbacks->Dup = _dup; }
-		if ( !callbacks->Dup2 )					{ callbacks->Dup2 = _dup2; }
-		if ( !callbacks->Fileno )				{ callbacks->Fileno = _fileno; }
-#elif defined( __APPLE__ ) || defined( __linux__ )	// defined( _WIN32 )
-		if ( !callbacks->Dup )					{ callbacks->Dup = dup; }
-		if ( !callbacks->Dup2 )					{ callbacks->Dup2 = dup2; }
-		if ( !callbacks->Fileno )				{ callbacks->Fileno = fileno; }
-#else	// defined( _WIN32 )
-#error Uncrecognised platform.  It appears Temper does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Temper/issues
-#endif	// defined( _WIN32 )
 		if ( !callbacks->Strcmp )				{ callbacks->Strcmp = strcmp; }
 		if ( !callbacks->StringContains )		{ callbacks->StringContains = TemperStringContainsInternal; }
 		if ( !callbacks->GetTimestamp )			{ callbacks->GetTimestamp = TemperGetTimestampInternal; }
@@ -1407,6 +1396,19 @@ void TemperSetupInternal( void ) {
 		if ( !callbacks->OnAfterTest )			{ callbacks->OnAfterTest = TemperOnAfterTestInternal; }
 		if ( !callbacks->RunTestThread )		{ callbacks->RunTestThread = TemperRunTestThreadInternal; }
 		if ( !callbacks->OnAllTestsFinished )	{ callbacks->OnAllTestsFinished = TemperOnAllTestsFinishedInternal; }
+
+		// platform-specific callbacks
+#if defined( _WIN32 )
+		if ( !callbacks->Dup )					{ callbacks->Dup = _dup; }
+		if ( !callbacks->Dup2 )					{ callbacks->Dup2 = _dup2; }
+		if ( !callbacks->Fileno )				{ callbacks->Fileno = _fileno; }
+#elif defined( __APPLE__ ) || defined( __linux__ )	// defined( _WIN32 )
+		if ( !callbacks->Dup )					{ callbacks->Dup = dup; }
+		if ( !callbacks->Dup2 )					{ callbacks->Dup2 = dup2; }
+		if ( !callbacks->Fileno )				{ callbacks->Fileno = fileno; }
+#else	// defined( _WIN32 )
+#error Uncrecognised platform.  It appears Temper does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Temper/issues
+#endif	// defined( _WIN32 )
 	}
 
 #ifdef _WIN32
