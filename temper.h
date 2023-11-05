@@ -1397,7 +1397,7 @@ void TemperSetupInternal( void ) {
 		if ( !callbacks->RunTestThread )		{ callbacks->RunTestThread = TemperRunTestThreadInternal; }
 		if ( !callbacks->OnAllTestsFinished )	{ callbacks->OnAllTestsFinished = TemperOnAllTestsFinishedInternal; }
 
-		// platform-specific callbacks
+		// platform-specific
 #if defined( _WIN32 )
 		if ( !callbacks->Dup )					{ callbacks->Dup = _dup; }
 		if ( !callbacks->Dup2 )					{ callbacks->Dup2 = _dup2; }
