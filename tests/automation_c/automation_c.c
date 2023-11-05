@@ -5,6 +5,8 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
 #pragma clang diagnostic ignored "-Wpadded"
+#pragma clang diagnostic ignored "-Wformat-security"
+#pragma clang diagnostic ignored "-Wdeclaration-after-statement"
 #endif
 
 //----------------------------------------------------------
@@ -124,7 +126,7 @@ static void AbsolvePreviousTest( const automationAccountFor_t claim ) {
 		g_temperTestContext.testsPassed += 1;
 		g_temperTestContext.testsSkipped -= 1;
 		g_temperTestContext.callbacks.Log( stdout, "Absolved previous skip.\n" );
-	}else if ( claim == ACCOUNT_FOR_QUIT_ATTEMPT ) {
+	} else if ( claim == ACCOUNT_FOR_QUIT_ATTEMPT ) {
 		TEMPERDEV_ASSERT( g_temperTestContext.testsFailed > 0 );
 		TEMPERDEV_ASSERT( g_temperTestContext.testsAborted > 0 );
 		TEMPERDEV_ASSERT( g_temperTestContext.testsQuit > 0 );
@@ -141,7 +143,7 @@ static void AbsolvePreviousTest( const automationAccountFor_t claim ) {
 //----------------------------------------------------------
 
 static void PassOrFailTest(const bool AllowPass, const char* message) {
-	if( AllowPass ) {
+	if ( AllowPass ) {
 		AbsolveTest( true );
 	} else {
 		g_temperTestContext.currentTestErrorCount += 1;
@@ -314,7 +316,7 @@ TEMPER_TEST( CheckAndCleanResults_7, TEMPER_FLAG_SHOULD_RUN ) {
 		AbsolvePreviousTest( ACCOUNT_FOR_ONE_ABORT );
 	}
 
-	TEMPER_CHECK_NOT_EQUAL_M(testAbortTestNumberWeNeverExpectSet, THE_ABORT_TEST_FAILURE_NUMBER, "Aborts in tests do not kill threads as the failure number was set.");
+	TEMPER_CHECK_NOT_EQUAL_M( testAbortTestNumberWeNeverExpectSet, THE_ABORT_TEST_FAILURE_NUMBER, "Aborts in tests do not kill threads as the failure number was set." );
 	testAbortTestNumberWeNeverExpectSet = 0;
 }
 
@@ -326,11 +328,11 @@ RESULT_DEPDENDANT_TEST_PARAMETRIC( CheckTrue_WhenAbortTriggered_AbortsParametric
 TEMPER_INVOKE_PARAMETRIC_TEST( CheckTrue_WhenAbortTriggered_AbortsParametricTest, false );
 
 TEMPER_TEST( CheckAndCleanResults_8, TEMPER_FLAG_SHOULD_RUN ) {
-	if( AssertResults( 0, 1, 1, 0, 0 ) ) {
+	if ( AssertResults( 0, 1, 1, 0, 0 ) ) {
 		AbsolvePreviousTest( ACCOUNT_FOR_ONE_ABORT );
 	}
 
-	TEMPER_CHECK_NOT_EQUAL_M(testAbortTestNumberWeNeverExpectSet, THE_ABORT_TEST_FAILURE_NUMBER, "Aborts in parameteric tests do not kill threads as the failure number was set.");
+	TEMPER_CHECK_NOT_EQUAL_M( testAbortTestNumberWeNeverExpectSet, THE_ABORT_TEST_FAILURE_NUMBER, "Aborts in parameteric tests do not kill threads as the failure number was set." );
 	testAbortTestNumberWeNeverExpectSet = 0;
 }
 
@@ -341,7 +343,9 @@ TEMPER_TEST( CheckAndCleanResults_8, TEMPER_FLAG_SHOULD_RUN ) {
 TEMPER_TEST( NoFailuresOrAborts_WhenExitCodeCalculated_ProvidesSuccessCode, TEMPER_FLAG_SHOULD_RUN ) {
 	CaptureTestCounts();
 	ClearTestCounts();
+
 	TEMPER_CHECK_EQUAL_M( TEMPERDEV_EXIT_SUCCESS, TemperCalculateExitCode(), "Expected the success code to be returned for no errors & no aborts" );
+
 	RestoreCapturedTestCounts();
 }
 
@@ -352,8 +356,11 @@ TEMPER_TEST( NoFailuresOrAborts_WhenExitCodeCalculated_ProvidesSuccessCode, TEMP
 TEMPER_TEST( Failures_WhenExitCodeCalculated_ProvidesFailureCode, TEMPER_FLAG_SHOULD_RUN ) {
 	CaptureTestCounts();
 	ClearTestCounts();
+
 	g_temperTestContext.testsFailed = 1;
+
 	TEMPER_CHECK_EQUAL_M( TEMPERDEV_EXIT_FAILURE, TemperCalculateExitCode(), "Expected the failure code to be returned for there being errors" );
+
 	RestoreCapturedTestCounts();
 }
 
@@ -364,8 +371,11 @@ TEMPER_TEST( Failures_WhenExitCodeCalculated_ProvidesFailureCode, TEMPER_FLAG_SH
 TEMPER_TEST( Aborts_WhenExitCodeCalculated_ProvidesFailureCode, TEMPER_FLAG_SHOULD_RUN ) {
 	CaptureTestCounts();
 	ClearTestCounts();
+
 	g_temperTestContext.testsAborted = 1;
+
 	TEMPER_CHECK_EQUAL_M( TEMPERDEV_EXIT_FAILURE, TemperCalculateExitCode(), "Expected the failure code to be returned for there being aborts" );
+
 	RestoreCapturedTestCounts();
 }
 
@@ -621,7 +631,7 @@ CONDITION_TEST( CheckNotDoubleSEqual_ValuesAroundUpperLowerBoundaries_ErrorCount
 
 RESULT_DEPENDANT_TEST( CheckTrue_WhenQuitTriggered_QuitInvokedAndAbortsTest, TEMPER_FLAG_SHOULD_RUN ) {
 	g_temperTestContext.flags |= TEMPERDEV_TEST_CONTEXT_FLAG_NEGATE_QUIT_ATTEMPTS;
-	TEMPER_CHECK_TRUE_QM(false, "Expected error 3 - We expect this test to quit now.\n");
+	TEMPER_CHECK_TRUE_QM( false, "Expected error 3 - We expect this test to quit now.\n" );
 	testAbortTestNumberWeNeverExpectSet = THE_ABORT_TEST_FAILURE_NUMBER;
 }
 
@@ -631,7 +641,7 @@ TEMPER_TEST( CheckAndCleanResults_9, TEMPER_FLAG_SHOULD_RUN ) {
 		AbsolvePreviousTest( ACCOUNT_FOR_QUIT_ATTEMPT );
 	}
 
-	TEMPER_CHECK_NOT_EQUAL_M(testAbortTestNumberWeNeverExpectSet, THE_ABORT_TEST_FAILURE_NUMBER, "Quits do not trigger aborts as the failure number was set.");
+	TEMPER_CHECK_NOT_EQUAL_M( testAbortTestNumberWeNeverExpectSet, THE_ABORT_TEST_FAILURE_NUMBER, "Quits do not trigger aborts as the failure number was set." );
 	testAbortTestNumberWeNeverExpectSet = 0;
 }
 
@@ -645,12 +655,36 @@ TEMPER_INVOKE_PARAMETRIC_TEST( CheckTrue_WhenQuitTriggered_QuitInvokedAndAbortsP
 
 TEMPER_TEST( CheckAndCleanResults_10, TEMPER_FLAG_SHOULD_RUN ) {
 	g_temperTestContext.flags &= ~TEMPERDEV_TEST_CONTEXT_FLAG_NEGATE_QUIT_ATTEMPTS; // we do not quit ourselves within this test but if we fail to absolve we will want the quit status of the previous test to fall through and end the run.
-	if( AssertResults( 0, 1, 1, 1, 0 ) ) {
+	if ( AssertResults( 0, 1, 1, 1, 0 ) ) {
 		AbsolvePreviousTest( ACCOUNT_FOR_QUIT_ATTEMPT );
 	}
 
-	TEMPER_CHECK_NOT_EQUAL_M(testAbortTestNumberWeNeverExpectSet, THE_ABORT_TEST_FAILURE_NUMBER, "Aborts in parameteric tests do not kill threads as the failure number was set.");
+	TEMPER_CHECK_NOT_EQUAL_M( testAbortTestNumberWeNeverExpectSet, THE_ABORT_TEST_FAILURE_NUMBER, "Aborts in parameteric tests do not kill threads as the failure number was set." );
 	testAbortTestNumberWeNeverExpectSet = 0;
+}
+
+//----------------------------------------------------------
+// > -f TESTS
+//----------------------------------------------------------
+
+// if -f got passed in as a command line arg then nothing gets output to stdout
+TEMPER_TEST( CheckStdoutGetsSuppressedProperly, TEMPER_FLAG_SHOULD_RUN ) {
+	const char* msg = "If you passed -f as a command line arg then you definitely should NOT see this in the console!\n";
+
+	printf( msg );
+
+	TEMPER_CHECK_TRUE_M( true, msg );
+}
+
+// if -f got passed in as a command line arg and the test fails, then we definitely do show it
+TEMPER_TEST( CheckStderrGetsWrittenToProperlyOnTestFail, TEMPER_FLAG_SHOULD_RUN ) {
+	TEMPER_CHECK_TRUE_M( 5 == 9, "If you passed -f as a command line arg then you definitely SHOULD see this in the console!\n" );
+}
+
+TEMPER_TEST( CheckAndCleanResults_11, TEMPER_FLAG_SHOULD_RUN ) {
+	if ( AssertResults( 3, 1, 0, 0, 0 ) ) {
+		AbsolvePreviousTest( ACCOUNT_FOR_ONE_FAILURE );
+	}
 }
 
 //----------------------------------------------------------
