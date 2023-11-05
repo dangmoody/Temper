@@ -620,13 +620,13 @@ CONDITION_TEST( CheckNotDoubleSEqual_ValuesAroundUpperLowerBoundaries_ErrorCount
 //----------------------------------------------------------
 
 RESULT_DEPENDANT_TEST( CheckTrue_WhenQuitTriggered_QuitInvokedAndAbortsTest, TEMPER_FLAG_SHOULD_RUN ) {
-	g_temperTestContext.flags |= TEMPER_TEST_CONTEXT_FLAG_NEGATE_QUIT_ATTEMPTS;
+	g_temperTestContext.flags |= TEMPERDEV_TEST_CONTEXT_FLAG_NEGATE_QUIT_ATTEMPTS;
 	TEMPER_CHECK_TRUE_QM(false, "Expected error 3 - We expect this test to quit now.\n");
 	testAbortTestNumberWeNeverExpectSet = THE_ABORT_TEST_FAILURE_NUMBER;
 }
 
 TEMPER_TEST( CheckAndCleanResults_9, TEMPER_FLAG_SHOULD_RUN ) {
-	g_temperTestContext.flags &= ~TEMPER_TEST_CONTEXT_FLAG_NEGATE_QUIT_ATTEMPTS; // we do not quit ourselves within this test but if we fail to absolve we will want the quit status of the previous test to fall through and end the run.
+	g_temperTestContext.flags &= ~TEMPERDEV_TEST_CONTEXT_FLAG_NEGATE_QUIT_ATTEMPTS; // we do not quit ourselves within this test but if we fail to absolve we will want the quit status of the previous test to fall through and end the run.
 	if ( AssertResults( 0, 1, 1, 1, 0 ) ) {
 		AbsolvePreviousTest( ACCOUNT_FOR_QUIT_ATTEMPT );
 	}
@@ -636,7 +636,7 @@ TEMPER_TEST( CheckAndCleanResults_9, TEMPER_FLAG_SHOULD_RUN ) {
 }
 
 RESULT_DEPDENDANT_TEST_PARAMETRIC( CheckTrue_WhenQuitTriggered_QuitInvokedAndAbortsParametricTest, const bool check ) {
-	g_temperTestContext.flags |= TEMPER_TEST_CONTEXT_FLAG_NEGATE_QUIT_ATTEMPTS;
+	g_temperTestContext.flags |= TEMPERDEV_TEST_CONTEXT_FLAG_NEGATE_QUIT_ATTEMPTS;
 	TEMPER_CHECK_TRUE_QM( check, "We expect this test to quit.\n" );
 	testAbortTestNumberWeNeverExpectSet = THE_ABORT_TEST_FAILURE_NUMBER;
 }
@@ -644,7 +644,7 @@ RESULT_DEPDENDANT_TEST_PARAMETRIC( CheckTrue_WhenQuitTriggered_QuitInvokedAndAbo
 TEMPER_INVOKE_PARAMETRIC_TEST( CheckTrue_WhenQuitTriggered_QuitInvokedAndAbortsParametricTest, false );
 
 TEMPER_TEST( CheckAndCleanResults_10, TEMPER_FLAG_SHOULD_RUN ) {
-	g_temperTestContext.flags &= ~TEMPER_TEST_CONTEXT_FLAG_NEGATE_QUIT_ATTEMPTS; // we do not quit ourselves within this test but if we fail to absolve we will want the quit status of the previous test to fall through and end the run.
+	g_temperTestContext.flags &= ~TEMPERDEV_TEST_CONTEXT_FLAG_NEGATE_QUIT_ATTEMPTS; // we do not quit ourselves within this test but if we fail to absolve we will want the quit status of the previous test to fall through and end the run.
 	if( AssertResults( 0, 1, 1, 1, 0 ) ) {
 		AbsolvePreviousTest( ACCOUNT_FOR_QUIT_ATTEMPT );
 	}

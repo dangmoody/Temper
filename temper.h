@@ -442,6 +442,11 @@ typedef struct temperCallbacks_t {
 	int		( *VFPrintf )( FILE* file, const char* fmt, va_list args );
 	int		( *SNPrintf )( char* s, size_t n, const char* format, ... );
 	int		( *VSNPrintf )( char* s, size_t n, const char* format, va_list args );
+	int		( *Dup )( int fileHandle );							// create second file descriptor
+	int		( *Dup2 )( int fileHandleSrc, int fileHandleDst );	// reassign file descriptor
+	int		( *Fileno )( FILE* handle );
+	FILE*	( *FOpen )( const char* filename, const char* mode );
+	int		( *FFlush )( FILE* file );
 	int		( *Strcmp )( const char* strA, const char* strB );
 	bool	( *StringContains )( const char* str, const char* substring );
 
@@ -471,7 +476,21 @@ typedef struct temperCallbacks_t {
 // You as the user probably don't want to be directly touching any of this.
 //==========================================================
 
-#define TEMPERDEV_BIT( x )				( 1 << ( x ) )
+#define TEMPERDEV_BIT( x )			( 1 << ( x ) )
+
+#ifndef TEMPERDEV_INVALID_FILE_ID
+#define TEMPERDEV_INVALID_FILE_ID	-1
+#endif
+
+#if defined( _WIN32 )
+#define TEMPERDEV_STDOUT_FILENO		1
+#define TEMPERDEV_NULL_STDOUT		"nul"
+#elif defined( __APPLE__ ) || defined( __linux__ )	// defined( _WIN32 )
+#define TEMPERDEV_STDOUT_FILENO		STDOUT_FILENO
+#define TEMPERDEV_NULL_STDOUT		"/dev/null"
+#else	// defined( _WIN32 )
+#error Unrecognised platform.  It appears Temper does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Temper/issues
+#endif	// defined( _WIN32 )
 
 //----------------------------------------------------------
 
@@ -526,9 +545,9 @@ typedef struct temperTestFailInfo_t {
 //----------------------------------------------------------
 
 typedef enum temperTestContextFlagBits_t {
-	TEMPER_TEST_CONTEXT_FLAG_NEGATE_QUIT_ATTEMPTS	= TEMPERDEV_BIT( 0 ),
-	TEMPER_TEST_CONTEXT_FLAG_PARTIAL_FILTER			= TEMPERDEV_BIT( 1 ),
-	TEMPER_TEST_CONTEXT_FLAG_ONLY_SHOW_FAILED_TESTS	= TEMPERDEV_BIT( 2 ),
+	TEMPERDEV_TEST_CONTEXT_FLAG_NEGATE_QUIT_ATTEMPTS	= TEMPERDEV_BIT( 0 ),
+	TEMPERDEV_TEST_CONTEXT_FLAG_PARTIAL_FILTER			= TEMPERDEV_BIT( 1 ),
+	TEMPERDEV_TEST_CONTEXT_FLAG_ONLY_SHOW_FAILED_TESTS	= TEMPERDEV_BIT( 2 ),
 } temperTestContextFlagBits_t;
 typedef int32_t temperTestContextFlags_t;
 
@@ -555,6 +574,8 @@ typedef struct temperTestContext_t {
 	uint32_t					totalTestsExecuted;
 	uint32_t					currentTestErrorCount;
 	int32_t						exitCode;
+	int32_t						oldStdoutID;
+	int32_t						nullStdoutID;
 	temperTestContextFlags_t	flags;
 	temperTimeUnit_t			timeUnit;
 	temperBool8					currentTestWasAborted;
@@ -722,6 +743,7 @@ TEMPERDEV_EXTERN_C bool	TemperDoubleEqualsInternal( const double a, const double
 #ifdef TEMPER_IMPLEMENTATION
 #ifdef _WIN32
 #include <Windows.h>
+#include <io.h>
 #endif
 
 temperTestContext_t g_temperTestContext;
@@ -899,7 +921,7 @@ static double TemperGetTimestampInternal( const temperTimeUnit_t timeUnit ) {
 		case TEMPER_TIME_UNIT_SECONDS:	return (double) clocks / 1000000000.0;
 	}
 #else	// defined( _WIN32 )
-#error Uncrecognised platform.  It appears Temper does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Temper/issues
+#error Unrecognised platform.  It appears Temper does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Temper/issues
 #endif	// defined( _WIN32 )
 
 	// never gets here
@@ -972,12 +994,12 @@ static bool TemperHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 		}
 
 		if ( g_temperTestContext.callbacks.Strcmp( arg, "-p" ) == 0 ) {
-			g_temperTestContext.flags |= TEMPER_TEST_CONTEXT_FLAG_PARTIAL_FILTER;
+			g_temperTestContext.flags |= TEMPERDEV_TEST_CONTEXT_FLAG_PARTIAL_FILTER;
 			continue;
 		}
 
 		if ( g_temperTestContext.callbacks.Strcmp( arg, "-f" ) == 0 ) {
-			g_temperTestContext.flags |= TEMPER_TEST_CONTEXT_FLAG_ONLY_SHOW_FAILED_TESTS;
+			g_temperTestContext.flags |= TEMPERDEV_TEST_CONTEXT_FLAG_ONLY_SHOW_FAILED_TESTS;
 			continue;
 		}
 
@@ -1021,7 +1043,7 @@ static bool TemperHandleCommandLineArgumentsInternal( int argc, char** argv ) {
 	}
 
 	// if partial filtering was enabled but the user did not then specify a suite or test filter then they need to know about incorrect usage
-	if ( g_temperTestContext.flags & TEMPER_TEST_CONTEXT_FLAG_PARTIAL_FILTER ) {
+	if ( g_temperTestContext.flags & TEMPERDEV_TEST_CONTEXT_FLAG_PARTIAL_FILTER ) {
 		if ( !g_temperTestContext.suiteFilter && !g_temperTestContext.testFilter ) {
 			g_temperTestContext.callbacks.LogError(
 				"Partial filtering (-p) was enabled but suite or test filtering (-s, -t) was not.\n"
@@ -1158,7 +1180,7 @@ static void TemperOnBeforeTestInternal( const temperTestInfo_t* information ) {
 	}
 
 	if ( information->testNameStr ) {
-		if ( ( g_temperTestContext.flags & TEMPER_TEST_CONTEXT_FLAG_ONLY_SHOW_FAILED_TESTS ) == 0 ) {
+		if ( ( g_temperTestContext.flags & TEMPERDEV_TEST_CONTEXT_FLAG_ONLY_SHOW_FAILED_TESTS ) == 0 ) {
 			g_temperTestContext.callbacks.Log( stdout, "TEST: \"%s\"\n", information->testNameStr );
 		}
 	}
@@ -1181,7 +1203,7 @@ static void TemperOnAfterTestInternal( const temperTestInfo_t* information ) {
 			g_temperTestContext.callbacks.Log( stderr, "=== TEST ABORTED (%.3f %s) ===\n\n", g_temperTestContext.currentTestEndTime - g_temperTestContext.currentTestStartTime, timeUnitStr );
 			TemperSetTextColorInternal( TEMPERDEV_COLOR_DEFAULT );
 		} else if ( g_temperTestContext.currentTestErrorCount > 0 ) {
-			if ( g_temperTestContext.flags & TEMPER_TEST_CONTEXT_FLAG_ONLY_SHOW_FAILED_TESTS ) {
+			if ( g_temperTestContext.flags & TEMPERDEV_TEST_CONTEXT_FLAG_ONLY_SHOW_FAILED_TESTS ) {
 				g_temperTestContext.callbacks.Log( stdout, "TEST: \"%s\"\n", information->testNameStr );
 
 				for ( uint32_t i = 0; i < g_temperTestContext.deferredTestFailMessagesCount; i++ ) {
@@ -1204,7 +1226,7 @@ static void TemperOnAfterTestInternal( const temperTestInfo_t* information ) {
 			g_temperTestContext.callbacks.Log( stderr, "TEST FAILED (%.3f %s)\n\n", g_temperTestContext.currentTestEndTime - g_temperTestContext.currentTestStartTime, timeUnitStr );
 			TemperSetTextColorInternal( TEMPERDEV_COLOR_DEFAULT );
 		} else {
-			if ( ( g_temperTestContext.flags & TEMPER_TEST_CONTEXT_FLAG_ONLY_SHOW_FAILED_TESTS ) == 0 ) {
+			if ( ( g_temperTestContext.flags & TEMPERDEV_TEST_CONTEXT_FLAG_ONLY_SHOW_FAILED_TESTS ) == 0 ) {
 				TemperSetTextColorInternal( TEMPERDEV_COLOR_GREEN );
 				g_temperTestContext.callbacks.Log( stderr, "TEST SUCCEEDED (%.3f %s)\n\n", g_temperTestContext.currentTestEndTime - g_temperTestContext.currentTestStartTime, timeUnitStr );
 				TemperSetTextColorInternal( TEMPERDEV_COLOR_DEFAULT );
@@ -1266,7 +1288,7 @@ void TemperTestTrueInternal( const bool condition, const char* conditionStr, con
 
 		// if we are only logging tests that fail then take the error message that would get printed and store it to print later
 		// otherwise just print it right now
-		if ( g_temperTestContext.flags & TEMPER_TEST_CONTEXT_FLAG_ONLY_SHOW_FAILED_TESTS ) {
+		if ( g_temperTestContext.flags & TEMPERDEV_TEST_CONTEXT_FLAG_ONLY_SHOW_FAILED_TESTS ) {
 			va_list args;
 			va_start( args, fmt );
 			TemperAddDeferredFailLogInternal( conditionStr, file, line, fmt, args );
@@ -1319,11 +1341,11 @@ static void TemperOnAllTestsFinishedInternal( void ) {
 	);
 
 	if ( g_temperTestContext.suiteFilter || g_temperTestContext.testFilter ) {
-		g_temperTestContext.callbacks.Log( stdout, "\t- Total tests matching filters: %d\n\t- Suite filter: %s\n\t- Test filter: %s\n\t- Partial results %s\n",
+		g_temperTestContext.callbacks.Log( stdout, "\t- Total tests matching filters: %d\n\t- Suite filter: %s\n\t- Test filter: %s\n\t- Partial results: %s\n",
 			g_temperTestContext.totalTestsFoundWithFilters,
 			g_temperTestContext.suiteFilter,
 			g_temperTestContext.testFilter,
-			( g_temperTestContext.flags & TEMPER_TEST_CONTEXT_FLAG_PARTIAL_FILTER ) ? "PERMITTED" : "DISCARDED" );
+			( g_temperTestContext.flags & TEMPERDEV_TEST_CONTEXT_FLAG_PARTIAL_FILTER ) ? "Enabled" : "Disabled" );
 	}
 
 	g_temperTestContext.callbacks.Log( stdout,
@@ -1356,6 +1378,19 @@ void TemperSetupInternal( void ) {
 		if ( !callbacks->VFPrintf )				{ callbacks->VFPrintf = vfprintf; }
 		if ( !callbacks->SNPrintf )				{ callbacks->SNPrintf = snprintf; }
 		if ( !callbacks->VSNPrintf )			{ callbacks->VSNPrintf = vsnprintf; }
+		if ( !callbacks->FFlush )				{ callbacks->FFlush = fflush; }
+		if ( !callbacks->FOpen )				{ callbacks->FOpen = fopen; }
+#if defined( _WIN32 )
+		if ( !callbacks->Dup )					{ callbacks->Dup = _dup; }
+		if ( !callbacks->Dup2 )					{ callbacks->Dup2 = _dup2; }
+		if ( !callbacks->Fileno )				{ callbacks->Fileno = _fileno; }
+#elif defined( __APPLE__ ) || defined( __linux__ )	// defined( _WIN32 )
+		if ( !callbacks->Dup )					{ callbacks->Dup = dup; }
+		if ( !callbacks->Dup2 )					{ callbacks->Dup2 = dup2; }
+		if ( !callbacks->Fileno )				{ callbacks->Fileno = fileno; }
+#else	// defined( _WIN32 )
+#error Uncrecognised platform.  It appears Temper does not support it.  If you think this is a bug, please submit an issue at https://github.com/dangmoody/Temper/issues
+#endif	// defined( _WIN32 )
 		if ( !callbacks->Strcmp )				{ callbacks->Strcmp = strcmp; }
 		if ( !callbacks->StringContains )		{ callbacks->StringContains = TemperStringContainsInternal; }
 		if ( !callbacks->GetTimestamp )			{ callbacks->GetTimestamp = TemperGetTimestampInternal; }
@@ -1398,6 +1433,14 @@ void TemperSetupInternal( void ) {
 	g_temperTestContext.suiteFilterPrevious = NULL;
 	g_temperTestContext.suiteFilter = NULL;
 	g_temperTestContext.testFilter = NULL;
+
+	// get old stdout
+	g_temperTestContext.oldStdoutID = g_temperTestContext.callbacks.Dup( TEMPERDEV_STDOUT_FILENO );
+	assert( g_temperTestContext.oldStdoutID != TEMPERDEV_INVALID_FILE_ID );
+
+	// get the "null" file
+	// when we "suppress" stdout we actually just write to a null file that no-one can see
+	g_temperTestContext.nullStdoutID = g_temperTestContext.callbacks.Fileno( g_temperTestContext.callbacks.FOpen( TEMPERDEV_NULL_STDOUT, "w" ) );
 }
 
 //----------------------------------------------------------
@@ -1411,7 +1454,7 @@ static bool TemperIsSuiteFilteredInternal( const char* suiteName ) {
 		return false;
 	}
 
-	if ( g_temperTestContext.flags & TEMPER_TEST_CONTEXT_FLAG_PARTIAL_FILTER ) {
+	if ( g_temperTestContext.flags & TEMPERDEV_TEST_CONTEXT_FLAG_PARTIAL_FILTER ) {
 		return g_temperTestContext.callbacks.StringContains( suiteName, g_temperTestContext.suiteFilter );
 	} else {
 		return g_temperTestContext.callbacks.Strcmp( suiteName, g_temperTestContext.suiteFilter ) == 0;
@@ -1429,7 +1472,7 @@ static bool TemperIsTestFilteredInternal( const char* testName ) {
 		return false;
 	}
 
-	if ( g_temperTestContext.flags & TEMPER_TEST_CONTEXT_FLAG_PARTIAL_FILTER ) {
+	if ( g_temperTestContext.flags & TEMPERDEV_TEST_CONTEXT_FLAG_PARTIAL_FILTER ) {
 		return g_temperTestContext.callbacks.StringContains( testName, g_temperTestContext.testFilter );
 	} else {
 		return g_temperTestContext.callbacks.Strcmp( testName, g_temperTestContext.testFilter ) == 0;
@@ -1438,9 +1481,28 @@ static bool TemperIsTestFilteredInternal( const char* testName ) {
 
 //----------------------------------------------------------
 
+static void TemperSuppressStdoutInternal( void ) {
+	// need to complete any remaining writes to stdout before switching streams
+	g_temperTestContext.callbacks.FFlush( stdout );
+	g_temperTestContext.callbacks.Dup2( g_temperTestContext.nullStdoutID, TEMPERDEV_STDOUT_FILENO );
+}
+
+//----------------------------------------------------------
+
+static void TemperRestoreStdoutInternal( void ) {
+	// need to complete any remaining writes to stdout before switching streams
+	g_temperTestContext.callbacks.FFlush( stdout );
+	g_temperTestContext.callbacks.Dup2( g_temperTestContext.oldStdoutID, TEMPERDEV_STDOUT_FILENO );
+}
+
 int TemperExecuteAllTestsInternal( void ) {
 	g_temperTestContext.callbacks.Log( stdout, "\n=== TEMPER: Executing Tests ===\n\n" );
 	double start = g_temperTestContext.callbacks.GetTimestamp( g_temperTestContext.timeUnit );
+
+	// if we only want to see failed tests then suppress stdout
+	if ( g_temperTestContext.flags & TEMPERDEV_TEST_CONTEXT_FLAG_ONLY_SHOW_FAILED_TESTS ) {
+		TemperSuppressStdoutInternal();
+	}
 
 	for ( uint64_t i = 0; i < g_temperTestContext.testInfosCount; i++ ) {
 		temperTestInfo_t* testInfo = &g_temperTestContext.testInfos[i];
@@ -1474,11 +1536,16 @@ int TemperExecuteAllTestsInternal( void ) {
 
 				g_temperTestContext.callbacks.OnAfterTest( testInfo );
 
-				if( g_temperTestContext.testsQuit > 0 && ( ( g_temperTestContext.flags & TEMPER_TEST_CONTEXT_FLAG_NEGATE_QUIT_ATTEMPTS ) == 0 ) ) {
+				if( g_temperTestContext.testsQuit > 0 && ( ( g_temperTestContext.flags & TEMPERDEV_TEST_CONTEXT_FLAG_NEGATE_QUIT_ATTEMPTS ) == 0 ) ) {
 					break;
 				}
 			}
 		}
+	}
+
+	// if we closed stdout before then reopen it now
+	if ( g_temperTestContext.flags & TEMPERDEV_TEST_CONTEXT_FLAG_ONLY_SHOW_FAILED_TESTS ) {
+		TemperRestoreStdoutInternal();
 	}
 
 	double end = g_temperTestContext.callbacks.GetTimestamp( g_temperTestContext.timeUnit );
