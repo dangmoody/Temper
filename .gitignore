@@ -34,3 +34,6 @@ releases/
 
 # ignore StructLayoutSettings vs plugin file
 StructLayoutSettings.json
+
+# ignore RemedyBG files
+*.rdbg
