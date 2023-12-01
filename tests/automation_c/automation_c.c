@@ -99,7 +99,7 @@ static void AbsolveTest( const bool condition ) {
 		g_temperTestContext.currentTestErrorCount = 0;
 
 		TemperSetTextColorInternal( TEMPERDEV_COLOR_GREEN );
-		g_temperTestContext.callbacks.Log( stdout, "Current test absolved.\n" );
+		g_temperTestContext.callbacks.Log( stdout, "Current test absolved." );
 		TemperSetTextColorInternal( TEMPERDEV_COLOR_DEFAULT );
 	}
 }
@@ -113,14 +113,14 @@ static void AbsolvePreviousTest( const automationAccountFor_t claim ) {
 		TEMPERDEV_ASSERT( g_temperTestContext.testsFailed > 0 );
 		g_temperTestContext.testsPassed += 1;
 		g_temperTestContext.testsFailed -= 1;
-		g_temperTestContext.callbacks.Log( stdout, "Absolved previous fail.\n" );
+		g_temperTestContext.callbacks.Log( stdout, "Absolved previous fail." );
 	} else if ( claim == ACCOUNT_FOR_ONE_ABORT ) {
 		TEMPERDEV_ASSERT( g_temperTestContext.testsFailed > 0 );
 		TEMPERDEV_ASSERT( g_temperTestContext.testsAborted > 0 );
 		g_temperTestContext.testsPassed += 1;
 		g_temperTestContext.testsFailed -= 1;
 		g_temperTestContext.testsAborted -= 1;
-		g_temperTestContext.callbacks.Log( stdout, "Absolved previous abort.\n" );
+		g_temperTestContext.callbacks.Log( stdout, "Absolved previous abort." );
 	} else if ( claim == ACCOUNT_FOR_ONE_SKIP ) {
 		TEMPERDEV_ASSERT( g_temperTestContext.testsSkipped > 0 );
 		g_temperTestContext.testsPassed += 1;
@@ -134,7 +134,7 @@ static void AbsolvePreviousTest( const automationAccountFor_t claim ) {
 		g_temperTestContext.testsFailed -= 1;
 		g_temperTestContext.testsAborted -= 1;
 		g_temperTestContext.testsQuit -= 1;
-		g_temperTestContext.callbacks.Log( stdout, "Absolved quit.\n" );
+		g_temperTestContext.callbacks.Log( stdout, "Absolved quit." );
 	}
 
 	TemperSetTextColorInternal( TEMPERDEV_COLOR_DEFAULT );
@@ -258,8 +258,8 @@ typedef struct person_t {
 
 TEMPER_TEST_PARAMETRIC( ParametricTest_WhenDeclaredWithStructParm_StructParmIsValid, TEMPER_FLAG_SHOULD_RUN, person_t* person, const char* expectedName, const uint32_t expectedAge ) {
 	// general data validation
-	TEMPER_CHECK_TRUE_AM( person != NULL, "person ptr is NULL.\n" );
-	TEMPER_CHECK_TRUE_AM( person->name != NULL, "person->name ptr inside \"%s\" is NULL.\n" );
+	TEMPER_CHECK_TRUE_AM( person != NULL, "person ptr is NULL." );
+	TEMPER_CHECK_TRUE_AM( person->name != NULL, "person->name ptr inside \"%s\" is NULL." );
 
 	// actual comparing what was passed in vs what was expected
 	TEMPER_CHECK_TRUE_AM( strcmp( person->name, expectedName ) == 0, "person->name was expected to be \"%s\" but was actually \"%s\".\n", expectedName, person->name );
@@ -277,12 +277,12 @@ TEMPER_INVOKE_PARAMETRIC_TEST( ParametricTest_WhenDeclaredWithStructParm_StructP
 
 TEMPER_TEST( CheckTrue_WhenFails_ErrorCountIncrements, TEMPER_FLAG_SHOULD_RUN ) {
 	bool countIsCorrect = true;
-	TEMPER_CHECK_TRUE_M( false, "We expect this test to fail.\n" );
+	TEMPER_CHECK_TRUE_M( false, "We expect this test to fail." );
 	countIsCorrect = g_temperTestContext.currentTestErrorCount == 1 ? countIsCorrect : false;
 
-	TEMPER_CHECK_TRUE_M( 5 == 7 && 8 + 2 == 11, "We expect this test to fail.\n" );
-	TEMPER_CHECK_TRUE_M( 5 == 5 && 8 + 2 == 11, "We expect this test to fail.\n" );
-	TEMPER_CHECK_TRUE_M( 5 == 5 && 8 + 2 == 10, "We expect this test to fail.\n" );
+	TEMPER_CHECK_TRUE_M( 5 == 7 && 8 + 2 == 11, "We expect this test to fail." );
+	TEMPER_CHECK_TRUE_M( 5 == 5 && 8 + 2 == 11, "We expect this test to fail." );
+	TEMPER_CHECK_TRUE_M( 5 == 5 && 8 + 2 == 10, "We expect this test to fail." );
 	countIsCorrect = g_temperTestContext.currentTestErrorCount == 3 ? countIsCorrect : false;
 
 	AbsolveTest( countIsCorrect );
@@ -293,7 +293,7 @@ TEMPER_TEST( CheckTrue_WhenFails_ErrorCountIncrements, TEMPER_FLAG_SHOULD_RUN ) 
 //----------------------------------------------------------
 
 RESULT_DEPENDANT_TEST( TemperCheck_WhenErrorTriggered_FailsTest, TEMPER_FLAG_SHOULD_RUN ) {
-	TEMPER_CHECK_TRUE_M( false, "We expect this test to fail.\n" );
+	TEMPER_CHECK_TRUE_M( false, "We expect this test to fail." );
 }
 
 TEMPER_TEST( CheckAndCleanResults_6, TEMPER_FLAG_SHOULD_RUN ) {
@@ -307,7 +307,7 @@ TEMPER_TEST( CheckAndCleanResults_6, TEMPER_FLAG_SHOULD_RUN ) {
 //----------------------------------------------------------
 
 RESULT_DEPENDANT_TEST( CheckTrue_WhenAbortTriggered_AbortsTest, TEMPER_FLAG_SHOULD_RUN ) {
-	TEMPER_CHECK_TRUE_AM( false, "We expect this test to abort.\n" );
+	TEMPER_CHECK_TRUE_AM( false, "We expect this test to abort." );
 	testAbortTestNumberWeNeverExpectSet = THE_ABORT_TEST_FAILURE_NUMBER;
 }
 
@@ -321,7 +321,7 @@ TEMPER_TEST( CheckAndCleanResults_7, TEMPER_FLAG_SHOULD_RUN ) {
 }
 
 RESULT_DEPDENDANT_TEST_PARAMETRIC( CheckTrue_WhenAbortTriggered_AbortsParametricTest, const bool check ) {
-	TEMPER_CHECK_TRUE_AM( check, "We expect this test to abort.\n" );
+	TEMPER_CHECK_TRUE_AM( check, "We expect this test to abort." );
 	testAbortTestNumberWeNeverExpectSet = THE_ABORT_TEST_FAILURE_NUMBER;
 }
 
@@ -387,28 +387,28 @@ CONDITION_TEST( CheckTrue_FalseParsed_ErrorCountIncrements ) {
 	bool errorCountCorrect = g_temperTestContext.currentTestErrorCount == 0 ? true : false;
 	TEMPER_CHECK_TRUE( false );
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 1 ? errorCountCorrect : false;
-	PassOrFailTest( errorCountCorrect, "Should have incremented the error count to 1.\n" );
+	PassOrFailTest( errorCountCorrect, "Should have incremented the error count to 1." );
 }
 
 CONDITION_TEST( CheckTrue_TrueParsed_ErrorCountStays ) {
 	bool errorCountCorrect = g_temperTestContext.currentTestErrorCount == 0 ? true : false;
 	TEMPER_CHECK_TRUE( true );
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 0 ? errorCountCorrect : false;
-	PassOrFailTest( errorCountCorrect, "Shouldn't have incremented the error count.\n" );
+	PassOrFailTest( errorCountCorrect, "Shouldn't have incremented the error count." );
 }
 
 CONDITION_TEST( CheckTrue_LongFalseStatementParsed_ErrorCountIncrements ) {
 	bool errorCountCorrect = g_temperTestContext.currentTestErrorCount == 0 ? true : false;
 	TEMPER_CHECK_TRUE( ( ( 2 * 8 ) / 4 ) == 4 && 7 - 7 );
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 1 ? errorCountCorrect : false;
-	PassOrFailTest( errorCountCorrect, "Should have incremented the error count to 1.\n" );
+	PassOrFailTest( errorCountCorrect, "Should have incremented the error count to 1." );
 }
 
 CONDITION_TEST( CheckTrue_LongTrueStatementParsed_ErrorCountStays ) {
 	bool errorCountCorrect = g_temperTestContext.currentTestErrorCount == 0 ? true : false;
 	TEMPER_CHECK_TRUE( ( ( 2 * 8 ) / 4 ) == 4 && 7 - 6 );
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 0 ? errorCountCorrect : false;
-	PassOrFailTest( errorCountCorrect, "Shouldn't have incremented the error count.\n" );
+	PassOrFailTest( errorCountCorrect, "Shouldn't have incremented the error count." );
 }
 
 //----------------------------------------------------------
@@ -419,28 +419,28 @@ CONDITION_TEST( CheckFalse_FalseParsed_ErrorCountStays ) {
 	bool errorCountCorrect = g_temperTestContext.currentTestErrorCount == 0 ? true : false;
 	TEMPER_CHECK_FALSE( false );
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 0 ? errorCountCorrect : false;
-	PassOrFailTest( errorCountCorrect, "Shouldn't have incremented the error count.\n" );
+	PassOrFailTest( errorCountCorrect, "Shouldn't have incremented the error count." );
 }
 
 CONDITION_TEST( CheckFalse_TrueParsed_ErrorCountIncrements ) {
 	bool errorCountCorrect = g_temperTestContext.currentTestErrorCount == 0 ? true : false;
 	TEMPER_CHECK_FALSE( true );
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 1 ? errorCountCorrect : false;
-	PassOrFailTest( errorCountCorrect, "Should have incremented the error count to 1.\n" );
+	PassOrFailTest( errorCountCorrect, "Should have incremented the error count to 1." );
 }
 
 CONDITION_TEST( CheckFalse_LongFalseStatementParsed_ErrorCountStays ) {
 	bool errorCountCorrect = g_temperTestContext.currentTestErrorCount == 0 ? true : false;
 	TEMPER_CHECK_FALSE( ( ( 2 * 8 ) / 4 ) == 4 && 7 - 7 );
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 0 ? errorCountCorrect : false;
-	PassOrFailTest( errorCountCorrect, "Shouldn't have incremented the error count.\n" );
+	PassOrFailTest( errorCountCorrect, "Shouldn't have incremented the error count." );
 }
 
 CONDITION_TEST( CheckFalse_LongTrueStatementParsed_ErrorCountIncrements ) {
 	bool errorCountCorrect = g_temperTestContext.currentTestErrorCount == 0 ? true : false;
 	TEMPER_CHECK_FALSE( ( ( 2 * 8 ) / 4 ) == 4 && 7 - 6 );
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 1 ? errorCountCorrect : false;
-	PassOrFailTest( errorCountCorrect, "Should have incremented the error count to 1.\n" );
+	PassOrFailTest( errorCountCorrect, "Should have incremented the error count to 1." );
 }
 
 //----------------------------------------------------------
@@ -451,14 +451,14 @@ CONDITION_TEST( CheckEqual_WhenTwoValuesAreEqual_ErrorCountStays ) {
 	bool errorCountCorrect = g_temperTestContext.currentTestErrorCount == 0 ? true : false;
 	TEMPER_CHECK_EQUAL( 8, 8 );
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 0 ? errorCountCorrect : false;
-	PassOrFailTest( errorCountCorrect, "Shouldn't have incremented the error count.\n" );
+	PassOrFailTest( errorCountCorrect, "Shouldn't have incremented the error count." );
 }
 
 CONDITION_TEST( CheckFalse_WhenTwoValuesAreNotEqual_ErrorCountIncrements ) {
 	bool errorCountCorrect = g_temperTestContext.currentTestErrorCount == 0 ? true : false;
 	TEMPER_CHECK_EQUAL( 4, 8 );
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 1 ? errorCountCorrect : false;
-	PassOrFailTest( errorCountCorrect, "Should have incremented the error count to 1.\n" );
+	PassOrFailTest( errorCountCorrect, "Should have incremented the error count to 1." );
 }
 
 //----------------------------------------------------------
@@ -478,7 +478,7 @@ CONDITION_TEST( CheckFloatEqual_ValuesAroundUpperLowerBoundaries_ErrorCountIncre
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 1 ? errorCountCorrect : false;
 	TEMPER_CHECK_FLOAT_EQUAL( lhs, 4.999992f );		// Below lower threshold
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 2 ? errorCountCorrect : false;
-	PassOrFailTest( errorCountCorrect, "Should have incremented the error count to 2.\n" );
+	PassOrFailTest( errorCountCorrect, "Should have incremented the error count to 2." );
 }
 
 //----------------------------------------------------------
@@ -498,7 +498,7 @@ CONDITION_TEST( CheckNotFloatEqual_ValuesAroundUpperLowerBoundaries_ErrorCountIn
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 3 ? errorCountCorrect : false;
 	TEMPER_CHECK_NOT_FLOAT_EQUAL( lhs, 4.999992f );		// Below lower threshold
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 3 ? errorCountCorrect : false;
-	PassOrFailTest( errorCountCorrect, "Should have incremented the error count to 2.\n" );
+	PassOrFailTest( errorCountCorrect, "Should have incremented the error count to 2." );
 }
 
 //----------------------------------------------------------
@@ -519,7 +519,7 @@ CONDITION_TEST( CheckFloatSEqual_ValuesAroundUpperLowerBoundaries_ErrorCountIncr
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 1 ? errorCountCorrect : false;
 	TEMPER_CHECK_FLOAT_WITHIN_RANGE( lhs, -2.6f, epsilon );		// Below lower threshold
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 2 ? errorCountCorrect : false;
-	PassOrFailTest( errorCountCorrect, "Should have incremented the error count to 2.\n" );
+	PassOrFailTest( errorCountCorrect, "Should have incremented the error count to 2." );
 }
 
 //----------------------------------------------------------
@@ -540,7 +540,7 @@ CONDITION_TEST( CheckNotFloatSEqual_ValuesAroundUpperLowerBoundaries_ErrorCountI
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 3 ? errorCountCorrect : false;
 	TEMPER_CHECK_FLOAT_NOT_WITHIN_RANGE( lhs, -2.6f, epsilon );		// Below lower threshold
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 3 ? errorCountCorrect : false;
-	PassOrFailTest( errorCountCorrect, "Should have incremented the error count to 3.\n" );
+	PassOrFailTest( errorCountCorrect, "Should have incremented the error count to 3." );
 }
 
 //----------------------------------------------------------
@@ -560,7 +560,7 @@ CONDITION_TEST( CheckDoubleEqual_ValuesAroundUpperLowerBoundaries_ErrorCountIncr
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 1 ? errorCountCorrect : false;
 	TEMPER_CHECK_DOUBLE_EQUAL( lhs, 4.99999999999992 );		// Below lower threshold
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 2 ? errorCountCorrect : false;
-	PassOrFailTest( errorCountCorrect, "Should have incremented the error count to 2.\n" );
+	PassOrFailTest( errorCountCorrect, "Should have incremented the error count to 2." );
 }
 
 //----------------------------------------------------------
@@ -580,7 +580,7 @@ CONDITION_TEST( CheckNotDoubleEqual_ValuesAroundUpperLowerBoundaries_ErrorCountI
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 3 ? errorCountCorrect : false;
 	TEMPER_CHECK_NOT_DOUBLE_EQUAL( lhs, 4.99999999999992 );		// Below lower threshold
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 3 ? errorCountCorrect : false;
-	PassOrFailTest( errorCountCorrect, "Should have incremented the error count to 2.\n" );
+	PassOrFailTest( errorCountCorrect, "Should have incremented the error count to 2." );
 }
 
 //----------------------------------------------------------
@@ -601,7 +601,7 @@ CONDITION_TEST( CheckDoubleSEqual_ValuesAroundUpperLowerBoundaries_ErrorCountInc
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 1 ? errorCountCorrect : false;
 	TEMPER_CHECK_DOUBLE_WITHIN_RANGE( lhs, -2.6, epsilon );		// Below lower threshold
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 2 ? errorCountCorrect : false;
-	PassOrFailTest( errorCountCorrect, "Should have incremented the error count to 2.\n" );
+	PassOrFailTest( errorCountCorrect, "Should have incremented the error count to 2." );
 }
 
 //----------------------------------------------------------
@@ -622,7 +622,7 @@ CONDITION_TEST( CheckNotDoubleSEqual_ValuesAroundUpperLowerBoundaries_ErrorCount
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 3 ? errorCountCorrect : false;
 	TEMPER_CHECK_DOUBLE_NOT_WITHIN_RANGE( lhs, -2.6, epsilon );		// Below lower threshold
 	errorCountCorrect = g_temperTestContext.currentTestErrorCount == 3 ? errorCountCorrect : false;
-	PassOrFailTest( errorCountCorrect, "Should have incremented the error count to 3.\n" );
+	PassOrFailTest( errorCountCorrect, "Should have incremented the error count to 3." );
 }
 
 //----------------------------------------------------------

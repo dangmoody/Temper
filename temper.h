@@ -1303,6 +1303,7 @@ void TemperTestTrueInternal( const bool condition, const char* conditionStr, con
 				va_start( args, fmt );
 				g_temperTestContext.callbacks.VFPrintf( stderr, fmt, args );
 				va_end( args );
+				printf("\n"); // So users don't need to add \n to the end of all their error logs and everything can just be on a new line
 			}
 			TemperSetTextColorInternal( TEMPERDEV_COLOR_DEFAULT );
 		}
@@ -1360,6 +1361,8 @@ static void TemperOnAllTestsFinishedInternal( void ) {
 		g_temperTestContext.testsQuit,    TemperGetPercentInternal( g_temperTestContext.testsQuit,    totalFound ),
 		g_temperTestContext.testsSkipped, TemperGetPercentInternal( g_temperTestContext.testsSkipped, totalFound )
 	);
+
+	TemperSetTextColorInternal( TEMPERDEV_COLOR_DEFAULT );
 }
 
 //----------------------------------------------------------
