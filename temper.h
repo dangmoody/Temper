@@ -124,6 +124,7 @@ Special Thanks:
 
 7. CHANGELOG
 v2.1.0, <INSERT RELEASE DATE HERE>:
+	* Added support for Raspberry Pi (64-bit)!
 	* Errors are now logged explicitly to stderr.  Everything else is now logged explicitly to stdout.
 	* Unified the names of the test macros for better searchability/auto-completion:
 		* Renamed `TEMPER_SUITE_TEST` to `TEMPER_TEST_SUITE`.
