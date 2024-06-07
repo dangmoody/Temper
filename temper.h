@@ -580,6 +580,9 @@ typedef struct temperTestContext_t {
 	temperTestContextFlags_t	flags;
 	temperTimeUnit_t			timeUnit;
 	temperBool8					currentTestWasAborted;
+	temperBool8					pad0;
+	temperBool8					pad1;
+	temperBool8					pad2;
 	const char*					suiteFilterPrevious;
 	const char*					suiteFilter;
 	const char*					testFilter;

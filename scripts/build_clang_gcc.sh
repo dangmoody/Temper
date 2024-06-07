@@ -141,7 +141,7 @@ fi
 
 if [[ "${g_config}" == release ]]
 then
-	optimisations=-O3 -ffast-math
+	optimisations="-O3 -ffast-math"
 else
 	optimisations=""
 fi
