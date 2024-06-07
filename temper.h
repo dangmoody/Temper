@@ -132,6 +132,7 @@ v2.1.0, <INSERT RELEASE DATE HERE>:
 	* Added new cmd line arg `-f`:
 		* If enabled, Temper will only log tests that failed.  Tests that succeeded will not output anything.
 		* This is useful when the program has a lot of tests.
+	* `assert.h` is no longer included if you #define over `TEMPERDEV_ASSERT`.
 
 v2.0.1, 12/06/2022:
 	* Rename __temper_test_info_fetcher_ struct prefix to TEMPERDEV_TEST_INFO_FETCHER to avoid triggering compiler warnings on the user's end.
