@@ -254,7 +254,6 @@ extern "C" {
 #include <stdlib.h>	// EXIT_SUCCESS, EXIT_FAILURE
 #include <stdarg.h>	// va_arg
 #include <string.h>	// strcmp, strstr
-#include <assert.h>
 #include <stdint.h>
 
 #ifndef __cplusplus
@@ -394,6 +393,7 @@ extern "C" {
 //==========================================================
 
 #ifndef TEMPERDEV_ASSERT
+#include <assert.h>
 #define TEMPERDEV_ASSERT					assert
 #endif
 
