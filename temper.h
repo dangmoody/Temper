@@ -126,9 +126,9 @@ Special Thanks:
 v2.1.0, <INSERT RELEASE DATE HERE>:
 	* Errors are now logged explicitly to stderr.  Everything else is now logged explicitly to stdout.
 	* Unified the names of the test macros for better searchability/auto-completion:
-		* Renamed TEMPER_SUITE_TEST to TEMPER_TEST_SUITE.
-		* Renamed TEMPER_PARAMETRIC to TEMPER_TEST_PARAMETRIC.
-		* Renamed TEMPER_SUITE_PARAMETRIC to TEMPER_TEST_PARAMETRIC_SUITE.
+		* Renamed `TEMPER_SUITE_TEST` to `TEMPER_TEST_SUITE`.
+		* Renamed `TEMPER_PARAMETRIC` to `TEMPER_TEST_PARAMETRIC`.
+		* Renamed `TEMPER_SUITE_PARAMETRIC` to `TEMPER_TEST_PARAMETRIC_SUITE`.
 	* Added new cmd line arg `-f`:
 		* If enabled, Temper will only log tests that failed.  Tests that succeeded will not output anything.
 		* This is useful when the program has a lot of tests.
