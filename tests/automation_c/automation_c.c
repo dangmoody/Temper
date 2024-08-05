@@ -1,12 +1,15 @@
 #define TEMPER_IMPLEMENTATION
 #include "../../temper.h"
 
-#ifdef __clang__
+#if defined( __clang__ )
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
 #pragma clang diagnostic ignored "-Wpadded"
 #pragma clang diagnostic ignored "-Wformat-security"
 #pragma clang diagnostic ignored "-Wdeclaration-after-statement"
+#elif defined( __GNUC__ )
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-security"
 #endif
 
 //----------------------------------------------------------
@@ -707,6 +710,8 @@ int main( int argc, char** argv ) {
 
 //----------------------------------------------------------
 
-#ifdef __clang__
+#if defined( __clang__ )
 #pragma clang diagnostic pop
+#elif defined( __GNUC__ )
+#pragma GCC diagnostic pop
 #endif
