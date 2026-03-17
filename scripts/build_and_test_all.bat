@@ -3,116 +3,117 @@
 setlocal EnableDelayedExpansion
 
 pushd %~dp0
+pushd ..
 
 echo ======= Clang / Debug =======
-call build_clang_gcc.bat --output automation_c.exe --compiler clang --config debug --source tests\\automation_c\\automation_c.c
+builder build_clang.cpp --config=automation-c-debug
 if %errorlevel% neq 0 goto :ExitFailure
 
-..\\bin\\win64\\clang\\debug\\tests\\automation_c.exe
+.\\bin\\debug\\clang\\automation_c_clang.exe
 if %errorlevel% neq 0 goto :ExitFailure
 echo ======= Clang / Debug Done =======
 echo.
 
 echo ======= Clang / Release =======
-call build_clang_gcc.bat --output automation_c.exe --compiler clang --config release --source tests\\automation_c\\automation_c.c
+builder build_clang.cpp --config=automation-c-release
 if %errorlevel% neq 0 goto :ExitFailure
 
-..\\bin\\win64\\clang\\release\\tests\\automation_c.exe
+.\\bin\\release\\clang\\automation_c_clang.exe
 if %errorlevel% neq 0 goto :ExitFailure
 echo ======= Clang / Release Done =======
 echo.
 
 
 echo ======= Clang++ / Debug =======
-call build_clang_gcc.bat --output automation_cpp.exe --compiler clang++ --config debug --source tests\\automation_cpp\\automation_cpp.cpp
+builder build_clang.cpp --config=automation-cpp-debug
 if %errorlevel% neq 0 goto :ExitFailure
 
-..\\bin\\win64\\clang++\\debug\\tests\\automation_cpp.exe
+.\\bin\\debug\\clang\\automation_cpp_clang.exe
 if %errorlevel% neq 0 goto :ExitFailure
 echo ======= Clang++ / Debug Done =======
 echo.
 
 echo ======= Clang++ / Release =======
-call build_clang_gcc.bat --output automation_cpp.exe --compiler clang++ --config release --source tests\\automation_cpp\\automation_cpp.cpp
+builder build_clang.cpp --config=automation-cpp-release
 if %errorlevel% neq 0 goto :ExitFailure
 
-..\\bin\\win64\\clang++\\release\\tests\\automation_cpp.exe
+.\\bin\\release\\clang\\automation_cpp_clang.exe
 if %errorlevel% neq 0 goto :ExitFailure
 echo ======= Clang++ / Release Done =======
 echo.
 
 
 echo ======= GCC / Debug =======
-call build_clang_gcc.bat --output automation_c.exe --compiler gcc --config debug --source tests\\automation_c\\automation_c.c
+builder build_gcc.cpp --config=automation-c-debug
 if %errorlevel% neq 0 goto :ExitFailure
 
-..\\bin\\win64\\gcc\\debug\\tests\\automation_c.exe
+.\\bin\\debug\\gcc\\automation_c_gcc.exe
 if %errorlevel% neq 0 goto :ExitFailure
 echo ======= GCC / Debug Done =======
 echo.
 
 echo ======= GCC / Release =======
-call build_clang_gcc.bat --output automation_c.exe --compiler gcc --config release --source tests\\automation_c\\automation_c.c
+builder build_gcc.cpp --config=automation-c-release
 if %errorlevel% neq 0 goto :ExitFailure
 
-..\\bin\\win64\\gcc\\release\\tests\\automation_c.exe
+.\\bin\\release\\gcc\\automation_c_gcc.exe
 if %errorlevel% neq 0 goto :ExitFailure
 echo ======= GCC / Release Done =======
 echo.
 
 
 echo ======= G++ / Debug =======
-call build_clang_gcc.bat --output automation_cpp.exe --compiler g++ --config debug --source tests\\automation_cpp\\automation_cpp.cpp
+builder build_gcc.cpp --config=automation-cpp-debug
 if %errorlevel% neq 0 goto :ExitFailure
 
-..\\bin\\win64\\g++\\debug\\tests\\automation_cpp.exe
+.\\bin\\debug\\gcc\\automation_cpp_gcc.exe
 if %errorlevel% neq 0 goto :ExitFailure
 echo ======= G++ / Debug Done =======
 echo.
 
 echo ======= G++ / Release =======
-call build_clang_gcc.bat --output automation_cpp.exe --compiler g++ --config release --source tests\\automation_cpp\\automation_cpp.cpp
+builder build_gcc.cpp --config=automation-cpp-release
 if %errorlevel% neq 0 goto :ExitFailure
 
-..\\bin\\win64\\g++\\release\\tests\\automation_cpp.exe
+.\\bin\\release\\gcc\\automation_cpp_gcc.exe
 if %errorlevel% neq 0 goto :ExitFailure
 echo ======= G++ / Release Done =======
 echo.
 
 
 echo ======= MSVC (C) / Debug =======
-call build_msvc.bat --output automation_c.exe --config debug --source tests\\automation_c\\automation_c.c
+builder build_msvc.cpp --config=automation-c-debug
 if %errorlevel% neq 0 goto :ExitFailure
 
-..\\bin\\win64\\msvc\\debug\\tests\\automation_c.exe
+.\\bin\\debug\\msvc\\automation_c_msvc.exe
 if %errorlevel% neq 0 goto :ExitFailure
 echo ======= MSVC (C) / Debug Done =======
 echo.
 
 echo ======= MSVC (C) / Release =======
-call build_msvc.bat --output automation_c.exe --config release --source tests\\automation_c\\automation_c.c
+builder build_msvc.cpp --config=automation-c-release
 if %errorlevel% neq 0 goto :ExitFailure
 
-..\\bin\\win64\\msvc\\release\\tests\\automation_c.exe
+.\\bin\\release\\msvc\\automation_c_msvc.exe
 if %errorlevel% neq 0 goto :ExitFailure
 echo ======= MSVC (C) / Release Done =======
 echo.
 
 
 echo ======= MSVC (C++) / Debug =======
-call build_msvc.bat --output automation_cpp.exe --config debug --source tests\\automation_cpp\\automation_cpp.cpp
+builder build_msvc.cpp --config=automation-cpp-debug
 if %errorlevel% neq 0 goto :ExitFailure
 
-..\\bin\\win64\\msvc\\debug\\tests\\automation_cpp.exe
+.\\bin\\debug\\msvc\\automation_cpp_msvc.exe
 if %errorlevel% neq 0 goto :ExitFailure
 echo ======= MSVC (C++) / Debug Done =======
 echo.
 
 echo ======= MSVC (C++) / Release =======
-call build_msvc.bat --output automation_cpp.exe --config release --source tests\\automation_cpp\\automation_cpp.cpp
+builder build_msvc.cpp --config=automation-cpp-release
 if %errorlevel% neq 0 goto :ExitFailure
 
-..\\bin\\win64\\msvc\\release\\tests\\automation_cpp.exe
+.\\bin\\release\\msvc\\automation_cpp_msvc.exe
 if %errorlevel% neq 0 goto :ExitFailure
 echo ======= MSVC (C++) / Release Done =======
 echo.
@@ -123,9 +124,11 @@ goto :ExitSuccess
 :ExitSuccess
 echo No errors were detected.  Everything looks fine.
 popd
+popd
 goto :EOF
 
 :ExitFailure
 echo ERROR: Last operation was not successful.  Stopping...
+popd
 popd
 exit /b %errorlevel%
