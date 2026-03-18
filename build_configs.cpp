@@ -60,6 +60,10 @@ static void GetBuildConfigs( BuilderOptions *options, const std::string &compile
 			.defines			= { "_CRT_SECURE_NO_WARNINGS", GetDebugDefine( config ) },
 		};
 
+		if ( compilerName == "clang" || compilerName == "gcc" ) {
+			automationCPP.additionalLibs.push_back( "stdc++" );
+		}
+
 		if ( compilerName == "gcc" ) {
 			automationCPP.additionalLibs = { "stdc++" };
 
