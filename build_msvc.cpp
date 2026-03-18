@@ -8,7 +8,7 @@ BUILDER_CALLBACK void SetBuilderOptions( BuilderOptions *options ) {
 	options->compilerPath = "cl";
 	options->compilerVersion = "14.44.35207";
 
-	GetBuildConfigs( options, "msvc" );
+	GetBuildConfigs( options, COMPILER_MSVC );
 }
 
 #endif // BUILDER_IS_DOING_USER_CONFIG_BUILD

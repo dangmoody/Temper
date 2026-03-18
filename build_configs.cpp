@@ -9,6 +9,12 @@ enum config_t {
 	CONFIG_COUNT
 };
 
+enum compiler_t {
+	COMPILER_CLANG	= 0,
+	COMPILER_GCC,
+	COMPILER_MSVC
+};
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wswitch"
 
@@ -20,7 +26,19 @@ static std::string GetConfigName( const config_t config ) {
 
 	printf( "ERROR: Bad config_t passed.\n" );
 
-	return NULL;
+	return std::string();
+}
+
+static std::string GetCompilerName( const compiler_t compiler ) {
+	switch ( compiler ) {
+		case COMPILER_CLANG:	return "clang";
+		case COMPILER_GCC:		return "gcc";
+		case COMPILER_MSVC:		return "msvc";
+	}
+
+	printf( "ERROR: Bad compiler_t passed.\n" );
+
+	return std::string();
 }
 
 static std::string GetDebugDefine( const config_t config ) {
@@ -31,12 +49,14 @@ static std::string GetDebugDefine( const config_t config ) {
 
 	printf( "ERROR: Bad config_t passed.\n" );
 
-	return NULL;
+	return std::string();
 }
 
 #pragma clang diagnostic pop
 
-static void GetBuildConfigs( BuilderOptions *options, const std::string &compilerName ) {
+static void GetBuildConfigs( BuilderOptions *options, const compiler_t compiler ) {
+	std::string compilerName = GetCompilerName( compiler );
+
 	for ( int configIndex = 0; configIndex < CONFIG_COUNT; configIndex++ ) {
 		const config_t config = (config_t) configIndex;
 
@@ -60,16 +80,17 @@ static void GetBuildConfigs( BuilderOptions *options, const std::string &compile
 			.defines			= { "_CRT_SECURE_NO_WARNINGS", GetDebugDefine( config ) },
 		};
 
-		if ( compilerName == "clang" || compilerName == "gcc" ) {
-			automationCPP.additionalLibs.push_back( "stdc++" );
-		}
+		switch ( compiler ) {
+			case COMPILER_CLANG: {
+				automationCPP.additionalLibs.push_back( "stdc++" );
+			} break;
 
-		if ( compilerName == "gcc" ) {
-			automationCPP.additionalLibs = { "stdc++" };
-
-			automationCPP.additionalLinkerArguments.push_back( "-static" );
-			automationCPP.additionalLinkerArguments.push_back( "-static-libstdc++" );
-			automationCPP.additionalLinkerArguments.push_back( "-static-libgcc" );
+			case COMPILER_GCC: {
+				automationCPP.additionalLibs = { "stdc++" };
+				automationCPP.additionalLinkerArguments.push_back( "-static" );
+				automationCPP.additionalLinkerArguments.push_back( "-static-libstdc++" );
+				automationCPP.additionalLinkerArguments.push_back( "-static-libgcc" );
+			} break;
 		}
 
 		AddBuildConfig( options, &automationCPP );

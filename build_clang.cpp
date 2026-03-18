@@ -5,7 +5,7 @@
 #include "build_configs.cpp"
 
 BUILDER_CALLBACK void SetBuilderOptions( BuilderOptions *options ) {
-	GetBuildConfigs( options, "clang" );
+	GetBuildConfigs( options, COMPILER_CLANG );
 }
 
 #endif // BUILDER_IS_DOING_USER_CONFIG_BUILD

@@ -11,7 +11,7 @@ BUILDER_CALLBACK void SetBuilderOptions( BuilderOptions *options ) {
 	options->compilerPath = "gcc";
 #endif
 
-	GetBuildConfigs( options, "gcc" );
+	GetBuildConfigs( options, COMPILER_GCC );
 }
 
 #endif // BUILDER_IS_DOING_USER_CONFIG_BUILD
