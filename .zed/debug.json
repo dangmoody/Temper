@@ -1,0 +1,55 @@
+[
+	{
+		"label": "debug: automation-c (clang)",
+		"adapter": "CodeLLDB",
+		"request": "launch",
+		"program": "${ZED_WORKTREE_ROOT}/bin/debug/automation_c_clang",
+		"cwd": "${ZED_WORKTREE_ROOT}",
+		"build": "build: automation-c (clang, debug)",
+	},
+
+	{
+		"label": "debug: automation-c (gcc)",
+		"adapter": "CodeLLDB",
+		"request": "launch",
+		"program": "${ZED_WORKTREE_ROOT}/bin/debug/automation_c_gcc",
+		"cwd": "${ZED_WORKTREE_ROOT}",
+		"build": "build: automation-c (gcc, debug)",
+	},
+
+	{
+		"label": "debug: automation-cpp (clang)",
+		"adapter": "CodeLLDB",
+		"request": "launch",
+		"program": "${ZED_WORKTREE_ROOT}/bin/debug/automation_cpp_clang",
+		"cwd": "${ZED_WORKTREE_ROOT}",
+		"build": "build: automation-cpp (clang, debug)",
+	},
+
+	{
+		"label": "debug: automation-cpp (gcc)",
+		"adapter": "CodeLLDB",
+		"request": "launch",
+		"program": "${ZED_WORKTREE_ROOT}/bin/debug/automation_cpp_gcc",
+		"cwd": "${ZED_WORKTREE_ROOT}",
+		"build": "build: automation-cpp (gcc, debug)",
+	},
+
+	{
+		"label": "debug: scale-test-c (clang)",
+		"adapter": "CodeLLDB",
+		"request": "launch",
+		"program": "${ZED_WORKTREE_ROOT}/bin/debug/scale_test_c_clang",
+		"cwd": "${ZED_WORKTREE_ROOT}",
+		"build": "build: scale-test-c (clang, debug)",
+	},
+
+	{
+		"label": "debug: scale-test-c (gcc)",
+		"adapter": "CodeLLDB",
+		"request": "launch",
+		"program": "${ZED_WORKTREE_ROOT}/bin/debug/scale_test_c_gcc",
+		"cwd": "${ZED_WORKTREE_ROOT}",
+		"build": "build: scale-test-c (gcc, debug)",
+	},
+]
