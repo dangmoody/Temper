@@ -6,18 +6,18 @@
 
 
 ## Building The Project
-If on Windows and using Clang or GCC then you will need to make sure that the compiler is added to your `PATH`.
 
+#### Pre-requisites
+* [Builder](https://github.com/dangmoody/Builder)
+* If on Windows and using Clang or GCC: make sure the compiler is added to your `PATH`.
+
+#### Instructions
 1. Clone the git repo.
-2. If on Windows:
-	* If you want to use Visual Studio:
-		* Make sure you have Visual Studio 2019 installed.
-		* Run `.\scripts\generate_vs2019.bat`.
-	* If you do NOT want to use Visual Studio: 
-		* Run `.\scripts\build_clang_gcc.bat` to build a demo for Clang/GCC.
-		* Run `.\scripts\build_msvc.bat` to build a demo for MSVC.
-3. If on MacOS/Linux:
-	* Run `.\scripts\build_clang_gcc.sh` to build a demo for Clang/GCC.
+2. To build and run all tests:
+	* On Windows: run `.\scripts\build_and_test_all.bat`
+	* On MacOS/Linux: run `./scripts/build_and_test_all.sh`
+3. To build a specific config: `~/builder/bin/builder build.cpp --config=<config>` where `<config>` is one of the configs listed in `build.cpp`.  Append `--release` for a release build, `--gcc` for GCC, or `--msvc` for MSVC (Windows only). Clang is the default compiler.
+4. To generate a Visual Studio solution: `~/builder/bin/builder build.cpp --sln`
 
 
 ## Pull Requests
