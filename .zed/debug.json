@@ -1,4 +1,5 @@
 [
+	// automation C
 	{
 		"label": "debug: automation-c (clang)",
 		"adapter": "CodeLLDB",
@@ -7,7 +8,6 @@
 		"cwd": "${ZED_WORKTREE_ROOT}",
 		"build": "build: automation-c (clang, debug)",
 	},
-
 	{
 		"label": "debug: automation-c (gcc)",
 		"adapter": "CodeLLDB",
@@ -17,6 +17,7 @@
 		"build": "build: automation-c (gcc, debug)",
 	},
 
+	// automation CPP
 	{
 		"label": "debug: automation-cpp (clang)",
 		"adapter": "CodeLLDB",
@@ -25,7 +26,6 @@
 		"cwd": "${ZED_WORKTREE_ROOT}",
 		"build": "build: automation-cpp (clang, debug)",
 	},
-
 	{
 		"label": "debug: automation-cpp (gcc)",
 		"adapter": "CodeLLDB",
@@ -35,6 +35,7 @@
 		"build": "build: automation-cpp (gcc, debug)",
 	},
 
+	// scale test C
 	{
 		"label": "debug: scale-test-c (clang)",
 		"adapter": "CodeLLDB",
@@ -43,7 +44,6 @@
 		"cwd": "${ZED_WORKTREE_ROOT}",
 		"build": "build: scale-test-c (clang, debug)",
 	},
-
 	{
 		"label": "debug: scale-test-c (gcc)",
 		"adapter": "CodeLLDB",
