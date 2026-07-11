@@ -1,3 +1,6 @@
+# ignore builder stuff
+.builder/
+
 # visual studio files
 .vs/
 *.sln

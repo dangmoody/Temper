@@ -1,0 +1,54 @@
+[
+  {
+    "label": "build: automation-c (clang, debug)",
+    "command": "~/builder/bin/builder build.cpp --config=automation-c"
+  },
+  {
+    "label": "build: automation-c (clang, release)",
+    "command": "~/builder/bin/builder build.cpp --config=automation-c --release"
+  },
+  {
+    "label": "build: automation-c (gcc, debug)",
+    "command": "~/builder/bin/builder build.cpp --config=automation-c --gcc"
+  },
+  {
+    "label": "build: automation-c (gcc, release)",
+    "command": "~/builder/bin/builder build.cpp --config=automation-c --gcc --release"
+  },
+  {
+    "label": "build: automation-cpp (clang, debug)",
+    "command": "~/builder/bin/builder build.cpp --config=automation-cpp"
+  },
+  {
+    "label": "build: automation-cpp (clang, release)",
+    "command": "~/builder/bin/builder build.cpp --config=automation-cpp --release"
+  },
+  {
+    "label": "build: automation-cpp (gcc, debug)",
+    "command": "~/builder/bin/builder build.cpp --config=automation-cpp --gcc"
+  },
+  {
+    "label": "build: automation-cpp (gcc, release)",
+    "command": "~/builder/bin/builder build.cpp --config=automation-cpp --gcc --release"
+  },
+  {
+    "label": "build: scale-test-c (clang, debug)",
+    "command": "~/builder/bin/builder build.cpp --config=scale-test-c"
+  },
+  {
+    "label": "build: scale-test-c (clang, release)",
+    "command": "~/builder/bin/builder build.cpp --config=scale-test-c --release"
+  },
+  {
+    "label": "build: scale-test-c (gcc, debug)",
+    "command": "~/builder/bin/builder build.cpp --config=scale-test-c --gcc"
+  },
+  {
+    "label": "build: scale-test-c (gcc, release)",
+    "command": "~/builder/bin/builder build.cpp --config=scale-test-c --gcc --release"
+  },
+  {
+    "label": "generate Visual Studio solution",
+    "command": "~/builder/bin/builder build.cpp --sln"
+  }
+]
