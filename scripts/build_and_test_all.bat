@@ -6,7 +6,7 @@ pushd %~dp0
 pushd ..
 
 echo ======= Clang / Debug =======
-builder build_clang.cpp --config=automation-c-debug
+builder build.cpp --config=automation-c-debug
 if %errorlevel% neq 0 goto :ExitFailure
 
 .\\bin\\debug\\clang\\automation_c_clang.exe
@@ -15,7 +15,7 @@ echo ======= Clang / Debug Done =======
 echo.
 
 echo ======= Clang / Release =======
-builder build_clang.cpp --config=automation-c-release
+builder build.cpp --config=automation-c-release
 if %errorlevel% neq 0 goto :ExitFailure
 
 .\\bin\\release\\clang\\automation_c_clang.exe
@@ -25,7 +25,7 @@ echo.
 
 
 echo ======= Clang++ / Debug =======
-builder build_clang.cpp --config=automation-cpp-debug
+builder build.cpp --config=automation-cpp-debug
 if %errorlevel% neq 0 goto :ExitFailure
 
 .\\bin\\debug\\clang\\automation_cpp_clang.exe
@@ -34,7 +34,7 @@ echo ======= Clang++ / Debug Done =======
 echo.
 
 echo ======= Clang++ / Release =======
-builder build_clang.cpp --config=automation-cpp-release
+builder build.cpp --config=automation-cpp-release
 if %errorlevel% neq 0 goto :ExitFailure
 
 .\\bin\\release\\clang\\automation_cpp_clang.exe
@@ -44,7 +44,7 @@ echo.
 
 
 echo ======= GCC / Debug =======
-builder build_gcc.cpp --config=automation-c-debug
+builder build.cpp --config=automation-c-debug
 if %errorlevel% neq 0 goto :ExitFailure
 
 .\\bin\\debug\\gcc\\automation_c_gcc.exe
@@ -53,7 +53,7 @@ echo ======= GCC / Debug Done =======
 echo.
 
 echo ======= GCC / Release =======
-builder build_gcc.cpp --config=automation-c-release
+builder build.cpp --config=automation-c-release
 if %errorlevel% neq 0 goto :ExitFailure
 
 .\\bin\\release\\gcc\\automation_c_gcc.exe
@@ -63,7 +63,7 @@ echo.
 
 
 echo ======= G++ / Debug =======
-builder build_gcc.cpp --config=automation-cpp-debug
+builder build.cpp --config=automation-cpp-debug
 if %errorlevel% neq 0 goto :ExitFailure
 
 .\\bin\\debug\\gcc\\automation_cpp_gcc.exe
@@ -72,7 +72,7 @@ echo ======= G++ / Debug Done =======
 echo.
 
 echo ======= G++ / Release =======
-builder build_gcc.cpp --config=automation-cpp-release
+builder build.cpp --config=automation-cpp-release
 if %errorlevel% neq 0 goto :ExitFailure
 
 .\\bin\\release\\gcc\\automation_cpp_gcc.exe
@@ -82,7 +82,7 @@ echo.
 
 
 echo ======= MSVC (C) / Debug =======
-builder build_msvc.cpp --config=automation-c-debug
+builder build.cpp --config=automation-c-debug
 if %errorlevel% neq 0 goto :ExitFailure
 
 .\\bin\\debug\\msvc\\automation_c_msvc.exe
@@ -91,7 +91,7 @@ echo ======= MSVC (C) / Debug Done =======
 echo.
 
 echo ======= MSVC (C) / Release =======
-builder build_msvc.cpp --config=automation-c-release
+builder build.cpp --config=automation-c-release
 if %errorlevel% neq 0 goto :ExitFailure
 
 .\\bin\\release\\msvc\\automation_c_msvc.exe
@@ -101,7 +101,7 @@ echo.
 
 
 echo ======= MSVC (C++) / Debug =======
-builder build_msvc.cpp --config=automation-cpp-debug
+builder build.cpp --config=automation-cpp-debug
 if %errorlevel% neq 0 goto :ExitFailure
 
 .\\bin\\debug\\msvc\\automation_cpp_msvc.exe
@@ -110,7 +110,7 @@ echo ======= MSVC (C++) / Debug Done =======
 echo.
 
 echo ======= MSVC (C++) / Release =======
-builder build_msvc.cpp --config=automation-cpp-release
+builder build.cpp --config=automation-cpp-release
 if %errorlevel% neq 0 goto :ExitFailure
 
 .\\bin\\release\\msvc\\automation_cpp_msvc.exe
