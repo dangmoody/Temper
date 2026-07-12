@@ -92,9 +92,9 @@ BUILDER_CALLBACK void SetBuilderOptions( BuilderOptions *options, CommandLineArg
 		automationCPP.additionalLinkerArguments.push_back( "-static-libstdc++" );
 		automationCPP.additionalLinkerArguments.push_back( "-static-libgcc" );
 	}
+#endif
 
 	AddBuildConfig( options, &automationCPP );
-#endif
 
 	BuildConfig scaleTestC = {
 		.name				= "scale-test-c",
