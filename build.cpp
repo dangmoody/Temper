@@ -83,6 +83,7 @@ BUILDER_CALLBACK void SetBuilderOptions( BuilderOptions *options, CommandLineArg
 		automationCPP.defines.push_back( "_DEBUG" );
 	}
 
+#ifdef __linux__
 	if ( clang ) {
 		automationCPP.additionalLibs.push_back( "stdc++" );
 	} else if ( gcc ) {
@@ -93,6 +94,7 @@ BUILDER_CALLBACK void SetBuilderOptions( BuilderOptions *options, CommandLineArg
 	}
 
 	AddBuildConfig( options, &automationCPP );
+#endif
 
 	BuildConfig scaleTestC = {
 		.name				= "scale-test-c",
