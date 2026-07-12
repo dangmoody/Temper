@@ -116,6 +116,8 @@ BUILDER_CALLBACK void SetBuilderOptions( BuilderOptions *options, CommandLineArg
 
 	AddBuildConfig( options, &scaleTestC );
 
+	options->generateSolution = HasCommandLineArg( args, "--sln" );
+
 	options->solution = {
 		.name = "Temper",
 		.path = "visual_studio",
@@ -146,10 +148,6 @@ BUILDER_CALLBACK void SetBuilderOptions( BuilderOptions *options, CommandLineArg
 			},
 		},
 	};
-
-	if ( HasCommandLineArg( args, "--sln" ) ) {
-		options->generateSolution = true;
-	}
 }
 
 #endif // BUILDER_DOING_USER_CONFIG_BUILD
