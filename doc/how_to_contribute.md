@@ -8,7 +8,6 @@
 ## Building The Project
 
 #### Pre-requisites
-* [Builder](https://github.com/dangmoody/Builder)
 * If on Windows and using Clang or GCC: make sure the compiler is added to your `PATH`.
 
 #### Instructions
@@ -16,8 +15,9 @@
 2. To build and run all tests:
 	* On Windows: run `.\scripts\build_and_test_all.bat`
 	* On MacOS/Linux: run `./scripts/build_and_test_all.sh`
-3. To build a specific config: `~/builder/bin/builder build.cpp --config=<config>` where `<config>` is one of the configs listed in `build.cpp`.  Append `--release` for a release build, `--gcc` for GCC, or `--msvc` for MSVC (Windows only). Clang is the default compiler.
-4. To generate a Visual Studio solution: `~/builder/bin/builder build.cpp --sln`
+3. To build a specific config: `./build --config=<config>` (`build.exe` on Windows) where `<config>` is one of the configs listed in `build.c`.  Append `--release` for a release build, `--gcc` for GCC, or `--msvc` for MSVC (Windows only). Clang is the default compiler.
+4. To generate a Visual Studio solution: `./build --sln`
+5. If you change `build.c`, just run the build exe again as normal.  It detects that it's out of date and rebuilds itself first.
 
 
 ## Pull Requests
